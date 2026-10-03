@@ -1,0 +1,236 @@
+const { config } = require('../../config');
+const { sanitizeFacts, sanitizeText, validateUserId } = require('../../utils/sanitizers');
+
+class HindsightMemoryService {
+  constructor() {
+    this.banks = new Map();
+    this.baseUrl = config.hindsightBaseUrl || 'https://api.hindsight.vectorize.io';
+    this.apiKey = config.hindsightApiKey || '';
+    this.allowRemote = config.nodeEnv !== 'test';
+  }
+
+  getApiKey() {
+    return this.apiKey || config.hindsightApiKey || '';
+  }
+
+  isRemoteConfigured() {
+    if (config.nodeEnv === 'test') {
+      return this.allowRemote && Boolean(this.getApiKey());
+    }
+
+    return Boolean(this.getApiKey());
+  }
+
+  buildBankId(userId, tenantId = 'default') {
+    if (!validateUserId(userId)) {
+      const err = new Error('Invalid user identifier.');
+      err.code = 'INVALID_IDENTITY';
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const scope = String(tenantId || 'default').trim() || 'default';
+    const normalizedUserId = String(userId).trim();
+
+    if (scope === 'default') {
+      return `user_${normalizedUserId}`;
+    }
+
+    return `tenant_${scope}_user_${normalizedUserId}`;
+  }
+
+  getBank(userId, tenantId = 'default') {
+    const bankId = this.buildBankId(userId, tenantId);
+    if (!this.banks.has(bankId)) {
+      this.banks.set(bankId, []);
+    }
+
+    return this.banks.get(bankId);
+  }
+
+  async request(path, { method = 'GET', body } = {}) {
+    const apiKey = this.getApiKey();
+    const headers = {
+      Accept: 'application/json',
+      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+    };
+
+    if (body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      method,
+      headers,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
+
+    const contentType = response.headers && response.headers.get ? response.headers.get('content-type') : '';
+    const payload = contentType && contentType.includes('application/json') ? await response.json() : await response.text();
+
+    if (!response.ok) {
+      const err = new Error(`Hindsight request failed with status ${response.status}.`);
+      err.statusCode = response.status;
+      err.payload = payload;
+      throw err;
+    }
+
+    return payload;
+  }
+
+  async remoteRecall(userId, query = '', tenantId = 'default') {
+    if (!this.isRemoteConfigured()) {
+      return [];
+    }
+
+    const bankId = this.buildBankId(userId, tenantId);
+    const sanitizedQuery = sanitizeText(query || '');
+
+    try {
+      const data = await this.request(`/v1/default/banks/${bankId}/memories/recall`, {
+        method: 'POST',
+        body: {
+          query: sanitizedQuery,
+          types: ['world', 'experience', 'observation'],
+          budget: 'mid',
+          max_tokens: 4096,
+        },
+      });
+
+      const results = Array.isArray(data && data.results) ? data.results : [];
+      const remoteFacts = results
+        .map((result) => {
+          const factText = sanitizeText(result.text || result.fact || result.content || result.context || '');
+          if (!factText) {
+            return null;
+          }
+
+          return {
+            category: result.type || result.category || 'experience',
+            fact: factText,
+          };
+        })
+        .filter(Boolean);
+
+      if (remoteFacts.length) {
+        this.getBank(userId, tenantId).push(...remoteFacts.filter((fact) => !this.getBank(userId, tenantId).some((existing) => existing.category === fact.category && existing.fact === fact.fact)));
+      }
+
+      return remoteFacts;
+    } catch (error) {
+      console.warn('Hindsight recall failed, falling back to local memory.', error.message);
+      return [];
+    }
+  }
+
+  async remoteRetain(userId, facts = [], tenantId = 'default') {
+    if (!this.isRemoteConfigured()) {
+      return { success: false, skipped: true };
+    }
+
+    const bankId = this.buildBankId(userId, tenantId);
+    const sanitized = sanitizeFacts(facts)
+      .map((fact) => ({
+        content: sanitizeText(fact.fact || ''),
+        context: sanitizeText(fact.category || 'support_context'),
+        metadata: {
+          userId: String(userId),
+          category: sanitizeText(fact.category || 'support_context'),
+          source: 'identity-centric-support',
+        },
+        tags: ['identity-centric-support', `user:${bankId}`],
+      }))
+      .filter((item) => item.content);
+
+    if (!sanitized.length) {
+      return { success: false, skipped: true };
+    }
+
+    try {
+      return await this.request(`/v1/default/banks/${bankId}/memories`, {
+        method: 'POST',
+        body: {
+          items: sanitized,
+          async: false,
+        },
+      });
+    } catch (error) {
+      console.warn('Hindsight retain failed, keeping local memory only.', error.message);
+      return { success: false, fallback: true };
+    }
+  }
+
+  async recall(userId, query = '', tenantId = 'default') {
+    const bank = this.getBank(userId, tenantId);
+    const search = sanitizeText(query || '').toLowerCase();
+
+    const baseFacts = !search
+      ? [...bank]
+      : bank.filter((fact) => {
+          const combined = `${fact.category || ''} ${fact.fact || ''}`.toLowerCase();
+          return combined.includes(search);
+        });
+
+    if (this.isRemoteConfigured()) {
+      const remoteFacts = await this.remoteRecall(userId, query, tenantId);
+      const merged = [...baseFacts, ...remoteFacts];
+      const deduped = [];
+      const seen = new Set();
+
+      for (const fact of merged) {
+        const key = `${fact.category || 'experience'}:${fact.fact}`.toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          deduped.push(fact);
+        }
+      }
+
+      return { facts: deduped };
+    }
+
+    return { facts: baseFacts };
+  }
+
+  async retain(userId, facts = [], tenantId = 'default') {
+    const bank = this.getBank(userId, tenantId);
+    const sanitized = sanitizeFacts(facts);
+
+    for (const fact of sanitized) {
+      const duplicate = bank.some(
+        (existing) => existing.category === fact.category && existing.fact === fact.fact,
+      );
+
+      if (!duplicate) {
+        bank.push(fact);
+      }
+    }
+
+    if (this.isRemoteConfigured()) {
+      await this.remoteRetain(userId, sanitized, tenantId);
+    }
+
+    return { facts: [...bank] };
+  }
+
+  async clear(userId, tenantId = 'default') {
+    const bankId = this.buildBankId(userId, tenantId);
+    this.banks.delete(bankId);
+
+    if (this.isRemoteConfigured()) {
+      try {
+        await this.request(`/v1/default/banks/${bankId}/memories`, { method: 'DELETE' });
+      } catch (error) {
+        console.warn('Hindsight clear failed, local memory cleared.', error.message);
+      }
+    }
+
+    return { success: true, message: 'Customer memory cleared.' };
+  }
+
+  async snapshot(userId, tenantId = 'default') {
+    return { userId, tenantId, facts: [...this.getBank(userId, tenantId)] };
+  }
+}
+
+const memoryService = new HindsightMemoryService();
+module.exports = memoryService;

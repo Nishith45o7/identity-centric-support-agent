@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Identity-Centric Support Agent</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Identity-Centric Support Agent</p>
+          <h1>Persistent memory support</h1>
+        </div>
+        <div class="toggle-group">
+          <label class="switch-label" for="memory-toggle">Memory</label>
+          <label class="switch">
+            <input id="memory-toggle" type="checkbox" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </header>
+
+      <main class="layout">
+        <aside class="panel identity-panel">
+          <div class="section-title">Customer Identity</div>
+          <div class="identity-box">
+            <label for="user-id">User ID</label>
+            <input id="user-id" type="text" value="user_demo_001" />
+          </div>
+          <div class="badge active" id="memory-status">Memory Active</div>
+        </aside>
+
+        <section class="panel chat-panel">
+          <div class="section-title">Support Chat</div>
+          <div id="messages" class="messages" aria-live="polite"></div>
+          <form id="chat-form" class="composer">
+            <textarea id="message-input" rows="3" placeholder="Type your message..."></textarea>
+            <button type="submit">Send</button>
+          </form>
+        </section>
+
+        <aside class="panel memory-panel">
+          <div class="section-title">Memory</div>
+          <div id="memory-list" class="memory-list">
+            <p class="empty-state">No remembered facts yet.</p>
+          </div>
+          <div class="panel-actions">
+            <button id="clear-memory" class="secondary" type="button">Clear Memory</button>
+            <button id="new-session" class="secondary" type="button">New Session</button>
+          </div>
+          <div class="panel-actions" style="margin-top: 0.75rem;">
+            <a href="/docs" class="secondary" style="display: inline-block; text-decoration: none; padding: 0.7rem 1rem; border-radius: 10px; background: rgba(255,255,255,0.04); color: #dfe9ff; border: 1px solid rgba(255,255,255,0.12);">Open API Docs</a>
+            <a href="/developer" class="secondary" style="display: inline-block; text-decoration: none; padding: 0.7rem 1rem; border-radius: 10px; background: rgba(255,255,255,0.04); color: #dfe9ff; border: 1px solid rgba(255,255,255,0.12);">Developer Dashboard</a>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

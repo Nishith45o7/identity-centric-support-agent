@@ -1,12 +1,100 @@
 const request = require('supertest');
+const crypto = require('crypto');
 const { app } = require('../src/app');
 const memoryService = require('../src/services/memory/hindsightMemoryService');
 
 describe('Identity-Centric Support API', () => {
   beforeEach(async () => {
+    memoryService.allowRemote = false;
     await memoryService.clear('user_a');
     await memoryService.clear('user_b');
     await memoryService.clear('user_demo_001');
+  });
+
+  test('developer signup, login, project creation, one-time API keys, and logout work', async () => {
+    const email = `developer-${crypto.randomUUID()}@example.test`;
+    const password = 'correct-horse-battery-staple';
+    const signup = await request(app)
+      .post('/v1/auth/signup')
+      .send({ name: 'Acme Support', email, password });
+
+    expect(signup.status).toBe(201);
+    expect(signup.body.user).toMatchObject({ email, name: 'Acme Support' });
+    expect(signup.headers['set-cookie'][0]).toMatch(/HttpOnly/);
+    expect((await request(app).get('/v1/projects')).status).toBe(401);
+
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+    const session = await request(app).get('/v1/auth/session').set('Cookie', cookie);
+    expect(session.body.user.email).toBe(email);
+
+    const projectResponse = await request(app)
+      .post('/v1/projects')
+      .set('Cookie', cookie)
+      .send({ name: 'Acme Website' });
+    expect(projectResponse.status).toBe(201);
+    const project = projectResponse.body.project;
+
+    const keyResponse = await request(app)
+      .post(`/v1/projects/${project.id}/api-keys`)
+      .set('Cookie', cookie)
+      .send({ name: 'Production key', environment: 'live' });
+    expect(keyResponse.status).toBe(201);
+    expect(keyResponse.body.key).toMatch(/^sk_live_/);
+
+    const keyList = await request(app)
+      .get(`/v1/projects/${project.id}/api-keys`)
+      .set('Cookie', cookie);
+    expect(keyList.status).toBe(200);
+    expect(keyList.body.keys[0]).not.toHaveProperty('hash');
+    expect(keyList.body.keys[0]).not.toHaveProperty('key');
+    expect(keyList.body.keys[0].prefix).toBe(keyResponse.body.metadata.prefix);
+
+    const wrongPassword = await request(app)
+      .post('/v1/auth/login')
+      .send({ email, password: 'wrong-password' });
+    expect(wrongPassword.status).toBe(401);
+
+    await request(app).post('/v1/auth/logout').set('Cookie', cookie).expect(200);
+    expect((await request(app).get('/v1/projects').set('Cookie', cookie)).status).toBe(401);
+  });
+
+  test('project keys isolate identical customer IDs and ignore caller project IDs', async () => {
+    const email = `isolation-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app)
+      .post('/v1/auth/signup')
+      .send({ name: 'Isolation Workspace', email, password: 'correct-horse-battery-staple' });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+
+    const projectA = (await request(app).post('/v1/projects').set('Cookie', cookie).send({ name: 'Project A' })).body.project;
+    const projectB = (await request(app).post('/v1/projects').set('Cookie', cookie).send({ name: 'Project B' })).body.project;
+    const keyA = (await request(app).post(`/v1/projects/${projectA.id}/api-keys`).set('Cookie', cookie).send({ name: 'Key A', environment: 'test' })).body.key;
+    const keyB = (await request(app).post(`/v1/projects/${projectB.id}/api-keys`).set('Cookie', cookie).send({ name: 'Key B', environment: 'test' })).body.key;
+    const customerId = `customer_${crypto.randomUUID()}`;
+
+    await request(app).post('/v1/support/chat').set('Authorization', `Bearer ${keyA}`).send({
+      user_id: customerId, project_id: projectB.id, message: 'I use a Windows laptop and my printer is offline.',
+    }).expect(200);
+    await request(app).post('/v1/support/end').set('Authorization', `Bearer ${keyA}`).send({
+      user_id: customerId, messages: ['I use a Windows laptop and my printer is offline.'],
+    }).expect(200);
+    await request(app).post('/v1/support/chat').set('Authorization', `Bearer ${keyB}`).send({
+      user_id: customerId, message: 'My MacBook login shows error 404.',
+    }).expect(200);
+    await request(app).post('/v1/support/end').set('Authorization', `Bearer ${keyB}`).send({
+      user_id: customerId, messages: ['My MacBook login shows error 404.'],
+    }).expect(200);
+
+    const memoryA = await request(app).get(`/v1/support/memory/${customerId}`).set('Authorization', `Bearer ${keyA}`);
+    const memoryB = await request(app).get(`/v1/support/memory/${customerId}`).set('Authorization', `Bearer ${keyB}`);
+    expect(JSON.stringify(memoryA.body.memory)).toMatch(/Windows|printer/i);
+    expect(JSON.stringify(memoryA.body.memory)).not.toMatch(/MacBook|404/i);
+    expect(JSON.stringify(memoryB.body.memory)).toMatch(/MacBook|404/i);
+    expect(JSON.stringify(memoryB.body.memory)).not.toMatch(/Windows|printer/i);
+
+    const crossProject = await request(app)
+      .get(`/v1/projects/${projectB.id}/api-keys`)
+      .set('Cookie', (await request(app).post('/v1/auth/signup').send({ name: 'Other', email: `other-${crypto.randomUUID()}@example.test`, password: 'correct-horse-battery-staple' })).headers['set-cookie'][0].split(';')[0]);
+    expect(crossProject.status).toBe(404);
   });
 
   test('server retries on a free port when the default port is busy', () => {
@@ -62,123 +150,61 @@ describe('Identity-Centric Support API', () => {
     process.exit = originalExit;
   });
 
-  test('creates a developer API key and lists it in v1', async () => {
-    const createResponse = await request(app)
-      .post('/v1/developer/keys')
-      .send({ name: 'Web app', environment: 'test' });
+  test('rejects support requests without project API keys and disables legacy key bootstrap', async () => {
+    const supportResponse = await request(app).post('/v1/support/chat').send({ user_id: 'customer_a', message: 'Help' });
+    const keyBootstrap = await request(app).post('/v1/developer/keys').send({ name: 'Unowned key' });
 
-    expect(createResponse.status).toBe(200);
-    expect(createResponse.body.key).toMatch(/^sk_test_/);
-    expect(createResponse.body.metadata).toMatchObject({
-      name: 'Web app',
-      environment: 'test',
-      status: 'active',
-    });
+    expect(supportResponse.status).toBe(401);
+    expect(supportResponse.body.error.code).toBe('INVALID_API_KEY');
+    expect(keyBootstrap.status).toBe(404);
+  });
 
+  test('requires a developer session to create or list projects', async () => {
+    const listResponse = await request(app).get('/v1/projects');
+    const createResponse = await request(app).post('/v1/projects').send({ name: 'Unowned project' });
+    const legacyTenant = await request(app).post('/v1/developer/tenants').send({ tenantId: 'unowned' });
+
+    expect(listResponse.status).toBe(401);
+    expect(createResponse.status).toBe(401);
+    expect(legacyTenant.status).toBe(404);
+  });
+
+  test('does not serve or persist keys through the legacy file registry API', async () => {
     const listResponse = await request(app).get('/v1/developer/keys');
-    expect(listResponse.status).toBe(200);
-    expect(listResponse.body.keys.length).toBeGreaterThan(0);
+    const createResponse = await request(app).post('/v1/developer/keys').send({ name: 'Unowned app' });
+
+    expect(listResponse.status).toBe(404);
+    expect(createResponse.status).toBe(404);
   });
 
-  test('creates and lists tenants with tenant-bound developer keys', async () => {
-    const tenantResponse = await request(app)
-      .post('/v1/developer/tenants')
-      .send({ tenantId: 'tenant_omega', name: 'Omega Labs', ownerEmail: 'ops@omegalabs.example' });
+  test('project usage is visible only to an authenticated project owner', async () => {
+    const email = `usage-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Usage workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+    const project = (await request(app).post('/v1/projects').set('Cookie', cookie).send({ name: 'Usage project' })).body.project;
+    const key = (await request(app).post(`/v1/projects/${project.id}/api-keys`).set('Cookie', cookie).send({ name: 'Usage key' })).body.key;
+    await request(app).post('/v1/support/chat').set('Authorization', `Bearer ${key}`).send({
+      user_id: 'usage_customer', message: 'My printer is offline.',
+    }).expect(200);
 
-    expect(tenantResponse.status).toBe(200);
-    expect(tenantResponse.body.tenant.tenantId).toBe('tenant_omega');
-    expect(tenantResponse.body.tenant.name).toBe('Omega Labs');
-
-    const keyResponse = await request(app)
-      .post('/v1/developer/keys')
-      .send({ name: 'Omega agent', environment: 'test', tenantId: 'tenant_omega' });
-
-    expect(keyResponse.status).toBe(200);
-    expect(keyResponse.body.metadata.tenantId).toBe('tenant_omega');
-
-    const tenants = await request(app).get('/v1/developer/tenants');
-    expect(tenants.status).toBe(200);
-    expect(tenants.body.tenants.some((tenant) => tenant.tenantId === 'tenant_omega')).toBe(true);
+    const usage = await request(app).get(`/v1/projects/${project.id}/usage`).set('Cookie', cookie);
+    const denied = await request(app).get(`/v1/projects/${project.id}/usage`);
+    expect(usage.status).toBe(200);
+    expect(Number(usage.body.usage.total_requests)).toBeGreaterThanOrEqual(1);
+    expect(usage.body.usage).toHaveProperty('memory_operations');
+    expect(denied.status).toBe(401);
   });
 
-  test('persists developer API keys on disk so the registry survives restarts', async () => {
-    const fs = require('fs');
-    const path = require('path');
-    const filePath = path.join(__dirname, '../data/api-keys.json');
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-
-    const createResponse = await request(app)
-      .post('/v1/developer/keys')
-      .send({ name: 'Persistent app', environment: 'test' });
-
-    expect(createResponse.status).toBe(200);
-
-    const persisted = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    expect(Array.isArray(persisted)).toBe(true);
-    expect(persisted.some((entry) => entry.name === 'Persistent app')).toBe(true);
-  });
-
-  test('exposes a developer summary and audit trail for tenant operations', async () => {
-    const tenantResponse = await request(app)
-      .post('/v1/developer/tenants')
-      .send({ tenantId: 'tenant_audit', name: 'Audit Tenant', ownerEmail: 'ops@audit.example' });
-
-    expect(tenantResponse.status).toBe(200);
-
-    const keyResponse = await request(app)
-      .post('/v1/developer/keys')
-      .send({ name: 'Audit Agent', environment: 'test', tenantId: 'tenant_audit' });
-
-    expect(keyResponse.status).toBe(200);
-
-    const summaryResponse = await request(app).get('/v1/developer/summary');
-    expect(summaryResponse.status).toBe(200);
-    expect(summaryResponse.body.summary).toHaveProperty('tenantCount');
-    expect(summaryResponse.body.summary).toHaveProperty('activeKeyCount');
-    expect(summaryResponse.body.summary.tenantCount).toBeGreaterThanOrEqual(1);
-
-    const auditResponse = await request(app).get('/v1/developer/audit');
-    expect(auditResponse.status).toBe(200);
-    expect(Array.isArray(auditResponse.body.events)).toBe(true);
-    expect(auditResponse.body.events.length).toBeGreaterThan(0);
-  });
-
-  test('isolates memory across tenants for the same customer id', async () => {
-    const keyA = await request(app)
-      .post('/v1/developer/keys')
-      .send({ name: 'Tenant A', environment: 'test', tenantId: 'tenant_acme' });
-
-    const keyB = await request(app)
-      .post('/v1/developer/keys')
-      .send({ name: 'Tenant B', environment: 'test', tenantId: 'tenant_shopx' });
-
-    await request(app)
-      .post('/v1/support/chat')
-      .set('Authorization', `Bearer ${keyA.body.key}`)
-      .send({ tenantId: 'tenant_acme', user_id: 'customer_123', message: 'My MacBook Pro login returns 404 after reset.' });
-
-    await request(app)
-      .post('/v1/support/end')
-      .set('Authorization', `Bearer ${keyA.body.key}`)
-      .send({ tenantId: 'tenant_acme', user_id: 'customer_123', messages: ['My MacBook Pro login returns 404 after reset.'] });
-
-    const tenantARecall = await request(app)
+  test('legacy tenant-bound API keys cannot access project support routes', async () => {
+    const response = await request(app)
       .get('/v1/support/memory/customer_123')
-      .set('Authorization', `Bearer ${keyA.body.key}`)
+      .set('Authorization', 'Bearer sk_test_legacy-key')
       .query({ tenantId: 'tenant_acme' });
 
-    const tenantBRecall = await request(app)
-      .get('/v1/support/memory/customer_123')
-      .set('Authorization', `Bearer ${keyB.body.key}`)
-      .query({ tenantId: 'tenant_shopx' });
-
-    expect(tenantARecall.status).toBe(200);
-    expect(tenantBRecall.status).toBe(200);
-    expect(JSON.stringify(tenantARecall.body.memory)).toMatch(/MacBook Pro|404/i);
-    expect(JSON.stringify(tenantBRecall.body.memory)).not.toMatch(/MacBook Pro|404/i);
+    expect(response.status).toBe(401);
+    expect(response.body.error.code).toBe('INVALID_API_KEY');
   });
 
   test('GET /api/health returns healthy response', async () => {
@@ -278,72 +304,26 @@ describe('Identity-Centric Support API', () => {
     expect(response.text).toContain('Create Tenant');
   });
 
-  test('enforces developer roles for read-only versus admin-only actions', async () => {
-    const adminKey = await request(app)
-      .post('/v1/developer/keys')
-      .send({ name: 'Admin Console', environment: 'test', role: 'admin' });
+  test('project API key revocation blocks later support requests', async () => {
+    const email = `revoke-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Revocation workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+    const project = (await request(app).post('/v1/projects').set('Cookie', cookie).send({ name: 'Revocation project' })).body.project;
+    const keyResult = await request(app).post(`/v1/projects/${project.id}/api-keys`).set('Cookie', cookie).send({ name: 'Revocable key' });
+    const key = keyResult.body.key;
 
-    const viewerKey = await request(app)
-      .post('/v1/developer/keys')
-      .send({ name: 'Viewer Console', environment: 'test', role: 'viewer' });
+    const revoked = await request(app)
+      .delete(`/v1/projects/${project.id}/api-keys/${keyResult.body.metadata.id}`)
+      .set('Cookie', cookie);
+    const denied = await request(app).post('/v1/support/chat').set('Authorization', `Bearer ${key}`).send({
+      user_id: 'revoke_customer', message: 'Still works?'
+    });
 
-    const summary = await request(app)
-      .get('/v1/developer/summary')
-      .set('Authorization', `Bearer ${viewerKey.body.key}`);
-
-    expect(summary.status).toBe(200);
-
-    const deny = await request(app)
-      .post('/v1/developer/keys')
-      .set('Authorization', `Bearer ${viewerKey.body.key}`)
-      .send({ name: 'Blocked Key', environment: 'test' });
-
-    expect(deny.status).toBe(403);
-    expect(deny.body.error.code).toBe('FORBIDDEN');
-
-    const allow = await request(app)
-      .post('/v1/developer/keys')
-      .set('Authorization', `Bearer ${adminKey.body.key}`)
-      .send({ name: 'Allowed Key', environment: 'test' });
-
-    expect(allow.status).toBe(200);
-  });
-
-  test('allows admins to update key roles and tenant metadata', async () => {
-    const adminKey = await request(app)
-      .post('/v1/developer/keys')
-      .send({ name: 'Admin Manager', environment: 'test', tenantId: 'tenant_admin_ops', role: 'admin' });
-
-    const tenant = await request(app)
-      .post('/v1/developer/tenants')
-      .set('Authorization', `Bearer ${adminKey.body.key}`)
-      .send({ tenantId: 'tenant_admin_ops', name: 'Ops Tenant', ownerEmail: 'ops@tenant.example' });
-
-    expect(tenant.status).toBe(200);
-
-    const keyList = await request(app)
-      .get('/v1/developer/keys')
-      .set('Authorization', `Bearer ${adminKey.body.key}`);
-
-    const createdKey = keyList.body.keys.find((entry) => entry.name === 'Admin Manager');
-    expect(createdKey).toBeTruthy();
-
-    const roleUpdate = await request(app)
-      .patch(`/v1/developer/keys/${createdKey.id}/role`)
-      .set('Authorization', `Bearer ${adminKey.body.key}`)
-      .send({ role: 'viewer' });
-
-    expect(roleUpdate.status).toBe(200);
-    expect(roleUpdate.body.metadata.role).toBe('viewer');
-
-    const tenantUpdate = await request(app)
-      .patch('/v1/developer/tenants/tenant_admin_ops')
-      .set('Authorization', `Bearer ${adminKey.body.key}`)
-      .send({ name: 'Ops Tenant Updated', ownerEmail: 'ops+new@tenant.example' });
-
-    expect(tenantUpdate.status).toBe(200);
-    expect(tenantUpdate.body.tenant.name).toBe('Ops Tenant Updated');
-    expect(tenantUpdate.body.tenant.ownerEmail).toBe('ops+new@tenant.example');
+    expect(revoked.status).toBe(200);
+    expect(denied.status).toBe(401);
+    expect(denied.body.error.code).toBe('INVALID_API_KEY');
   });
 
   test('retains and recalls facts for the same user', async () => {
@@ -407,30 +387,33 @@ describe('Identity-Centric Support API', () => {
     memoryService.apiKey = 'hsk_test_123';
     memoryService.allowRemote = true;
 
-    const result = await memoryService.recall('user_remote', 'login issue');
+    try {
+      const result = await memoryService.recall('user_remote', 'login issue');
 
-    expect(result.facts).toEqual(
-      expect.arrayContaining([
+      expect(result.facts).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            category: 'experience',
+            fact: 'MacBook Pro login issue',
+          }),
+        ]),
+      );
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining(`/v1/default/banks/${memoryService.buildBankId('user_remote')}/memories/recall`),
         expect.objectContaining({
-          category: 'experience',
-          fact: 'MacBook Pro login issue',
+          method: 'POST',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer hsk_test_123',
+            'Content-Type': 'application/json',
+          }),
         }),
-      ]),
-    );
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/v1/default/banks/user_user_remote/memories/recall'),
-      expect.objectContaining({
-        method: 'POST',
-        headers: expect.objectContaining({
-          Authorization: 'Bearer hsk_test_123',
-          'Content-Type': 'application/json',
-        }),
-      }),
-    );
+      );
+    } finally {
+      global.fetch = originalFetch;
+      memoryService.apiKey = originalKey;
+      memoryService.allowRemote = originalAllowRemote;
+    }
 
-    global.fetch = originalFetch;
-    memoryService.apiKey = originalKey;
-    memoryService.allowRemote = originalAllowRemote;
   });
 
   test('isolates memory between users', async () => {

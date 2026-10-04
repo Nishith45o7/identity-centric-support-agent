@@ -17,6 +17,7 @@ const config = {
   memoryMode: String(process.env.MEMORY_MODE || 'on').toLowerCase() === 'on',
   supportApiKey: process.env.SUPPORT_API_KEY || '',
   databaseUrl: process.env.DATABASE_URL || '',
+  apiKeyPepper: process.env.API_KEY_PEPPER || (process.env.NODE_ENV === 'production' ? '' : 'identity-centric-support-development-only'),
 };
 
 module.exports = { config, parseOrigins };

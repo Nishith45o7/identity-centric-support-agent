@@ -10,6 +10,7 @@ const requestLogger = require('./middleware/requestLogger');
 const errorHandler = require('./middleware/errorHandler');
 const notFoundHandler = require('./middleware/notFound');
 const supportRoutes = require('./routes/supportRoutes');
+const platformRoutes = require('./routes/platformRoutes');
 const v1Routes = require('./routes/v1Routes');
 
 const app = express();
@@ -92,7 +93,7 @@ app.use('/api', (req, res, next) => {
   return requireSupportApiKey(req, res, next);
 });
 app.use('/api', supportRoutes);
-app.use('/v1', supportLimiter);
+app.use('/v1', platformRoutes);
 app.use('/v1', v1Routes);
 
 app.use('/swagger-ui', express.static(getAbsoluteFSPath()));

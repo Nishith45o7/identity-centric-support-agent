@@ -9,17 +9,24 @@ const { getUserIdFromRequest, validateChatPayload, validateSessionPayload, valid
 const asyncHandler = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 
 const resolveTenantId = (req) => {
+  if (req.apiKey?.tenantId) {
+    return String(req.apiKey.tenantId).trim() || 'default';
+  }
+
   const candidate = req.body?.tenantId || req.body?.tenant_id || req.query?.tenantId || req.query?.tenant_id || req.headers['x-tenant-id'] || req.apiKey?.tenantId || 'default';
   return String(candidate || 'default').trim() || 'default';
 };
 
-const requireDeveloperKey = async (req, res, next) => {
-  const publicWithoutKey = ['/developer/keys', '/developer/tenants', '/developer/summary', '/developer/audit'];
-  const isBootstrap = publicWithoutKey.includes(req.path) && (!req.headers.authorization && !req.headers['x-api-key']);
-  if (isBootstrap) {
-    return next();
+router.use((req, res, next) => {
+  if (req.path.startsWith('/developer/') || req.path.startsWith('/support/')) {
+    return res.status(404).json({
+      error: { code: 'NOT_FOUND', message: 'This legacy API route is no longer available.', request_id: req.requestId },
+    });
   }
+  return next();
+});
 
+const requireDeveloperKey = async (req, res, next) => {
   const candidate = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : req.headers['x-api-key'];
   const validKey = await apiKeyService.verifyKey(candidate);
 

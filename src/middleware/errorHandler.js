@@ -1,19 +1,12 @@
 const errorHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || 500;
-  const payload = {
-    success: false,
+  res.status(statusCode).json({
     error: {
       code: err.code || 'INTERNAL_ERROR',
-      message: err.message || 'An unexpected error occurred.',
+      message: statusCode >= 500 ? 'An unexpected error occurred.' : err.message || 'The request could not be completed.',
+      request_id: req.requestId,
     },
-    requestId: req.requestId,
-  };
-
-  if (process.env.NODE_ENV !== 'production' && err.stack) {
-    payload.error.stack = err.stack;
-  }
-
-  res.status(statusCode).json(payload);
+  });
 };
 
 module.exports = errorHandler;

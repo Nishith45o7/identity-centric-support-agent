@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Persistent identity-linked memory for AI customer support." />
+    <title>Continuity for customer support</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root { --ink: #172522; --muted: #65736e; --paper: #f4f5ef; --white: #fff; --line: #dce3dc; --green: #146b54; --green-dark: #0c4739; --coral: #f08368; --mono: 'DM Mono', monospace; --sans: 'Manrope', sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+      a { color: inherit; text-decoration: none; }
+      .bar { height: 72px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 6vw, 88px); }
+      .brand { display: flex; align-items: center; gap: 11px; font-size: 14px; font-weight: 800; }
+      .mark { width: 28px; height: 28px; display: grid; place-items: center; color: white; background: var(--green); border-radius: 7px; font: 15px var(--mono); }
+      nav { display: flex; align-items: center; gap: 27px; color: var(--muted); font-size: 13px; }
+      nav a:hover { color: var(--green); }
+      .nav-cta { padding: 10px 15px; background: var(--green); color: white; border-radius: 5px; font-weight: 700; }
+      .hero { min-height: 660px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(360px, .8fr); gap: 7vw; align-items: center; padding: 72px clamp(20px, 9vw, 136px) 82px; background: radial-gradient(ellipse at 81% 48%, rgba(20,107,84,.08), transparent 43%), var(--paper); }
+      .eyebrow { display: flex; align-items: center; gap: 10px; color: var(--green); font: 11px var(--mono); text-transform: uppercase; }
+      .eyebrow:before { content: ''; width: 24px; height: 1px; background: var(--coral); }
+      h1 { max-width: 700px; margin: 23px 0; font-size: clamp(44px, 6vw, 78px); line-height: 1.03; letter-spacing: 0; font-weight: 600; }
+      h1 em { color: var(--green); font-style: normal; }
+      .intro { max-width: 570px; color: var(--muted); font-size: 17px; line-height: 1.75; }
+      .actions { display: flex; align-items: center; gap: 24px; margin-top: 32px; font-size: 13px; font-weight: 700; }
+      .primary { display: inline-flex; align-items: center; gap: 12px; color: white; background: var(--green); padding: 15px 19px; border-radius: 5px; }
+      .primary span { font: 18px var(--mono); }
+      .secondary { color: var(--green-dark); border-bottom: 1px solid #aebfb3; padding: 8px 0; }
+      .diagram { position: relative; min-height: 410px; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+      .step { display: grid; grid-template-columns: 46px 1fr auto; align-items: center; gap: 14px; padding: 17px 18px; background: var(--white); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 10px 30px rgba(25,54,44,.035); animation: arrive .55s both; }
+      .step:nth-child(2) { margin-left: 24px; animation-delay: .08s; }
+      .step:nth-child(3) { margin-left: 48px; animation-delay: .16s; }
+      .step:nth-child(4) { margin-left: 72px; animation-delay: .24s; }
+      .step:nth-child(5) { margin-left: 96px; animation-delay: .32s; }
+      .number { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; color: var(--green); background: #e7f2eb; font: 12px var(--mono); }
+      .step strong { font-size: 13px; }
+      .step small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+      .step code { color: var(--green); font: 10px var(--mono); }
+      .connector { height: 7px; margin-left: 40px; border-left: 1px solid #a6b9ae; }
+      .section { padding: 82px clamp(20px, 9vw, 136px); background: var(--white); border-top: 1px solid var(--line); }
+      .section-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 36px; }
+      .section h2 { max-width: 580px; margin: 12px 0 0; font-size: clamp(29px, 4vw, 45px); line-height: 1.15; font-weight: 600; }
+      .section-head p { max-width: 360px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+      .code-sample { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+      .code-copy { padding: 26px; }
+      .code-copy h3 { margin: 0 0 11px; font-size: 15px; }
+      .code-copy p { color: var(--muted); font-size: 13px; line-height: 1.7; }
+      pre { min-height: 190px; margin: 0; overflow: auto; padding: 26px; color: #d9f0e5; background: var(--green-dark); font: 12px/1.8 var(--mono); }
+      footer { padding: 24px clamp(20px, 6vw, 88px); display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
+      @keyframes arrive { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+      @media (max-width: 850px) { .hero { grid-template-columns: 1fr; gap: 34px; padding-top: 60px; } .diagram { min-height: auto; } .step:nth-child(n) { margin-left: min(calc((var(--i, 0) * 10px)), 40px); } .section-head { display: block; } .section-head p { margin-top: 18px; } }
+      @media (max-width: 600px) { .bar { height: auto; min-height: 64px; } nav { gap: 12px; } nav a:not(.nav-cta) { display: none; } .hero { min-height: auto; } .step:nth-child(n) { margin-left: 0; } .step code { display: none; } .code-sample { grid-template-columns: 1fr; } footer { gap: 12px; flex-wrap: wrap; } }
+      @media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; } }
+    </style>
+  </head>
+  <body>
+    <header class="bar">
+      <a class="brand" href="/"><span class="mark">ic</span> Continuity API</a>
+      <nav aria-label="Main navigation">
+        <a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/login">Log in</a><a class="nav-cta" href="/signup">Start building</a>
+      </nav>
+    </header>
+    <main>
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Identity-linked support infrastructure</div>
+          <h1>Support that remembers <em>every customer.</em></h1>
+          <p class="intro">Give your support experience durable customer context with one API. Your app sends a customer ID and a message; Continuity handles memory, reasoning, and the reply.</p>
+          <div class="actions"><a class="primary" href="/signup">Create your workspace <span>↗</span></a><a class="secondary" href="/docs">Read the quick start</a></div>
+        </div>
+        <div class="diagram" aria-label="Support request flow">
+          <div class="step"><span class="number">01</span><div><strong>Your application</strong><small>Send customer identity + message</small></div><code>POST /v1/support/chat</code></div>
+          <div class="connector"></div>
+          <div class="step"><span class="number">02</span><div><strong>Project API key</strong><small>Resolve the owning project</small></div><code>sk_live_•••</code></div>
+          <div class="connector"></div>
+          <div class="step"><span class="number">03</span><div><strong>Relevant history</strong><small>Recall context for this customer</small></div><code>memory scoped</code></div>
+          <div class="connector"></div>
+          <div class="step"><span class="number">04</span><div><strong>Context-aware reply</strong><small>Continue from what is already known</small></div><code>response</code></div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="section-head">
+          <div><div class="eyebrow">A smaller integration surface</div><h2>Keep your customer experience. We’ll keep the context.</h2></div>
+          <p>Project keys define the security boundary. Customer memory is isolated by organization, project, and the stable user ID your app already owns.</p>
+        </div>
+        <div class="code-sample">
+          <div class="code-copy"><h3>Your first request</h3><p>No memory-bank setup, provider credentials, or prompt plumbing in your application. Start with a project and a test key.</p><a class="secondary" href="/docs">Open developer docs</a></div>
+          <pre><code>curl -X POST http://localhost:3000/v1/support/chat \
+  -H "Authorization: Bearer $CONTINUITY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":"customer_123", \
+       "message":"My login issue is still happening."}'</code></pre>
+        </div>
+      </section>
+    </main>
+    <footer><span>Continuity API · Identity-centric support</span><span><a href="/playground">Try the support playground</a> · <a href="/reference">API reference</a></span></footer>
+  </body>
+</html>

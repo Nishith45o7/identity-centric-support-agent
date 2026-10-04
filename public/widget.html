@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Continuity Widget customer-support demo" />
+    <title>Continuity Widget</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --panel-alt: #1f2937;
+        --ink: #f8fafc;
+        --muted: #bfd0e8;
+        --accent: #7dd3fc;
+        --accent-strong: #38bdf8;
+        --success: #4ade80;
+        --danger: #fca5a5;
+        --border: rgba(148, 163, 184, 0.25);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; font-family: Inter, Arial, sans-serif; background: linear-gradient(180deg, #091221 0%, #101827 100%); color: var(--ink); }
+      body { display: grid; place-items: center; padding: 32px; }
+      .widget-shell {
+        width: min(440px, 100%);
+        background: rgba(15, 23, 42, 0.96);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: 0 18px 48px rgba(15, 23, 42, 0.45);
+        overflow: hidden;
+      }
+      .widget-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(59, 130, 246, 0.08);
+      }
+      .widget-header h1 {
+        margin: 0;
+        font-size: 1.1rem;
+        letter-spacing: 0.01em;
+      }
+      .widget-header p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+      .widget-body { padding: 18px 18px 12px; }
+      .field {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .field label {
+        color: var(--muted);
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .field input {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--ink);
+        padding: 10px 12px;
+        font-size: 0.94rem;
+      }
+      .chat {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: rgba(17, 24, 39, 0.9);
+        min-height: 240px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .bubble {
+        max-width: 85%;
+        border-radius: 12px;
+        line-height: 1.5;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+      }
+      .bubble.user {
+        margin-left: auto;
+        background: rgba(56, 189, 248, 0.18);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+      }
+      .bubble.agent {
+        margin-right: auto;
+        background: rgba(148, 163, 184, 0.08);
+        border: 1px solid var(--border);
+      }
+      form {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+      }
+      textarea {
+        width: 100%;
+        min-height: 52px;
+        resize: vertical;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(15, 23, 42, 0.8);
+        color: var(--ink);
+        padding: 10px 12px;
+        font: inherit;
+      }
+      button {
+        border: 0;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+        color: #031525;
+        font-weight: 700;
+        padding: 0 16px;
+        cursor: pointer;
+      }
+      .status {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 0.72rem;
+        padding: 0 2px 8px;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--success);
+        display: inline-block;
+        box-shadow: 0 0 10px rgba(74, 222, 128, 0.7);
+      }
+      @media (max-width: 480px) {
+        body { padding: 16px; }
+        form { grid-template-columns: 1fr; }
+        button { min-height: 45px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="widget-shell">
+      <header class="widget-header">
+        <h1>Continuity Widget</h1>
+        <p>customer-support assistant for real-time help</p>
+      </header>
+
+      <div class="widget-body">
+        <div class="field">
+          <label for="user-id">Customer ID</label>
+          <input id="user-id" type="text" value="customer_widget_demo" placeholder="customer_123" />
+        </div>
+
+        <div class="status">
+          <span><span class="dot"></span> live</span>
+          <span id="memory-state">memory on</span>
+        </div>
+
+        <div class="chat" id="chat-messages" aria-live="polite">
+          <div class="bubble agent">Hi there. I can help with account and product questions.</div>
+        </div>
+
+        <form id="widget-form">
+          <textarea id="widget-input" placeholder="Ask a question..." aria-label="Ask a question"></textarea>
+          <button type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="/widget.js"></script>
+    <script>
+      window.ContinuityWidget.init({
+        target: 'body',
+        userId: 'customer_widget_demo',
+        title: 'Continuity Widget',
+      });
+    </script>
+  </body>
+</html>

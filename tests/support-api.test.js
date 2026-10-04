@@ -97,6 +97,17 @@ describe('Identity-Centric Support API', () => {
     expect(crossProject.status).toBe(404);
   });
 
+  test('validates required production secrets before startup', () => {
+    const { validateRuntimeConfig } = require('../src/config');
+
+    expect(() => validateRuntimeConfig({
+      nodeEnv: 'production',
+      apiKeyPepper: '',
+      billingWebhookSecret: '',
+      supportApiKey: '',
+    })).toThrow(/API_KEY_PEPPER|BILLING_WEBHOOK_SECRET|SUPPORT_API_KEY/i);
+  });
+
   test('server retries on a free port when the default port is busy', () => {
     const { startServer } = require('../src/server');
     const listeners = [];
@@ -304,6 +315,22 @@ describe('Identity-Centric Support API', () => {
     expect(response.text).toContain('Create Tenant');
   });
 
+  test('serves a standalone chat widget demo for embedded customer support', async () => {
+    const response = await request(app).get('/widget');
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('Continuity Widget');
+    expect(response.text).toContain('customer-support');
+  });
+
+  test('serves a reusable embeddable widget script for customers', async () => {
+    const response = await request(app).get('/widget.js');
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('ContinuityWidget');
+    expect(response.text).toContain('fetch');
+  });
+
   test('project API key revocation blocks later support requests', async () => {
     const email = `revoke-${crypto.randomUUID()}@example.test`;
     const signup = await request(app).post('/v1/auth/signup').send({
@@ -324,6 +351,276 @@ describe('Identity-Centric Support API', () => {
     expect(revoked.status).toBe(200);
     expect(denied.status).toBe(401);
     expect(denied.body.error.code).toBe('INVALID_API_KEY');
+  });
+
+  test('project tools can be created, permission-checked, and executed safely', async () => {
+    const email = `tools-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Tool workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+    const project = (await request(app).post('/v1/projects').set('Cookie', cookie).send({ name: 'Tool project' })).body.project;
+    const key = (await request(app).post(`/v1/projects/${project.id}/api-keys`).set('Cookie', cookie).send({ name: 'Tool key', environment: 'test' })).body.key;
+
+    const createTool = await request(app)
+      .post(`/v1/projects/${project.id}/tools`)
+      .set('Cookie', cookie)
+      .send({
+        name: 'lookup_customer',
+        description: 'Look up customer profile data.',
+        sensitivity: 'READ',
+        permissions: ['customers:read'],
+        inputSchema: {
+          type: 'object',
+          properties: { customerId: { type: 'string' } },
+          required: ['customerId'],
+        },
+      });
+
+    expect(createTool.status).toBe(201);
+    expect(createTool.body.tool.name).toBe('lookup_customer');
+
+    const execute = await request(app)
+      .post(`/v1/projects/${project.id}/tools/${createTool.body.tool.id}/execute`)
+      .set('Authorization', `Bearer ${key}`)
+      .send({ customerId: 'cust_demo_123' });
+
+    expect(execute.status).toBe(200);
+    expect(execute.body.result.customerId).toBe('cust_demo_123');
+    expect(execute.body.result.status).toBe('ok');
+
+    const denied = await request(app)
+      .post(`/v1/projects/${project.id}/tools/${createTool.body.tool.id}/execute`)
+      .set('Authorization', `Bearer ${key}`)
+      .send({});
+
+    expect(denied.status).toBe(400);
+  });
+
+  test('organization metadata and members are visible to the workspace owner', async () => {
+    const email = `org-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Organization workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+    const organization = await request(app).get('/v1/organization').set('Cookie', cookie);
+    const members = await request(app).get('/v1/organization/members').set('Cookie', cookie);
+
+    expect(organization.status).toBe(200);
+    expect(organization.body.organization.name).toMatch(/Workspace/i);
+    expect(organization.body.organization.planName).toBe('starter');
+    expect(members.status).toBe(200);
+    expect(members.body.members.length).toBeGreaterThan(0);
+    expect(members.body.members[0].role).toBe('owner');
+  });
+
+  test('organization plans expose limits that match the current billing tier', async () => {
+    const email = `plan-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Plan workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+    const organization = await request(app).get('/v1/organization').set('Cookie', cookie);
+
+    expect(organization.status).toBe(200);
+    expect(organization.body.organization.plan.name).toBe('starter');
+    expect(organization.body.organization.plan.maxProjects).toBeGreaterThan(0);
+    expect(organization.body.organization.plan.maxRequestsPer15Min).toBeGreaterThan(0);
+  });
+
+  test('organization can update its subscription plan through a billing endpoint', async () => {
+    const email = `billing-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Billing workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+
+    const initial = await request(app).get('/v1/organization').set('Cookie', cookie);
+    expect(initial.status).toBe(200);
+    expect(initial.body.organization.plan.name).toBe('starter');
+
+    const update = await request(app).post('/v1/organization/plan').set('Cookie', cookie).send({ planName: 'growth' });
+    expect(update.status).toBe(200);
+    expect(update.body.organization.plan.name).toBe('growth');
+    expect(update.body.organization.plan.maxRequestsPer15Min).toBeGreaterThan(initial.body.organization.plan.maxRequestsPer15Min);
+
+    const downgrade = await request(app).post('/v1/organization/plan').set('Cookie', cookie).send({ planName: 'starter' });
+    expect(downgrade.status).toBe(200);
+    expect(downgrade.body.organization.plan.name).toBe('starter');
+  });
+
+  test('organization activity log exposes audit events for the workspace', async () => {
+    const email = `audit-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Audit workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+
+    const response = await request(app).get('/v1/organization/audit').set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.events.length).toBeGreaterThan(0);
+    expect(response.body.events[0].action).toMatch(/organization|plan|member|created/i);
+  });
+
+  test('organization owners can remove workspace members and revoke access', async () => {
+    const ownerEmail = `member-owner-${crypto.randomUUID()}@example.test`;
+    const memberEmail = `member-guest-${crypto.randomUUID()}@example.test`;
+
+    const ownerSignup = await request(app).post('/v1/auth/signup').send({
+      name: 'Member owner', email: ownerEmail, password: 'correct-horse-battery-staple',
+    });
+    const ownerCookie = ownerSignup.headers['set-cookie'][0].split(';')[0];
+
+    const memberSignup = await request(app).post('/v1/auth/signup').send({
+      name: 'Team member', email: memberEmail, password: 'correct-horse-battery-staple',
+    });
+    const memberCookie = memberSignup.headers['set-cookie'][0].split(';')[0];
+
+    await request(app).post('/v1/organization/members').set('Cookie', ownerCookie).send({ email: memberEmail, role: 'member' });
+
+    const memberListBefore = await request(app).get('/v1/organization/members').set('Cookie', ownerCookie);
+    expect(memberListBefore.status).toBe(200);
+    expect(memberListBefore.body.members).toEqual(expect.arrayContaining([
+      expect.objectContaining({ email: memberEmail }),
+    ]));
+
+    const remove = await request(app).delete(`/v1/organization/members/${memberSignup.body.user.id}`).set('Cookie', ownerCookie);
+    expect(remove.status).toBe(200);
+    expect(remove.body.success).toBe(true);
+
+    const memberListAfter = await request(app).get('/v1/organization/members').set('Cookie', ownerCookie);
+    expect(memberListAfter.status).toBe(200);
+    expect(memberListAfter.body.members).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ email: memberEmail }),
+    ]));
+
+    const revokedAccess = await request(app).get('/v1/organization').set('Cookie', memberCookie);
+    expect(revokedAccess.status).toBe(401);
+  });
+
+  test('organization billing ledger exposes invoice history and event trail', async () => {
+    const email = `invoices-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Invoice workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+
+    const createInvoice = await request(app)
+      .post('/v1/organization/invoices')
+      .set('Cookie', cookie)
+      .send({
+        invoiceNumber: 'INV-1001',
+        amountCents: 2500,
+        currency: 'usd',
+        description: 'Growth plan monthly invoice',
+      });
+
+    expect(createInvoice.status).toBe(201);
+    expect(createInvoice.body.invoice.invoiceNumber).toBe('INV-1001');
+    expect(createInvoice.body.invoice.amountCents).toBe(2500);
+
+    const invoiceList = await request(app).get('/v1/organization/invoices').set('Cookie', cookie);
+    expect(invoiceList.status).toBe(200);
+    expect(invoiceList.body.invoices).toEqual(expect.arrayContaining([
+      expect.objectContaining({ invoiceNumber: 'INV-1001', amountCents: 2500 }),
+    ]));
+
+    const events = await request(app).get('/v1/organization/billing-events').set('Cookie', cookie);
+    expect(events.status).toBe(200);
+    expect(events.body.events).toEqual(expect.arrayContaining([
+      expect.objectContaining({ eventType: 'invoice.created' }),
+    ]));
+  });
+
+  test('organization billing webhook marks an invoice as paid and records the event', async () => {
+    const email = `billing-webhook-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Webhook workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+
+    const invoice = await request(app)
+      .post('/v1/organization/invoices')
+      .set('Cookie', cookie)
+      .send({
+        invoiceNumber: 'INV-WEBHOOK-1',
+        amountCents: 4200,
+        currency: 'usd',
+        description: 'Webhook test invoice',
+      });
+
+    expect(invoice.status).toBe(201);
+
+    const hooks = await request(app)
+      .post('/v1/organization/billing/webhook')
+      .set('Cookie', cookie)
+      .send({
+        eventType: 'invoice.paid',
+        invoiceNumber: 'INV-WEBHOOK-1',
+        status: 'paid',
+      });
+
+    expect(hooks.status).toBe(200);
+    expect(hooks.body.success).toBe(true);
+    expect(hooks.body.invoiceStatus).toBe('paid');
+
+    const list = await request(app).get('/v1/organization/invoices').set('Cookie', cookie);
+    expect(list.status).toBe(200);
+    expect(list.body.invoices).toEqual(expect.arrayContaining([
+      expect.objectContaining({ invoiceNumber: 'INV-WEBHOOK-1', status: 'paid' }),
+    ]));
+  });
+
+  test('organization billing summary exposes balance, cycle totals, and current plan', async () => {
+    const email = `billing-summary-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Summary workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+
+    await request(app)
+      .post('/v1/organization/invoices')
+      .set('Cookie', cookie)
+      .send({ invoiceNumber: 'INV-SUMMARY-1', amountCents: 2100, currency: 'usd', description: 'Initial invoice' });
+
+    await request(app)
+      .post('/v1/organization/invoices')
+      .set('Cookie', cookie)
+      .send({ invoiceNumber: 'INV-SUMMARY-2', amountCents: 6000, currency: 'usd', description: 'Second invoice' });
+
+    await request(app)
+      .post('/v1/organization/billing/webhook')
+      .set('Cookie', cookie)
+      .send({ eventType: 'invoice.paid', invoiceNumber: 'INV-SUMMARY-1', status: 'paid' });
+
+    const summary = await request(app).get('/v1/organization/billing').set('Cookie', cookie);
+    expect(summary.status).toBe(200);
+    expect(summary.body.billing.planName).toBe('starter');
+    expect(summary.body.billing.outstandingBalanceCents).toBe(6000);
+    expect(summary.body.billing.paidBalanceCents).toBe(2100);
+    expect(summary.body.billing.totalInvoices).toBe(2);
+  });
+
+  test('organization usage summary exposes plan limits and current utilization', async () => {
+    const email = `usage-summary-${crypto.randomUUID()}@example.test`;
+    const signup = await request(app).post('/v1/auth/signup').send({
+      name: 'Usage Summary workspace', email, password: 'correct-horse-battery-staple',
+    });
+    const cookie = signup.headers['set-cookie'][0].split(';')[0];
+
+    const project = (await request(app).post('/v1/projects').set('Cookie', cookie).send({ name: 'Usage Summary project' })).body.project;
+    const key = (await request(app).post(`/v1/projects/${project.id}/api-keys`).set('Cookie', cookie).send({ name: 'Usage key', environment: 'live' })).body.key;
+    await request(app).post('/v1/support/chat').set('Authorization', `Bearer ${key}`).send({ user_id: 'usage_summary_customer', message: 'Help me with a printer issue.' }).expect(200);
+
+    const summary = await request(app).get('/v1/organization/usage').set('Cookie', cookie);
+    expect(summary.status).toBe(200);
+    expect(summary.body.usage.planName).toBe('starter');
+    expect(summary.body.usage.projectCount).toBeGreaterThanOrEqual(1);
+    expect(summary.body.usage.projectLimit).toBe(3);
+    expect(summary.body.usage.requestCount).toBeGreaterThanOrEqual(1);
+    expect(summary.body.usage.requestLimit).toBe(120);
+    expect(summary.body.usage.memberCount).toBeGreaterThanOrEqual(1);
   });
 
   test('retains and recalls facts for the same user', async () => {

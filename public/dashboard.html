@@ -81,22 +81,41 @@
     <div class="toast" id="toast" role="status" hidden></div>
 
     <script>
-      const state={user:null,projects:[],projectId:'',keys:[],customers:[],customerId:'',apiKey:''};
+      const state={user:null,projects:[],projectId:'',keys:[],customers:[],customerId:'',apiKey:'',organization:null,organizationBilling:null,organizationUsage:null};
       const $=(selector)=>document.querySelector(selector);
-      const escapeHtml=(value)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const escapeHtml=(value)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
       const api=async(url,options={})=>{const response=await fetch(url,{credentials:'same-origin',...options,headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});const data=await response.json().catch(()=>({}));if(response.status===401&&url!=='/v1/auth/session'){location.assign('/login');throw new Error('Your session expired.')}if(!response.ok)throw new Error(data.error?.message||'Request failed.');return data};
       const toast=(message)=>{const node=$('#toast');node.textContent=message;node.hidden=false;setTimeout(()=>{node.hidden=true},2400)};
       const showView=(name)=>{document.querySelectorAll('.view').forEach(view=>view.classList.toggle('active',view.id===`view-${name}`));document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===name));$('#page-title').textContent=({overview:'Overview',projects:'Projects',keys:'API keys',customers:'Customers & memory',usage:'Usage'})[name]||name};
       const selectedProject=()=>state.projects.find(project=>project.id===state.projectId);
       const projectUrl=(suffix)=>`/v1/projects/${encodeURIComponent(state.projectId)}${suffix}`;
+      const formatMoney=(cents)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format((Number(cents||0)/100));
 
       const renderProjects=()=>{
         const options=state.projects.map(project=>`<option value="${escapeHtml(project.id)}" ${project.id===state.projectId?'selected':''}>${escapeHtml(project.name)}</option>`).join('');
         $('#project-select').innerHTML=options||'<option value="">No project selected</option>';
         const cards=state.projects.map(project=>`<article class="project-item"><strong>${escapeHtml(project.name)}</strong><small>${escapeHtml(project.id)} · ${escapeHtml(project.status)}</small><div style="display:flex;gap:7px;margin-top:12px"><button class="btn secondary small" data-action="select-project" data-id="${escapeHtml(project.id)}">Open project</button></div></article>`).join('')||'<div class="empty">No projects yet. Create one to issue a key.</div>';
         $('#projects-list').innerHTML=cards;$('#overview-projects').innerHTML=cards;$('#project-count').textContent=`${state.projects.length} project${state.projects.length===1?'':'s'}`;
-        $('#overview-sub').textContent=selectedProject()?`Usage and customer activity for ${selectedProject().name}.`:'Create a project to begin.';
+        const plan = state.organization?.plan || { name: state.organization?.planName || 'starter', maxProjects: 3, maxRequestsPer15Min: 120 };
+        const billing = state.organizationBilling?.billing || {};
+        const statusMeta = billing.billingStatus ? ` · billing ${billing.billingStatus}` : '';
+        $('#overview-sub').textContent = selectedProject()
+          ? `Usage and customer activity for ${selectedProject().name}. Plan: ${plan.name}${statusMeta} · ${plan.maxProjects} project cap · ${plan.maxRequestsPer15Min} req/15m.`
+          : `Plan: ${plan.name}${statusMeta} · ${plan.maxProjects} project cap · ${plan.maxRequestsPer15Min} req/15m.`;
         $('#quickstart-code').textContent=state.projectId ? `curl -X POST ${location.origin}/v1/support/chat --header "Authorization: Bearer $CONTINUITY_API_KEY" --header "Content-Type: application/json" --data '{"user_id":"customer_123","message":"My issue is still happening."}'` : 'Create a project and test key to see your request example.';
+      };
+
+      const renderWorkspaceHealth=()=>{
+        const billing = state.organizationBilling?.billing || {};
+        const usage = state.organizationUsage?.usage || {};
+        if (!billing.planName && !usage.planName) return;
+        const orgSummary = [
+          `<div class="metric"><div class="metric-label">Plan</div><div class="metric-value" style="font-size:20px">${escapeHtml(billing.planName || usage.planName || 'starter')}</div><div class="metric-note">Current workspace tier</div></div>`,
+          `<div class="metric"><div class="metric-label">Outstanding</div><div class="metric-value" style="font-size:20px">${escapeHtml(formatMoney(billing.outstandingBalanceCents || 0))}</div><div class="metric-note">Unpaid invoice total</div></div>`,
+          `<div class="metric"><div class="metric-label">Paid</div><div class="metric-value" style="font-size:20px">${escapeHtml(formatMoney(billing.paidBalanceCents || 0))}</div><div class="metric-note">Collected in current ledger</div></div>`,
+          `<div class="metric"><div class="metric-label">Projects</div><div class="metric-value" style="font-size:20px">${escapeHtml(String(usage.projectCount || 0))}/${escapeHtml(String(usage.projectLimit || 0))}</div><div class="metric-note">Workspace utilization</div></div>`,
+        ].join('');
+        $('#overview-projects').innerHTML = orgSummary;
       };
 
       const renderKeys=()=>{
@@ -130,9 +149,18 @@
         const session=await api('/v1/auth/session');
         if(!session.user){location.replace('/login');return}
         state.user=session.user;$('#side-name').textContent=session.user.name;$('#side-email').textContent=session.user.email;$('#welcome-title').textContent=`Welcome, ${session.user.name.split(' ')[0]}.`;
-        const result=await api('/v1/projects');state.projects=result.projects||[];
+        const [organization, billing, usage, projects] = await Promise.all([
+          api('/v1/organization').then((response)=>response.organization).catch(() => null),
+          api('/v1/organization/billing').then((response)=>response.billing ? response : { billing: {} }).catch(() => ({ billing: {} })),
+          api('/v1/organization/usage').then((response)=>response.usage ? response : { usage: {} }).catch(() => ({ usage: {} })),
+          api('/v1/projects').catch(() => ({ projects: [] })),
+        ]);
+        state.organization = organization;
+        state.organizationBilling = billing;
+        state.organizationUsage = usage;
+        state.projects = projects.projects || [];
         const previous=localStorage.getItem('continuity_project');state.projectId=state.projects.some(project=>project.id===previous)?previous:state.projects[0]?.id||'';
-        renderProjects();await loadProjectData();
+        renderProjects();renderWorkspaceHealth();await loadProjectData();
         if(!state.projects.length)$('#project-dialog').showModal();
       };
 

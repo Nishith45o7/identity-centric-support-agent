@@ -1,61 +1,52 @@
-# Identity-Centric Support Agent
+# Identity-Centric Support Platform
 
-A secure, identity-aware support agent that persists useful customer facts across sessions without exposing private or cross-user data.
+A production-oriented, multi-tenant AI support SaaS for managing developer workspaces, projects, customer-facing support agents, team access, and billing-aware usage limits.
 
-## Problem
-Customers repeatedly explain their device, issue history, and previous attempts. The application solves this with a memory loop:
+## What this platform includes
 
-RECALL → REASON → RESPOND → EXTRACT → RETAIN
+- Developer authentication and workspace membership management
+- Multi-project support environments with customer isolation
+- Project API keys with revocation and access control
+- Project-scoped support chat endpoints and customer memory storage
+- Embeddable support widget and dashboard UI
+- Organization plan management, billing summaries, and invoice history
+- Usage summaries and member/audit tracking for operational visibility
+- PostgreSQL-ready schema with SQLite fallback for local and test environments
 
 ## Architecture
 
 - Backend: Node.js + Express
-- Memory: in-memory per-user memory bank with a Hindsight-compatible abstraction
-- AI: Groq chat integration with a graceful demo fallback when API keys are not configured
-- Security: Helmet, CORS, rate limiting, input validation, user identity checks
-- Frontend: lightweight responsive web UI served by the Express app
+- Database: SQLite for local/dev/tests, PostgreSQL-ready migrations for production
+- Auth: developer session cookies and project-scoped API keys
+- AI support flow: support agent service with Hindsight and Groq integration
+- Frontend: dashboard and embeddable widget assets under the public folder
+- Security: request validation, origin checks, rate limits, project isolation, audit logging
 
-## Project structure
+## Core product model
+
+The system is organized around workspaces and projects:
+
+- Developer user signs up and logs in
+- User belongs to an organization/workspace
+- Workspace contains members, projects, and billing metadata
+- Each project owns customer data, support keys, and tool definitions
+- Support requests are authenticated by project API keys, not just developer sessions
+
+This keeps customer data isolated across projects while preserving a developer dashboard for operational control.
+
+## Quick start
+
+```bash
+npm install
+npm run validate:config
+npm test
+npm run dev
+```
+
+The app serves the dashboard and widgets locally on:
 
 ```text
-identity-centric-support/
-├── public/
-│   ├── app.js
-│   ├── index.html
-│   └── styles.css
-├── src/
-│   ├── app.js
-│   ├── server.js
-│   ├── config/
-│   │   └── index.js
-│   ├── controllers/
-│   │   └── supportController.js
-│   ├── middleware/
-│   │   ├── errorHandler.js
-│   │   ├── notFound.js
-│   │   └── requestLogger.js
-│   ├── routes/
-│   │   └── supportRoutes.js
-│   ├── services/
-│   │   ├── identity/
-│   │   │   └── identityService.js
-│   │   ├── llm/
-│   │   │   └── groqService.js
-│   │   ├── memory/
-│   │   │   └── hindsightMemoryService.js
-│   │   └── supportAgent/
-│   │       └── supportAgentService.js
-│   ├── utils/
-│   │   ├── logger.js
-│   │   └── sanitizers.js
-│   └── validators/
-│       └── supportValidator.js
-├── tests/
-│   └── support-api.test.js
-├── .env.example
-├── .gitignore
-├── package.json
-└── README.md
+http://localhost:3000
 ```
 
 ## Environment variables
@@ -65,115 +56,122 @@ PORT=3000
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:3000
 DATABASE_URL=
+SUPPORT_API_KEY=
+BILLING_WEBHOOK_SECRET=
+API_KEY_PEPPER=
 GROQ_API_KEY=
 HINDSIGHT_API_KEY=
 HINDSIGHT_BASE_URL=https://api.hindsight.vectorize.io
 MEMORY_MODE=on
 ```
 
-The app uses the live Hindsight API when a valid `HINDSIGHT_API_KEY` is present, and safely falls back to the local in-memory memory bank when it is not configured. Secrets are never exposed to the browser.
-
-The developer registry uses local SQLite when `DATABASE_URL` is unset. For Neon or another PostgreSQL provider, set `DATABASE_URL` as a server-side environment secret. On startup, the app creates the registry tables and imports existing `data/identity_support.sqlite` rows into empty PostgreSQL tables. Keep the connection URL out of source control and rotate credentials that have been shared outside your secret manager.
-
-## Install and run
+Production deployments must provide all required secrets before booting the service. Use:
 
 ```bash
-npm install
-npm run dev
+npm run validate:config
 ```
 
-Then open the frontend in the browser at:
+Notes:
+- When `DATABASE_URL` is unset, the app uses SQLite.
+- When `GROQ_API_KEY` or `HINDSIGHT_API_KEY` is missing, the app falls back to local demo-safe behavior instead of failing the request lifecycle.
+- Billing and workspace secrets are expected to stay server-side only.
 
-```text
-http://localhost:3000
-```
+## Developer and workspace APIs
 
-### Docker
+### Auth
 
 ```bash
-npm run docker:build
-npm run docker:run
+POST /v1/auth/signup
+POST /v1/auth/login
+POST /v1/auth/logout
+GET /v1/auth/session
 ```
 
-The container exposes the app on port 3000 and reads the same environment variables from `.env`.
-The image includes a built-in container health check that probes `GET /api/health` and marks the service unhealthy if it stops responding.
+### Organization and teams
 
-The API is available at:
+```bash
+GET /v1/organization
+GET /v1/organization/members
+POST /v1/organization/members
+DELETE /v1/organization/members/:userId
+PATCH /v1/organization/members/:userId/role
+GET /v1/organization/audit
+POST /v1/organization/plan
+GET /v1/organization/billing
+GET /v1/organization/usage
+GET /v1/organization/invoices
+POST /v1/organization/invoices
+GET /v1/organization/billing-events
+POST /v1/organization/billing/webhook
+```
 
-```text
-GET /api/health
-POST /api/support/chat
-POST /api/support/end
-GET /api/support/memory
-DELETE /api/support/memory
+### Projects
 
-POST /v1/developer/keys
-GET /v1/developer/keys
-DELETE /v1/developer/keys/:keyId
+```bash
+GET /v1/projects
+POST /v1/projects
+GET /v1/projects/:projectId
+PATCH /v1/projects/:projectId
+DELETE /v1/projects/:projectId
+POST /v1/projects/:projectId/api-keys
+GET /v1/projects/:projectId/api-keys
+DELETE /v1/projects/:projectId/api-keys/:keyId
+POST /v1/projects/:projectId/tools
+GET /v1/projects/:projectId/tools
+POST /v1/projects/:projectId/tools/:toolId/execute
+```
+
+### Support routes
+
+```bash
 POST /v1/support/chat
 POST /v1/support/end
 GET /v1/support/memory/:userId
 DELETE /v1/support/memory/:userId
 ```
 
-## Developer API key flow
-
-The versioned support API accepts developer-issued keys in the `Authorization: Bearer <key>` header or `x-api-key` header. The service creates a signed developer key, stores only a hash, and exposes a tenant-aware key registry for policy enforcement.
+### Public endpoints
 
 ```bash
-curl -X POST http://localhost:3000/v1/developer/keys \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Support Console","environment":"test","tenantId":"tenant_acme"}'
+GET /api/health
+GET /docs
+GET /widget
+GET /widget.js
 ```
 
-## API examples
+## Example flow
 
-### Health
-
-```bash
-curl http://localhost:3000/api/health
-```
-
-### Chat
-
-```bash
-curl -X POST http://localhost:3000/api/support/chat \
-  -H "Content-Type: application/json" \
-  -d '{"userId":"user_demo_001","message":"The problem is still happening."}'
-```
-
-### End session
-
-```bash
-curl -X POST http://localhost:3000/api/support/end \
-  -H "Content-Type: application/json" \
-  -d '{"userId":"user_demo_001","messages":["I use a MacBook Pro and I am getting a 404 login error."]}'
-```
+1. Sign up as a developer and create a workspace.
+2. Create a project for a product or customer cohort.
+3. Generate a project API key for the support client or widget.
+4. Send support requests through the support API using the project key.
+5. Review workspace members, billing data, audit events, and usage summaries from the dashboard.
+6. Update the plan or invoice state through the billing endpoints or webhook simulation.
 
 ## Security notes
 
-- Secrets are only kept in server environment variables.
-- Memory is isolated per user.
-- Sensitive values such as passwords, tokens, and API keys are filtered before retention.
-- CORS is restricted to configured origins.
-- The support routes are rate limited.
-
-## Demo flow
-
-1. Start a chat for `user_demo_001` with a MacBook Pro + login error.
-2. End the session to store the facts.
-3. Start a second chat for the same user with the message, "The problem is still happening."
-4. Observe that the system uses the remembered context.
-5. Repeat with `memoryMode: "off"` to compare the stateless behavior.
+- Project API keys are stored as hashes, never plain text.
+- Customer memory is isolated by project and user context.
+- Sensitive fields like tokens, passwords, and secrets are filtered before persistence.
+- Workspace membership and project ownership checks are enforced on route access.
+- Rate limiting and origin validation are enabled for public-facing endpoints.
 
 ## Testing
 
 ```bash
-npm test
+npm test -- --runInBand
 ```
 
-## Known limitations
+The project includes integration tests covering signup, project creation, key revocation, support access, workspace management, billing, usage tracking, and multi-user memory isolation.
 
-- If the Hindsight key is absent, the app uses the secure in-memory fallback instead of a remote bank.
-- When Groq credentials are absent, the app runs in local demo response mode.
-- Production deployments should provide real provider credentials and review the remote retention policy for compliance-sensitive data.
+## Current status
+
+The project is in a production-oriented SaaS state with the core operating layers in place:
+- developer workspace auth
+- project isolation
+- billing and plan management
+- member removal and access revocation
+- invoice history and billing events
+- usage reporting and operational audit logs
+
+It remains suitable as a foundation for real payment-provider integration, broader production hardening, and operational deployment workflows.

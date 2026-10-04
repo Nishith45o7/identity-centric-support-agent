@@ -227,7 +227,8 @@ router.post('/support/chat', validateChatPayload, async (req, res, next) => {
     const tenantId = resolveTenantId(req);
     const result = await supportAgentService.processSupportMessage({
       userId,
-      rawMessage: req.body.message,
+      message: req.body.message,
+      memoryMode: req.body.memoryMode,
       tenantId,
       requestId: req.id,
     });

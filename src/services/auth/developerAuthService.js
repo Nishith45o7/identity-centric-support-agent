@@ -82,6 +82,10 @@ const signup = async ({ email, password, name } = {}) => {
       'INSERT INTO organization_members (organization_id, user_id, role, created_at) VALUES (?, ?, ?, ?)',
       [organizationId, userId, 'owner', now]
     );
+    await execute(
+      'INSERT INTO audit_logs (id, organization_id, project_id, actor_user_id, api_key_id, action, metadata, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [`audit_${crypto.randomUUID()}`, organizationId, null, userId, null, 'organization.created', JSON.stringify({ name: `${normalizedName}'s Workspace`, ownerEmail: normalizedEmail, planName: 'starter' }), now]
+    );
     return createSession(userId, execute);
   });
 

@@ -1,5 +1,5 @@
 const { app } = require('./app');
-const { config } = require('./config');
+const { config, validateRuntimeConfig } = require('./config');
 const { close: closeDatabase, ready: databaseReady } = require('./db');
 
 const registerGracefulShutdown = (server) => {
@@ -53,6 +53,13 @@ const startServer = (appInstance = app, port = config.port) => {
 };
 
 if (require.main === module) {
+  try {
+    validateRuntimeConfig(config);
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+
   databaseReady
     .then(() => startServer(app, config.port))
     .catch((error) => {

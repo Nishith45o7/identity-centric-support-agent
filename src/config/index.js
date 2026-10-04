@@ -16,7 +16,27 @@ const config = {
   hindsightBaseUrl: process.env.HINDSIGHT_BASE_URL || 'https://api.hindsight.vectorize.io',
   memoryMode: String(process.env.MEMORY_MODE || 'on').toLowerCase() === 'on',
   supportApiKey: process.env.SUPPORT_API_KEY || '',
+  billingWebhookSecret: process.env.BILLING_WEBHOOK_SECRET || '',
   databaseUrl: process.env.DATABASE_URL || '',
+  apiKeyPepper: process.env.API_KEY_PEPPER || (process.env.NODE_ENV === 'production' ? '' : 'identity-centric-support-development-only'),
 };
 
-module.exports = { config, parseOrigins };
+const validateRuntimeConfig = (runtime = config) => {
+  if (String(runtime.nodeEnv || 'development').toLowerCase() !== 'production') {
+    return runtime;
+  }
+
+  const requiredSecrets = [
+    ['API_KEY_PEPPER', runtime.apiKeyPepper],
+    ['BILLING_WEBHOOK_SECRET', runtime.billingWebhookSecret],
+    ['SUPPORT_API_KEY', runtime.supportApiKey],
+  ].filter(([, value]) => !String(value || '').trim());
+
+  if (requiredSecrets.length > 0) {
+    throw new Error(`Production deployment is missing required environment values: ${requiredSecrets.map(([key]) => key).join(', ')}.`);
+  }
+
+  return runtime;
+};
+
+module.exports = { config, parseOrigins, validateRuntimeConfig };

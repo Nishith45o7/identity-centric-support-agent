@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { config } = require('../../config');
 const { sanitizeFacts, sanitizeText, validateUserId } = require('../../utils/sanitizers');
 
@@ -21,7 +22,7 @@ class HindsightMemoryService {
     return Boolean(this.getApiKey());
   }
 
-  buildBankId(userId, tenantId = 'default') {
+  buildBankId(userId, tenantId = 'default', projectId = 'default') {
     if (!validateUserId(userId)) {
       const err = new Error('Invalid user identifier.');
       err.code = 'INVALID_IDENTITY';
@@ -29,18 +30,13 @@ class HindsightMemoryService {
       throw err;
     }
 
-    const scope = String(tenantId || 'default').trim() || 'default';
-    const normalizedUserId = String(userId).trim();
-
-    if (scope === 'default') {
-      return `user_${normalizedUserId}`;
-    }
-
-    return `tenant_${scope}_user_${normalizedUserId}`;
+    const scope = [tenantId || 'default', projectId || 'default', String(userId).trim()].join('\u0000');
+    const digest = crypto.createHash('sha256').update(scope).digest('hex');
+    return `ics_${digest}`;
   }
 
-  getBank(userId, tenantId = 'default') {
-    const bankId = this.buildBankId(userId, tenantId);
+  getBank(userId, tenantId = 'default', projectId = 'default') {
+    const bankId = this.buildBankId(userId, tenantId, projectId);
     if (!this.banks.has(bankId)) {
       this.banks.set(bankId, []);
     }
@@ -78,12 +74,12 @@ class HindsightMemoryService {
     return payload;
   }
 
-  async remoteRecall(userId, query = '', tenantId = 'default') {
+  async remoteRecall(userId, query = '', tenantId = 'default', projectId = 'default') {
     if (!this.isRemoteConfigured()) {
       return [];
     }
 
-    const bankId = this.buildBankId(userId, tenantId);
+    const bankId = this.buildBankId(userId, tenantId, projectId);
     const sanitizedQuery = sanitizeText(query || '');
 
     try {
@@ -113,7 +109,7 @@ class HindsightMemoryService {
         .filter(Boolean);
 
       if (remoteFacts.length) {
-        this.getBank(userId, tenantId).push(...remoteFacts.filter((fact) => !this.getBank(userId, tenantId).some((existing) => existing.category === fact.category && existing.fact === fact.fact)));
+        this.getBank(userId, tenantId, projectId).push(...remoteFacts.filter((fact) => !this.getBank(userId, tenantId, projectId).some((existing) => existing.category === fact.category && existing.fact === fact.fact)));
       }
 
       return remoteFacts;
@@ -123,18 +119,18 @@ class HindsightMemoryService {
     }
   }
 
-  async remoteRetain(userId, facts = [], tenantId = 'default') {
+  async remoteRetain(userId, facts = [], tenantId = 'default', projectId = 'default') {
     if (!this.isRemoteConfigured()) {
       return { success: false, skipped: true };
     }
 
-    const bankId = this.buildBankId(userId, tenantId);
+    const bankId = this.buildBankId(userId, tenantId, projectId);
     const sanitized = sanitizeFacts(facts)
       .map((fact) => ({
         content: sanitizeText(fact.fact || ''),
         context: sanitizeText(fact.category || 'support_context'),
         metadata: {
-          userId: String(userId),
+          externalIdentityHash: crypto.createHash('sha256').update(String(userId)).digest('hex'),
           category: sanitizeText(fact.category || 'support_context'),
           source: 'identity-centric-support',
         },
@@ -160,8 +156,8 @@ class HindsightMemoryService {
     }
   }
 
-  async recall(userId, query = '', tenantId = 'default') {
-    const bank = this.getBank(userId, tenantId);
+  async recall(userId, query = '', tenantId = 'default', projectId = 'default') {
+    const bank = this.getBank(userId, tenantId, projectId);
     const search = sanitizeText(query || '').toLowerCase();
 
     const baseFacts = !search
@@ -172,7 +168,7 @@ class HindsightMemoryService {
         });
 
     if (this.isRemoteConfigured()) {
-      const remoteFacts = await this.remoteRecall(userId, query, tenantId);
+      const remoteFacts = await this.remoteRecall(userId, query, tenantId, projectId);
       const merged = [...baseFacts, ...remoteFacts];
       const deduped = [];
       const seen = new Set();
@@ -191,8 +187,8 @@ class HindsightMemoryService {
     return { facts: baseFacts };
   }
 
-  async retain(userId, facts = [], tenantId = 'default') {
-    const bank = this.getBank(userId, tenantId);
+  async retain(userId, facts = [], tenantId = 'default', projectId = 'default') {
+    const bank = this.getBank(userId, tenantId, projectId);
     const sanitized = sanitizeFacts(facts);
 
     for (const fact of sanitized) {
@@ -206,29 +202,33 @@ class HindsightMemoryService {
     }
 
     if (this.isRemoteConfigured()) {
-      await this.remoteRetain(userId, sanitized, tenantId);
+      await this.remoteRetain(userId, sanitized, tenantId, projectId);
     }
 
     return { facts: [...bank] };
   }
 
-  async clear(userId, tenantId = 'default') {
-    const bankId = this.buildBankId(userId, tenantId);
+  async clear(userId, tenantId = 'default', projectId = 'default') {
+    const bankId = this.buildBankId(userId, tenantId, projectId);
     this.banks.delete(bankId);
 
     if (this.isRemoteConfigured()) {
       try {
         await this.request(`/v1/default/banks/${bankId}/memories`, { method: 'DELETE' });
       } catch (error) {
-        console.warn('Hindsight clear failed, local memory cleared.', error.message);
+        const failure = new Error('Customer memory could not be deleted from the memory provider.');
+        failure.code = 'MEMORY_ERROR';
+        failure.statusCode = 502;
+        throw failure;
       }
     }
 
     return { success: true, message: 'Customer memory cleared.' };
   }
 
-  async snapshot(userId, tenantId = 'default') {
-    return { userId, tenantId, facts: [...this.getBank(userId, tenantId)] };
+  async snapshot(userId, tenantId = 'default', projectId = 'default') {
+    const recalled = await this.recall(userId, '', tenantId, projectId);
+    return { userId, tenantId, facts: recalled.facts };
   }
 }
 

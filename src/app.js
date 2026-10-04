@@ -10,9 +10,13 @@ const requestLogger = require('./middleware/requestLogger');
 const errorHandler = require('./middleware/errorHandler');
 const notFoundHandler = require('./middleware/notFound');
 const supportRoutes = require('./routes/supportRoutes');
+const platformRoutes = require('./routes/platformRoutes');
 const v1Routes = require('./routes/v1Routes');
 
 const app = express();
+
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
 
 const requireSupportApiKey = (req, res, next) => {
   const configuredKey = config.supportApiKey || '';
@@ -36,7 +40,10 @@ const requireSupportApiKey = (req, res, next) => {
   return next();
 };
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'same-site' },
+  hidePoweredBy: true,
+}));
 app.use((req, res, next) => {
   if (req.path.startsWith('/docs') || req.path.startsWith('/swagger-ui')) {
     res.setHeader(
@@ -92,7 +99,7 @@ app.use('/api', (req, res, next) => {
   return requireSupportApiKey(req, res, next);
 });
 app.use('/api', supportRoutes);
-app.use('/v1', supportLimiter);
+app.use('/v1', platformRoutes);
 app.use('/v1', v1Routes);
 
 app.use('/swagger-ui', express.static(getAbsoluteFSPath()));
@@ -101,6 +108,9 @@ app.get('/docs', (req, res) => {
 });
 app.get('/developer', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/developer.html'));
+});
+app.get('/widget', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/widget.html'));
 });
 
 app.use(express.static(path.join(__dirname, '../public')));

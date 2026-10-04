@@ -5,11 +5,13 @@ const { config } = require('../config');
 
 const dataDir = path.join(process.cwd(), 'data');
 const dbFile = path.join(dataDir, 'identity_support.sqlite');
+const migrationsDir = path.join(__dirname, 'migrations');
 const isPostgres = Boolean(config.databaseUrl);
 
 fs.mkdirSync(dataDir, { recursive: true });
 
 const db = isPostgres ? null : new DatabaseSync(dbFile);
+let pool;
 
 const schema = [
   `CREATE TABLE IF NOT EXISTS tenants (
@@ -128,19 +130,46 @@ const querySync = (sql, params = []) => {
   return { rows: [], rowCount: result.changes, changes: result.changes };
 };
 
+const getMigrations = () => fs.readdirSync(migrationsDir)
+  .filter((file) => file.endsWith('.sql'))
+  .sort()
+  .map((file) => ({ version: file, sql: fs.readFileSync(path.join(migrationsDir, file), 'utf8') }));
+
+const runSqliteMigrations = () => {
+  db.exec('CREATE TABLE IF NOT EXISTS schema_migrations (version TEXT PRIMARY KEY, applied_at TEXT NOT NULL)');
+
+  for (const migration of getMigrations()) {
+    const applied = db.prepare('SELECT version FROM schema_migrations WHERE version = ?').get(migration.version);
+    if (applied) {
+      continue;
+    }
+
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      db.exec(migration.sql);
+      db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)')
+        .run(migration.version, new Date().toISOString());
+      db.exec('COMMIT');
+    } catch (error) {
+      db.exec('ROLLBACK');
+      throw error;
+    }
+  }
+};
+
 if (!isPostgres) {
   db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
   for (const statement of schema) {
     db.exec(statement);
   }
+  runSqliteMigrations();
   migrateLegacyData(querySync);
 }
 
-let pool;
-const postgresQuery = async (sql, params = []) => {
+const postgresQuery = async (sql, params = [], executor = pool) => {
   let parameterIndex = 0;
   const statement = sql.replace(/\?/g, () => `$${++parameterIndex}`);
-  const result = await pool.query(statement, params);
+  const result = await executor.query(statement, params);
   return { rows: result.rows, rowCount: result.rowCount, changes: result.rowCount };
 };
 
@@ -203,6 +232,30 @@ const migrateLegacyDataPostgres = async () => {
   }
 };
 
+const runPostgresMigrations = async () => {
+  await pool.query('CREATE TABLE IF NOT EXISTS schema_migrations (version TEXT PRIMARY KEY, applied_at TEXT NOT NULL)');
+
+  for (const migration of getMigrations()) {
+    const applied = await pool.query('SELECT version FROM schema_migrations WHERE version = $1', [migration.version]);
+    if (applied.rowCount > 0) {
+      continue;
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(migration.sql);
+      await client.query('INSERT INTO schema_migrations (version, applied_at) VALUES ($1, $2)', [migration.version, new Date().toISOString()]);
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+};
+
 const initializePostgres = async () => {
   const { Pool } = require('pg');
   pool = new Pool({ connectionString: config.databaseUrl, max: 10 });
@@ -211,6 +264,7 @@ const initializePostgres = async () => {
     await pool.query(statement);
   }
 
+  await runPostgresMigrations();
   await importSqliteRegistry();
   await migrateLegacyDataPostgres();
 };
@@ -226,10 +280,42 @@ const query = async (sql, params = []) => {
   return querySync(sql, params);
 };
 
+const transaction = async (operation) => {
+  await ready;
+  if (!isPostgres) {
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      const result = await operation(async (sql, params = []) => querySync(sql, params));
+      db.exec('COMMIT');
+      return result;
+    } catch (error) {
+      db.exec('ROLLBACK');
+      throw error;
+    }
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await operation((sql, params = []) => postgresQuery(sql, params, client));
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
 const close = async () => {
   if (pool) {
     await pool.end();
   }
 };
 
-module.exports = { db, dataDir, dbFile, isPostgres, query, ready, close };
+const migrate = async () => {
+  await ready;
+};
+
+module.exports = { db, dataDir, dbFile, isPostgres, query, transaction, ready, close, migrate };

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600" role="img" aria-label="Key features">
+<defs><linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#101734"/><stop offset="1" stop-color="#0a0f24"/></linearGradient>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#050816"/><stop offset="1" stop-color="#0d1233"/></linearGradient></defs>
+<rect width="1200" height="600" rx="24" fill="url(#bg)"/>
+<circle cx="556" cy="224" r="0.8" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.6s" begin="0.0s" repeatCount="indefinite"/></circle>
+<circle cx="603" cy="539" r="0.7" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.7s" begin="2.5s" repeatCount="indefinite"/></circle>
+<circle cx="49" cy="227" r="1.4" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.4s" begin="2.9s" repeatCount="indefinite"/></circle>
+<circle cx="189" cy="143" r="0.7" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.5s" begin="3.7s" repeatCount="indefinite"/></circle>
+<circle cx="709" cy="465" r="1.0" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.2s" begin="0.4s" repeatCount="indefinite"/></circle>
+<circle cx="349" cy="405" r="1.4" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.3s" begin="0.4s" repeatCount="indefinite"/></circle>
+<circle cx="320" cy="126" r="0.9" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.4s" begin="0.8s" repeatCount="indefinite"/></circle>
+<circle cx="1064" cy="528" r="0.7" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.1s" begin="2.0s" repeatCount="indefinite"/></circle>
+<circle cx="28" cy="255" r="1.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.3s" begin="2.4s" repeatCount="indefinite"/></circle>
+<circle cx="145" cy="347" r="1.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.6s" begin="0.0s" repeatCount="indefinite"/></circle>
+<circle cx="100" cy="324" r="0.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.3s" begin="2.0s" repeatCount="indefinite"/></circle>
+<circle cx="1105" cy="252" r="1.0" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.9s" begin="0.4s" repeatCount="indefinite"/></circle>
+<circle cx="696" cy="104" r="1.3" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.9s" begin="0.2s" repeatCount="indefinite"/></circle>
+<circle cx="666" cy="364" r="0.8" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.8s" begin="4.0s" repeatCount="indefinite"/></circle>
+<circle cx="1198" cy="73" r="1.4" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.9s" begin="0.9s" repeatCount="indefinite"/></circle>
+<circle cx="733" cy="26" r="1.0" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.0s" begin="2.4s" repeatCount="indefinite"/></circle>
+<circle cx="930" cy="52" r="1.0" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.6s" begin="2.3s" repeatCount="indefinite"/></circle>
+<circle cx="542" cy="241" r="1.7" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.7s" begin="0.1s" repeatCount="indefinite"/></circle>
+<circle cx="959" cy="197" r="1.1" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.6s" begin="1.8s" repeatCount="indefinite"/></circle>
+<circle cx="390" cy="53" r="1.3" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.3s" begin="3.1s" repeatCount="indefinite"/></circle>
+<circle cx="30" cy="468" r="1.5" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.5s" begin="2.8s" repeatCount="indefinite"/></circle>
+<circle cx="298" cy="443" r="1.1" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.7s" begin="3.9s" repeatCount="indefinite"/></circle>
+<circle cx="481" cy="224" r="1.5" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.1s" begin="2.7s" repeatCount="indefinite"/></circle>
+<circle cx="205" cy="506" r="0.9" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.2s" begin="3.9s" repeatCount="indefinite"/></circle>
+<circle cx="207" cy="568" r="1.7" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.8s" begin="0.0s" repeatCount="indefinite"/></circle>
+<circle cx="73" cy="125" r="1.0" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.8s" begin="3.9s" repeatCount="indefinite"/></circle>
+<circle cx="425" cy="84" r="1.2" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.4s" begin="0.3s" repeatCount="indefinite"/></circle>
+<circle cx="667" cy="418" r="0.7" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.4s" begin="2.8s" repeatCount="indefinite"/></circle>
+<circle cx="917" cy="230" r="1.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.5s" begin="2.9s" repeatCount="indefinite"/></circle>
+<circle cx="926" cy="528" r="1.1" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.3s" begin="0.2s" repeatCount="indefinite"/></circle>
+<circle cx="635" cy="104" r="1.3" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.3s" begin="3.1s" repeatCount="indefinite"/></circle>
+<circle cx="267" cy="8" r="0.8" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.4s" begin="2.2s" repeatCount="indefinite"/></circle>
+<circle cx="466" cy="104" r="1.1" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.8s" begin="2.1s" repeatCount="indefinite"/></circle>
+<circle cx="1130" cy="17" r="1.7" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.7s" begin="2.2s" repeatCount="indefinite"/></circle>
+<circle cx="628" cy="322" r="1.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.2s" begin="2.6s" repeatCount="indefinite"/></circle>
+<circle cx="651" cy="180" r="1.4" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.2s" begin="0.4s" repeatCount="indefinite"/></circle>
+<circle cx="839" cy="272" r="1.1" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.9s" begin="0.2s" repeatCount="indefinite"/></circle>
+<circle cx="724" cy="224" r="1.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.7s" begin="3.3s" repeatCount="indefinite"/></circle>
+<circle cx="876" cy="375" r="1.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.1s" begin="2.4s" repeatCount="indefinite"/></circle>
+<circle cx="736" cy="407" r="1.0" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.2s" begin="0.8s" repeatCount="indefinite"/></circle>
+<text x="600" y="52" font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace" font-size="14" font-weight="700" fill="#818cf8" text-anchor="middle" letter-spacing="6">KEY FEATURES</text>
+<rect x="540" y="62" width="120" height="3" rx="1.5" fill="#22d3ee"><animate attributeName="width" values="30;120;30" dur="4s" repeatCount="indefinite"/><animate attributeName="x" values="585;540;585" dur="4s" repeatCount="indefinite"/></rect>
+<g transform="translate(30,90)">
+<rect width="270" height="230" rx="20" fill="url(#card)" stroke="#1e293b"/>
+<rect width="270" height="230" rx="20" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-dasharray="150 816">
+<animate attributeName="stroke-dashoffset" values="0;-966" dur="7s" begin="0.0s" repeatCount="indefinite"/></rect>
+<circle cx="135" cy="62" r="44" fill="#6366f1" opacity=".12"><animate attributeName="r" values="40;50;40" dur="4s" begin="0.0s" repeatCount="indefinite"/></circle>
+<circle cx="135" cy="62" r="32" fill="#0b1226" stroke="#6366f1" stroke-opacity=".7"/>
+<g transform="translate(135,62)"><rect x="-11" y="-3" width="22" height="16" rx="4" stroke="#6366f1" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M-6 -3V-8A6 6 0 0 1 6 -8V-3" stroke="#6366f1" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" values="M-6 -3V-8A6 6 0 0 1 6 -8V-3;M-6 -3V-14A6 6 0 0 1 6 -14V-3;M-6 -3V-8A6 6 0 0 1 6 -8V-3" dur="4s" repeatCount="indefinite"/></path><circle cy="5" r="2" fill="#6366f1"/></g>
+<text x="135" y="140" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle" >Developer auth</text>
+<text x="135" y="170" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >Signup &amp; login with secure</text>
+<text x="135" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >session-based access</text>
+<rect x="105" y="206" width="60" height="3" rx="1.5" fill="#6366f1" opacity=".8"><animate attributeName="width" values="20;90;20" dur="4s" begin="0.0s" repeatCount="indefinite"/><animate attributeName="x" values="125;90;125" dur="4s" begin="0.0s" repeatCount="indefinite"/></rect>
+</g><g transform="translate(320,90)">
+<rect width="270" height="230" rx="20" fill="url(#card)" stroke="#1e293b"/>
+<rect width="270" height="230" rx="20" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-dasharray="150 816">
+<animate attributeName="stroke-dashoffset" values="0;-966" dur="7s" begin="0.6s" repeatCount="indefinite"/></rect>
+<circle cx="135" cy="62" r="44" fill="#8b5cf6" opacity=".12"><animate attributeName="r" values="40;50;40" dur="4s" begin="0.4s" repeatCount="indefinite"/></circle>
+<circle cx="135" cy="62" r="32" fill="#0b1226" stroke="#8b5cf6" stroke-opacity=".7"/>
+<g transform="translate(135,62)"><circle cy="-9" r="4" stroke="#8b5cf6" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="-11" cy="9" r="4" stroke="#8b5cf6" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="9" r="4" stroke="#8b5cf6" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 -5V0M0 0H-11V5M0 0H11V5" stroke="#8b5cf6" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="135" y="140" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle" >Workspaces &amp; orgs</text>
+<text x="135" y="170" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >Organizations, members and</text>
+<text x="135" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >role-based access control</text>
+<rect x="105" y="206" width="60" height="3" rx="1.5" fill="#8b5cf6" opacity=".8"><animate attributeName="width" values="20;90;20" dur="4s" begin="0.3s" repeatCount="indefinite"/><animate attributeName="x" values="125;90;125" dur="4s" begin="0.3s" repeatCount="indefinite"/></rect>
+</g><g transform="translate(610,90)">
+<rect width="270" height="230" rx="20" fill="url(#card)" stroke="#1e293b"/>
+<rect width="270" height="230" rx="20" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-dasharray="150 816">
+<animate attributeName="stroke-dashoffset" values="0;-966" dur="7s" begin="1.2s" repeatCount="indefinite"/></rect>
+<circle cx="135" cy="62" r="44" fill="#06b6d4" opacity=".12"><animate attributeName="r" values="40;50;40" dur="4s" begin="0.8s" repeatCount="indefinite"/></circle>
+<circle cx="135" cy="62" r="32" fill="#0b1226" stroke="#06b6d4" stroke-opacity=".7"/>
+<g transform="translate(135,62)"><g><animateTransform attributeName="transform" type="rotate" values="-8;8;-8" dur="3s" repeatCount="indefinite"/><circle cx="-8" cy="0" r="6" stroke="#06b6d4" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M-2 0H13M8 0V6M13 0V5" stroke="#06b6d4" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+<text x="135" y="140" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle" >Projects &amp; API keys</text>
+<text x="135" y="170" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >Project-scoped keys, hashed</text>
+<text x="135" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >with a pepper, revocable</text>
+<rect x="105" y="206" width="60" height="3" rx="1.5" fill="#06b6d4" opacity=".8"><animate attributeName="width" values="20;90;20" dur="4s" begin="0.6s" repeatCount="indefinite"/><animate attributeName="x" values="125;90;125" dur="4s" begin="0.6s" repeatCount="indefinite"/></rect>
+</g><g transform="translate(900,90)">
+<rect width="270" height="230" rx="20" fill="url(#card)" stroke="#1e293b"/>
+<rect width="270" height="230" rx="20" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-dasharray="150 816">
+<animate attributeName="stroke-dashoffset" values="0;-966" dur="7s" begin="1.8s" repeatCount="indefinite"/></rect>
+<circle cx="135" cy="62" r="44" fill="#22d3ee" opacity=".12"><animate attributeName="r" values="40;50;40" dur="4s" begin="1.2s" repeatCount="indefinite"/></circle>
+<circle cx="135" cy="62" r="32" fill="#0b1226" stroke="#22d3ee" stroke-opacity=".7"/>
+<g transform="translate(135,62)"><path d="M-13 -10H13A3 3 0 0 1 16 -7V6A3 3 0 0 1 13 9H-2L-9 15V9H-13A3 3 0 0 1 -16 6V-7A3 3 0 0 1 -13 -10Z" stroke="#22d3ee" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="-7" cy="-0.5" r="1.8" fill="#22d3ee"><animate attributeName="opacity" values="1;.2;1" dur="1.4s" begin="0.0s" repeatCount="indefinite"/></circle><circle cx="0" cy="-0.5" r="1.8" fill="#22d3ee"><animate attributeName="opacity" values="1;.2;1" dur="1.4s" begin="0.25s" repeatCount="indefinite"/></circle><circle cx="7" cy="-0.5" r="1.8" fill="#22d3ee"><animate attributeName="opacity" values="1;.2;1" dur="1.4s" begin="0.5s" repeatCount="indefinite"/></circle></g>
+<text x="135" y="140" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle" >Support chat</text>
+<text x="135" y="170" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >Customer-facing LLM chat</text>
+<text x="135" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >endpoints per project</text>
+<rect x="105" y="206" width="60" height="3" rx="1.5" fill="#22d3ee" opacity=".8"><animate attributeName="width" values="20;90;20" dur="4s" begin="0.9s" repeatCount="indefinite"/><animate attributeName="x" values="125;90;125" dur="4s" begin="0.9s" repeatCount="indefinite"/></rect>
+</g><g transform="translate(30,340)">
+<rect width="270" height="230" rx="20" fill="url(#card)" stroke="#1e293b"/>
+<rect width="270" height="230" rx="20" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-dasharray="150 816">
+<animate attributeName="stroke-dashoffset" values="0;-966" dur="7s" begin="2.4s" repeatCount="indefinite"/></rect>
+<circle cx="135" cy="62" r="44" fill="#10b981" opacity=".12"><animate attributeName="r" values="40;50;40" dur="4s" begin="1.6s" repeatCount="indefinite"/></circle>
+<circle cx="135" cy="62" r="32" fill="#0b1226" stroke="#10b981" stroke-opacity=".7"/>
+<g transform="translate(135,62)"><path d="M0 1L15 8L0 15L-15 8Z" stroke="#10b981" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"><animate attributeName="opacity" values="0.45;1;0.45" dur="3s" begin="0.0s" repeatCount="indefinite"/></path><path d="M0 -6L15 1L0 8L-15 1Z" stroke="#10b981" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"><animate attributeName="opacity" values="0.7;1;0.7" dur="3s" begin="0.4s" repeatCount="indefinite"/></path><path d="M0 -13L15 -6L0 1L-15 -6Z" stroke="#10b981" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="1"><animate attributeName="opacity" values="1;1;1" dur="3s" begin="0.8s" repeatCount="indefinite"/></path></g>
+<text x="135" y="140" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle" >Memory isolation</text>
+<text x="135" y="170" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >Memory partitioned per</text>
+<text x="135" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >user + project boundary</text>
+<rect x="105" y="206" width="60" height="3" rx="1.5" fill="#10b981" opacity=".8"><animate attributeName="width" values="20;90;20" dur="4s" begin="1.2s" repeatCount="indefinite"/><animate attributeName="x" values="125;90;125" dur="4s" begin="1.2s" repeatCount="indefinite"/></rect>
+</g><g transform="translate(320,340)">
+<rect width="270" height="230" rx="20" fill="url(#card)" stroke="#1e293b"/>
+<rect width="270" height="230" rx="20" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-dasharray="150 816">
+<animate attributeName="stroke-dashoffset" values="0;-966" dur="7s" begin="3.0s" repeatCount="indefinite"/></rect>
+<circle cx="135" cy="62" r="44" fill="#f59e0b" opacity=".12"><animate attributeName="r" values="40;50;40" dur="4s" begin="2.0s" repeatCount="indefinite"/></circle>
+<circle cx="135" cy="62" r="32" fill="#0b1226" stroke="#f59e0b" stroke-opacity=".7"/>
+<g transform="translate(135,62)"><rect x="-14" y="2" width="7" height="10" rx="2" fill="#f59e0b"><animate attributeName="height" values="10;18;10" dur="2.6s" begin="0.0s" repeatCount="indefinite"/><animate attributeName="y" values="2;-6;2" dur="2.6s" begin="0.0s" repeatCount="indefinite"/></rect><rect x="-3" y="-5" width="7" height="17" rx="2" fill="#f59e0b"><animate attributeName="height" values="17;25;17" dur="2.6s" begin="0.3s" repeatCount="indefinite"/><animate attributeName="y" values="-5;-13;-5" dur="2.6s" begin="0.3s" repeatCount="indefinite"/></rect><rect x="8" y="-12" width="7" height="24" rx="2" fill="#f59e0b"><animate attributeName="height" values="24;32;24" dur="2.6s" begin="0.6s" repeatCount="indefinite"/><animate attributeName="y" values="-12;-20;-12" dur="2.6s" begin="0.6s" repeatCount="indefinite"/></rect></g>
+<text x="135" y="140" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle" >Billing &amp; usage</text>
+<text x="135" y="170" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >Org plans, invoices and</text>
+<text x="135" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >usage summaries</text>
+<rect x="105" y="206" width="60" height="3" rx="1.5" fill="#f59e0b" opacity=".8"><animate attributeName="width" values="20;90;20" dur="4s" begin="1.5s" repeatCount="indefinite"/><animate attributeName="x" values="125;90;125" dur="4s" begin="1.5s" repeatCount="indefinite"/></rect>
+</g><g transform="translate(610,340)">
+<rect width="270" height="230" rx="20" fill="url(#card)" stroke="#1e293b"/>
+<rect width="270" height="230" rx="20" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-dasharray="150 816">
+<animate attributeName="stroke-dashoffset" values="0;-966" dur="7s" begin="3.6s" repeatCount="indefinite"/></rect>
+<circle cx="135" cy="62" r="44" fill="#ec4899" opacity=".12"><animate attributeName="r" values="40;50;40" dur="4s" begin="2.4s" repeatCount="indefinite"/></circle>
+<circle cx="135" cy="62" r="32" fill="#0b1226" stroke="#ec4899" stroke-opacity=".7"/>
+<g transform="translate(135,62)"><rect x="-15" y="-11" width="30" height="22" rx="4" stroke="#ec4899" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M-15 -4H15" stroke="#ec4899" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="-10" cy="-7.5" r="1.3" fill="#ec4899"/><circle cx="-6" cy="-7.5" r="1.3" fill="#ec4899"/><rect x="-10" y="1" width="10" height="6" rx="1.5" fill="#ec4899" opacity=".7"><animate attributeName="width" values="10;18;10" dur="3s" repeatCount="indefinite"/></rect></g>
+<text x="135" y="140" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle" >Widget &amp; dashboard</text>
+<text x="135" y="170" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >Embeddable widget plus a</text>
+<text x="135" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >developer dashboard UI</text>
+<rect x="105" y="206" width="60" height="3" rx="1.5" fill="#ec4899" opacity=".8"><animate attributeName="width" values="20;90;20" dur="4s" begin="1.8s" repeatCount="indefinite"/><animate attributeName="x" values="125;90;125" dur="4s" begin="1.8s" repeatCount="indefinite"/></rect>
+</g><g transform="translate(900,340)">
+<rect width="270" height="230" rx="20" fill="url(#card)" stroke="#1e293b"/>
+<rect width="270" height="230" rx="20" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-dasharray="150 816">
+<animate attributeName="stroke-dashoffset" values="0;-966" dur="7s" begin="4.2s" repeatCount="indefinite"/></rect>
+<circle cx="135" cy="62" r="44" fill="#3b82f6" opacity=".12"><animate attributeName="r" values="40;50;40" dur="4s" begin="2.8s" repeatCount="indefinite"/></circle>
+<circle cx="135" cy="62" r="32" fill="#0b1226" stroke="#3b82f6" stroke-opacity=".7"/>
+<g transform="translate(135,62)"><ellipse cy="-9" rx="13" ry="5" stroke="#3b82f6" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M-13 -9V9C-13 12 13 12 13 9V-9M-13 0C-13 3 13 3 13 0" stroke="#3b82f6" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="0" cy="-9" r="2" fill="#3b82f6"><animate attributeName="cy" values="-9;10;-9" dur="3.2s" repeatCount="indefinite"/></circle></g>
+<text x="135" y="140" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle" >Postgres + SQLite</text>
+<text x="135" y="170" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >PostgreSQL-ready migrations,</text>
+<text x="135" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >SQLite local fallback</text>
+<rect x="105" y="206" width="60" height="3" rx="1.5" fill="#3b82f6" opacity=".8"><animate attributeName="width" values="20;90;20" dur="4s" begin="2.1s" repeatCount="indefinite"/><animate attributeName="x" values="125;90;125" dur="4s" begin="2.1s" repeatCount="indefinite"/></rect>
+</g>
+</svg>

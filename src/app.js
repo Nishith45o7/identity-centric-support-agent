@@ -101,6 +101,10 @@ app.use('/api', (req, res, next) => {
 app.use('/api', supportRoutes);
 app.use('/v1', platformRoutes);
 app.use('/v1', v1Routes);
+app.get('/widget/config', (req, res, next) => {
+  req.url = `/widget/config${req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''}`;
+  return platformRoutes(req, res, next);
+});
 
 app.use('/swagger-ui', express.static(getAbsoluteFSPath()));
 app.get('/docs', (req, res) => {
@@ -112,10 +116,28 @@ app.get('/developer', (req, res) => {
 app.get('/widget', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/widget.html'));
 });
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/dashboard.html'));
+});
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/login.html'));
+});
+app.get('/signup', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/signup.html'));
+});
+app.get('/home', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/home.html'));
+});
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/home.html'));
+});
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.get('*', (req, res) => {
-  if (req.path.startsWith('/api')) {
+  if (req.path.startsWith('/api') || req.path.startsWith('/v1')) {
     return notFoundHandler(req, res);
   }
 

@@ -3,188 +3,805 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Workspace · Continuity API</title>
+    <title>Contextis Developer Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <style>
-      :root{--ink:#172522;--muted:#697771;--paper:#f4f5ef;--white:#fff;--line:#dce3dc;--green:#146b54;--green-dark:#0c4739;--mint:#e7f2eb;--coral:#eb7b61;--red:#a73826;--mono:'DM Mono',monospace;--sans:'Manrope',sans-serif}
-      *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:13px}button,input,select{font:inherit}button,a{touch-action:manipulation}a{color:inherit;text-decoration:none}button{cursor:pointer}button:disabled{opacity:.55;cursor:wait}
-      .shell{min-height:100vh;display:grid;grid-template-columns:224px minmax(0,1fr)}.side{position:sticky;top:0;height:100vh;padding:20px 14px;background:#fbfcf8;border-right:1px solid var(--line);display:flex;flex-direction:column}.brand{display:flex;align-items:center;gap:10px;padding:2px 10px 23px;font-size:13px;font-weight:800}.mark{width:27px;height:27px;display:grid;place-items:center;border-radius:6px;color:#fff;background:var(--green);font:12px var(--mono)}.workspace-label{padding:0 10px;color:var(--muted);font:10px var(--mono);text-transform:uppercase}.nav{display:grid;gap:4px;margin-top:13px}.nav button{height:37px;display:flex;align-items:center;gap:10px;padding:0 10px;border:0;border-radius:4px;background:transparent;text-align:left;color:#55645d;font-size:12px}.nav button:hover{background:#f0f3ed}.nav button.active{background:var(--mint);color:var(--green-dark);font-weight:700}.nav .glyph{width:17px;color:var(--green);font:13px var(--mono)}.side-bottom{margin-top:auto;padding:12px 10px;border-top:1px solid var(--line)}.user-name{font-weight:700;font-size:12px}.user-email{margin-top:4px;color:var(--muted);font-size:10px;overflow-wrap:anywhere}.signout{margin-top:13px;padding:0;border:0;background:none;color:var(--muted);font-size:11px}.signout:hover{color:var(--red)}
-      .main{min-width:0}.top{height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 30px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.55)}.top-title{font-weight:700;font-size:13px}.top-actions{display:flex;align-items:center;gap:10px}.project-select{height:35px;max-width:220px;padding:0 30px 0 10px;border:1px solid var(--line);border-radius:4px;color:var(--ink);background:var(--white)}.content{max-width:1250px;margin:0 auto;padding:29px 30px 60px}.view{display:none}.view.active{display:block}.heading{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:23px}.eyebrow{color:var(--green);font:10px var(--mono);text-transform:uppercase}.heading h1{margin:8px 0 0;font-size:25px;letter-spacing:0;font-weight:700}.sub{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.6}.btn{min-height:36px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 13px;border:1px solid var(--green);border-radius:4px;background:var(--green);color:#fff;font-size:11px;font-weight:700}.btn:hover{background:var(--green-dark)}.btn.secondary{border-color:var(--line);background:#fff;color:var(--ink)}.btn.secondary:hover{border-color:#9bb1a4}.btn.danger{border-color:#e7c8bf;background:#fff;color:var(--red)}.btn.small{min-height:29px;padding:0 9px;font-size:10px}.btn-icon{width:33px;height:33px;border:1px solid var(--line);border-radius:4px;background:white;color:var(--muted)}
-      .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:23px}.metric{padding:17px;background:var(--white);border:1px solid var(--line);border-radius:5px}.metric-label{color:var(--muted);font-size:10px}.metric-value{margin-top:11px;font-size:25px;font-weight:700}.metric-note{margin-top:5px;color:var(--muted);font-size:10px}.columns{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}.panel{padding:18px;background:var(--white);border:1px solid var(--line);border-radius:5px}.panel h2{margin:0;font-size:14px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.table{width:100%;border-collapse:collapse;text-align:left}.table th{padding:9px 8px;border-bottom:1px solid var(--line);color:var(--muted);font:9px var(--mono);font-weight:400;text-transform:uppercase}.table td{padding:12px 8px;border-bottom:1px solid #edf0eb;vertical-align:middle}.table tr:last-child td{border-bottom:0}.mono{font:10px var(--mono);overflow-wrap:anywhere}.muted{color:var(--muted)}.empty{padding:21px 8px;text-align:center;color:var(--muted);font-size:11px}.status{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-size:10px}.status:before{content:'';width:6px;height:6px;border-radius:50%;background:#3b9a71}.status.revoked{color:var(--muted)}.status.revoked:before{background:#aab4ac}.inline-form{display:flex;gap:8px;align-items:end}.field{display:grid;gap:6px;min-width:0}.field label{color:var(--muted);font-size:10px}.field input,.field select{height:36px;min-width:0;padding:0 10px;border:1px solid var(--line);border-radius:4px;background:white;color:var(--ink)}.field input:focus,.field select:focus{outline:2px solid #a1c9b3;outline-offset:1px}.project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.project-item{padding:14px;border:1px solid var(--line);border-radius:4px}.project-item strong{font-size:12px}.project-item small{display:block;margin-top:7px;color:var(--muted);font:10px var(--mono)}.welcome{padding:23px 25px;margin-bottom:18px;border-left:3px solid var(--coral);background:#e9f0e9}.welcome h2{margin:0;font-size:19px}.welcome p{margin:7px 0 0;color:var(--muted);font-size:11px;line-height:1.65}.callout{padding:17px 18px;background:#f6f7f1;border:1px solid var(--line);border-radius:4px}.callout strong{font-size:11px}.callout p{margin:8px 0 0;color:var(--muted);font-size:11px;line-height:1.6}.code{overflow:auto;margin:13px 0 0;padding:15px;border-radius:4px;background:var(--green-dark);color:#e2f0e6;font:10px/1.7 var(--mono)}.notice{min-height:18px;color:var(--red);font-size:11px}.customer-layout{display:grid;grid-template-columns:minmax(300px,.8fr) minmax(0,1.2fr);gap:14px}.memory-fact{padding:11px 0;border-bottom:1px solid #edf0eb}.memory-fact:last-child{border-bottom:0}.memory-fact strong{display:block;font-size:11px}.memory-fact span{display:block;margin-top:4px;color:var(--muted);font-size:11px;line-height:1.55}.dialog{width:min(94vw,530px);border:1px solid var(--line);border-radius:6px;padding:0;color:var(--ink);box-shadow:0 22px 70px rgba(14,45,34,.2)}.dialog::backdrop{background:rgba(17,38,31,.45)}.dialog-inner{padding:24px}.dialog h2{margin:0;font-size:18px}.dialog p{color:var(--muted);font-size:11px;line-height:1.6}.secret{display:block;overflow-wrap:anywhere;padding:13px;background:#edf4ee;border:1px solid #cfddd1;border-radius:4px;color:var(--green-dark);font:12px var(--mono);user-select:all}.dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.spinner{color:var(--muted);font-size:11px;padding:13px 0}.toast{position:fixed;right:22px;bottom:20px;padding:11px 14px;border-radius:4px;background:var(--green-dark);color:white;font-size:11px;box-shadow:0 7px 20px #0002}.toast[hidden]{display:none}
-      @media(max-width:1000px){.shell{grid-template-columns:190px minmax(0,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}.columns{grid-template-columns:1fr}.customer-layout{grid-template-columns:1fr}}
-      @media(max-width:700px){.shell{display:block}.side{position:static;height:auto;padding:10px 14px;border-right:0;border-bottom:1px solid var(--line)}.brand{padding:0 5px 10px}.workspace-label,.side-bottom{display:none}.nav{display:flex;overflow:auto;margin:0 -3px}.nav button{flex:0 0 auto}.nav button .glyph{display:none}.top{height:auto;min-height:58px;padding:11px 16px}.top-title{display:none}.project-select{max-width:52vw}.content{padding:21px 15px 44px}.heading{align-items:start}.heading h1{font-size:22px}.heading>.btn{white-space:nowrap}.inline-form{align-items:stretch;flex-direction:column}.metrics{gap:8px}.metric{padding:13px}.metric-value{font-size:21px}.project-grid{grid-template-columns:1fr}.table th,.table td{padding:9px 5px}.hide-mobile{display:none}}
-      @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+      :root {
+        --bg: #070d1e;
+        --sidebar-bg: rgba(9, 15, 34, 0.85);
+        --card-bg: rgba(13, 23, 49, 0.65);
+        --card-hover: rgba(18, 32, 68, 0.75);
+        --card-border: rgba(148, 163, 184, 0.12);
+        --card-border-focus: rgba(56, 189, 248, 0.35);
+        --accent: #38bdf8;
+        --accent-glow: rgba(56, 189, 248, 0.25);
+        --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --success: #34d399;
+        --warning: #fbbf24;
+        --danger: #f87171;
+        --sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        --mono: 'JetBrains Mono', monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        min-height: 100vh;
+        font-family: var(--sans);
+        background: radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
+                    radial-gradient(circle at 10% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                    var(--bg);
+        color: var(--text);
+        font-size: 13px;
+        display: flex;
+        overflow-x: hidden;
+      }
+      a { color: inherit; text-decoration: none; }
+      button, input, select, textarea { font-family: inherit; font-size: inherit; }
+      button { cursor: pointer; border: 0; background: none; }
+
+      /* Sidebar */
+      .sidebar {
+        width: 250px;
+        min-height: 100vh;
+        background: var(--sidebar-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-right: 1px solid var(--card-border);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+      }
+      .brand-box {
+        padding: 22px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid var(--card-border);
+      }
+      .brand-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--accent-gradient);
+        color: #031525;
+        font-weight: 800;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .brand-title { font-weight: 800; font-size: 15px; letter-spacing: -0.01em; }
+      .brand-badge { font-size: 10px; color: var(--accent); font-weight: 600; text-transform: uppercase; margin-left: auto; letter-spacing: 0.08em; }
+
+      .project-switcher {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--card-border);
+        background: rgba(0, 0, 0, 0.15);
+      }
+      .switcher-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+      .project-select {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid var(--card-border);
+        color: var(--text);
+        font-weight: 600;
+        outline: none;
+      }
+
+      .nav-menu {
+        flex: 1;
+        padding: 14px 12px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 14px;
+        border-radius: 10px;
+        color: var(--muted);
+        font-weight: 500;
+        font-size: 13px;
+        transition: all 0.15s ease;
+        text-align: left;
+        width: 100%;
+      }
+      .nav-item:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }
+      .nav-item.active {
+        color: var(--accent);
+        background: rgba(56, 189, 248, 0.1);
+        font-weight: 600;
+      }
+      .nav-glyph { width: 18px; font-size: 14px; display: inline-flex; justify-content: center; }
+
+      .sidebar-footer {
+        padding: 14px 18px;
+        border-top: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(0, 0, 0, 0.15);
+      }
+      .user-info strong { display: block; font-size: 12px; color: var(--text); }
+      .user-info small { color: var(--muted); font-size: 10px; }
+      .logout-btn { color: var(--muted); font-size: 12px; transition: color 0.15s; }
+      .logout-btn:hover { color: var(--danger); }
+
+      /* Main Stage */
+      .main-stage {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .topbar {
+        height: 64px;
+        padding: 0 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--card-border);
+        background: rgba(7, 13, 30, 0.6);
+        backdrop-filter: blur(16px);
+      }
+      .page-title { font-size: 16px; font-weight: 700; }
+      .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+      .content {
+        padding: 32px;
+        max-width: 1300px;
+        width: 100%;
+        margin: 0 auto;
+      }
+      .view { display: none; }
+      .view.active { display: block; }
+
+      /* Components */
+      .view-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 24px;
+      }
+      .view-eyebrow { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 4px; }
+      .view-title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+      .view-desc { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+      .glass-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        padding: 24px;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+        margin-bottom: 24px;
+      }
+
+      .btn {
+        padding: 9px 18px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.15s ease;
+      }
+      .btn-primary {
+        background: var(--accent-gradient);
+        color: #031525;
+        font-weight: 700;
+      }
+      .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--card-border);
+        color: var(--text);
+      }
+      .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+      .btn-danger {
+        background: rgba(248, 113, 113, 0.12);
+        border: 1px solid rgba(248, 113, 113, 0.3);
+        color: var(--danger);
+      }
+      .btn-small { padding: 6px 12px; font-size: 11px; border-radius: 8px; }
+
+      .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+      .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+      .stat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 20px;
+        backdrop-filter: blur(16px);
+      }
+      .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; }
+      .stat-val { font-size: 26px; font-weight: 800; margin: 8px 0 4px; }
+      .stat-sub { font-size: 11px; color: var(--muted); }
+
+      /* Tables */
+      .table-box { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+      th {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--card-border);
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      td {
+        padding: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        vertical-align: middle;
+      }
+      tr:last-child td { border-bottom: 0; }
+      .tag {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        background: rgba(56, 189, 248, 0.12);
+        color: var(--accent);
+      }
+      .tag-live { background: rgba(52, 211, 153, 0.15); color: var(--success); }
+      .tag-revoked { background: rgba(148, 163, 184, 0.1); color: var(--muted); }
+
+      /* Forms */
+      .form-grid { display: grid; gap: 16px; }
+      .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+      .field input, .field select, .field textarea {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid var(--card-border);
+        color: var(--text);
+        outline: none;
+      }
+      .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+
+      /* Code block */
+      .code-box {
+        background: #020617;
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 14px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: #e2e8f0;
+        overflow-x: auto;
+        line-height: 1.6;
+      }
+
+      /* Modal Dialog */
+      dialog {
+        background: rgba(11, 19, 41, 0.95);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 28px;
+        color: var(--text);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(24px);
+        width: min(92vw, 480px);
+        margin: auto;
+      }
+      dialog::backdrop { background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 12px 20px;
+        background: #0284c7;
+        color: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.2s ease;
+      }
+      .toast[hidden] { display: none; }
+      @keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+      /* Widget customizer preview */
+      .preview-container {
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        background: rgba(0, 0, 0, 0.25);
+        height: 480px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
     </style>
   </head>
   <body>
-    <div class="shell">
-      <aside class="side">
-        <a class="brand" href="/"><span class="mark">ic</span> Continuity API</a>
-        <div class="workspace-label">Workspace</div>
-        <nav class="nav" aria-label="Dashboard">
-          <button class="active" data-view="overview"><span class="glyph">⌂</span>Overview</button>
-          <button data-view="projects"><span class="glyph">▦</span>Projects</button>
-          <button data-view="keys"><span class="glyph">⌘</span>API keys</button>
-          <button data-view="customers"><span class="glyph">◎</span>Customers & memory</button>
-          <button data-view="usage"><span class="glyph">↗</span>Usage</button>
-          <a class="btn secondary small" href="/docs" style="margin-top:8px">Developer docs ↗</a>
-        </nav>
-        <div class="side-bottom"><div class="user-name" id="side-name"></div><div class="user-email" id="side-email"></div><button class="signout" id="signout">Log out</button></div>
-      </aside>
-      <div class="main">
-        <header class="top"><div class="top-title" id="page-title">Overview</div><div class="top-actions"><select class="project-select" id="project-select" aria-label="Current project"><option value="">No project selected</option></select><button class="btn small" data-action="new-project">＋ New project</button></div></header>
-        <main class="content">
-          <section class="view active" id="view-overview">
-            <div class="welcome"><h2 id="welcome-title">Welcome</h2><p>Start with a project, issue a test key, then send a customer message. The project key is the scope for every customer identity and memory operation.</p></div>
-            <div class="heading"><div><div class="eyebrow">Workspace overview</div><h1>Overview</h1><p class="sub" id="overview-sub">Your support API activity in the selected project.</p></div><button class="btn" data-action="new-project">Create project</button></div>
-            <div class="metrics">
-              <div class="metric"><div class="metric-label">Requests · 30 days</div><div class="metric-value" id="metric-requests">0</div><div class="metric-note">Across the selected project</div></div>
-              <div class="metric"><div class="metric-label">Successful</div><div class="metric-value" id="metric-success">0</div><div class="metric-note">Responses below 400</div></div>
-              <div class="metric"><div class="metric-label">Failed</div><div class="metric-value" id="metric-failed">0</div><div class="metric-note">Responses 400 and above</div></div>
-              <div class="metric"><div class="metric-label">Avg. response</div><div class="metric-value" id="metric-latency">0<span style="font-size:12px"> ms</span></div><div class="metric-note">Observed API duration</div></div>
-            </div>
-            <div class="columns">
-              <section class="panel"><div class="panel-head"><h2>Projects</h2><button class="btn secondary small" data-view="projects">View projects</button></div><div id="overview-projects" class="project-grid"><div class="spinner">Loading projects…</div></div></section>
-              <section class="panel"><div class="panel-head"><h2>First request</h2><a class="muted" href="/docs">Quick start ↗</a></div><div class="callout"><strong>Send identity and message</strong><p>Keep your own stable customer ID. The project key binds every request to its project.</p><pre class="code" id="quickstart-code">Create a project and API key to see the request example.</pre></div></section>
-            </div>
-          </section>
-
-          <section class="view" id="view-projects">
-            <div class="heading"><div><div class="eyebrow">Organization workspace</div><h1>Projects</h1><p class="sub">Each project owns its API keys, customers, usage, and memory scope.</p></div><button class="btn" data-action="new-project">＋ Create project</button></div>
-            <div class="panel"><div class="panel-head"><h2>Your projects</h2><span class="muted" id="project-count">0 projects</span></div><div id="projects-list" class="project-grid"><div class="spinner">Loading projects…</div></div></div>
-          </section>
-
-          <section class="view" id="view-keys">
-            <div class="heading"><div><div class="eyebrow">Project credentials</div><h1>API keys</h1><p class="sub">Secrets are shown once. Lists contain only prefixes and safe metadata.</p></div></div>
-            <div class="panel" style="margin-bottom:14px"><div class="panel-head"><h2>Issue a key</h2></div><form id="key-form" class="inline-form"><div class="field" style="flex:1"><label for="key-name">Key name</label><input id="key-name" name="name" placeholder="Website production" required maxlength="100" /></div><div class="field"><label for="key-environment">Environment</label><select id="key-environment" name="environment"><option value="test">Test</option><option value="live">Live</option></select></div><button class="btn" type="submit">Create key</button></form><div class="notice" id="key-notice"></div></div>
-            <div class="panel"><div class="panel-head"><h2>Keys for this project</h2><span class="muted" id="key-count">0 keys</span></div><div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Prefix</th><th>Environment</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody id="keys-table"><tr><td colspan="6" class="empty">Select a project to view keys.</td></tr></tbody></table></div></div>
-          </section>
-
-          <section class="view" id="view-customers">
-            <div class="heading"><div><div class="eyebrow">Identity-scoped records</div><h1>Customers & memory</h1><p class="sub">Inspect or delete memory belonging to customers in this project only.</p></div></div>
-            <div class="customer-layout"><section class="panel"><div class="panel-head"><h2>Recent customers</h2><span class="muted" id="customer-count"></span></div><div id="customers-list"><div class="empty">Select a project to view customers.</div></div></section><section class="panel"><div class="panel-head"><h2>Remembered context</h2><button class="btn danger small" id="clear-memory" disabled>Delete memory</button></div><div id="memory-detail" class="empty">Select a customer to inspect its memory.</div></section></div>
-          </section>
-
-          <section class="view" id="view-usage">
-            <div class="heading"><div><div class="eyebrow">Request accounting</div><h1>Usage</h1><p class="sub">Operational counts for the last 30 days, based on recorded API requests.</p></div></div>
-            <div class="metrics"><div class="metric"><div class="metric-label">Requests · 30 days</div><div class="metric-value" id="usage-requests">0</div></div><div class="metric"><div class="metric-label">Successful requests</div><div class="metric-value" id="usage-success">0</div></div><div class="metric"><div class="metric-label">Failed requests</div><div class="metric-value" id="usage-failed">0</div></div><div class="metric"><div class="metric-label">Memory operations</div><div class="metric-value" id="usage-memory">0</div></div></div>
-            <div class="panel"><h2>Average response time</h2><p class="sub" id="usage-latency">0 ms</p><p class="muted">Usage counts are operational telemetry, not billing-grade metering.</p></div>
-          </section>
-        </main>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand-box">
+        <div class="brand-icon">C</div>
+        <div>
+          <div class="brand-title">Contextis</div>
+          <small style="color: var(--muted); font-size: 10px;">Developer Workspace</small>
+        </div>
+        <span class="brand-badge">Dev</span>
       </div>
-    </div>
 
-    <dialog class="dialog" id="secret-dialog"><div class="dialog-inner"><div class="eyebrow">Copy now · shown once</div><h2>Your API key</h2><p>Continuity stores only a keyed hash. After closing this dialog, the full secret cannot be retrieved.</p><code class="secret" id="secret-value"></code><div class="dialog-actions"><button class="btn secondary" id="copy-key">Copy key</button><button class="btn" id="close-secret">Done</button></div></div></dialog>
-    <dialog class="dialog" id="project-dialog"><div class="dialog-inner"><div class="eyebrow">Workspace setup</div><h2>Create a project</h2><p>Projects isolate API keys, usage, customers, and customer memory.</p><form id="project-form"><div class="field"><label for="project-name">Project name</label><input id="project-name" name="name" minlength="2" maxlength="80" required placeholder="Acme website" /></div><div class="notice" id="project-notice"></div><div class="dialog-actions"><button type="button" class="btn secondary" id="cancel-project">Cancel</button><button class="btn" type="submit">Create project</button></div></form></div></dialog>
-    <div class="toast" id="toast" role="status" hidden></div>
+      <div class="project-switcher">
+        <div class="switcher-label">Active Project</div>
+        <select class="project-select" id="project-select" aria-label="Select Project">
+          <option value="">Loading projects…</option>
+        </select>
+      </div>
 
-    <script>
-      const state={user:null,projects:[],projectId:'',keys:[],customers:[],customerId:'',apiKey:'',organization:null,organizationBilling:null,organizationUsage:null};
-      const $=(selector)=>document.querySelector(selector);
-      const escapeHtml=(value)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
-      const api=async(url,options={})=>{const response=await fetch(url,{credentials:'same-origin',...options,headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});const data=await response.json().catch(()=>({}));if(response.status===401&&url!=='/v1/auth/session'){location.assign('/login');throw new Error('Your session expired.')}if(!response.ok)throw new Error(data.error?.message||'Request failed.');return data};
-      const toast=(message)=>{const node=$('#toast');node.textContent=message;node.hidden=false;setTimeout(()=>{node.hidden=true},2400)};
-      const showView=(name)=>{document.querySelectorAll('.view').forEach(view=>view.classList.toggle('active',view.id===`view-${name}`));document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===name));$('#page-title').textContent=({overview:'Overview',projects:'Projects',keys:'API keys',customers:'Customers & memory',usage:'Usage'})[name]||name};
-      const selectedProject=()=>state.projects.find(project=>project.id===state.projectId);
-      const projectUrl=(suffix)=>`/v1/projects/${encodeURIComponent(state.projectId)}${suffix}`;
-      const formatMoney=(cents)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format((Number(cents||0)/100));
+      <nav class="nav-menu">
+        <button class="nav-item active" data-view="overview"><span class="nav-glyph">◫</span>Overview</button>
+        <button class="nav-item" data-view="projects"><span class="nav-glyph">▦</span>Projects</button>
+        <button class="nav-item" data-view="keys"><span class="nav-glyph">⌘</span>API Keys</button>
+        <button class="nav-item" data-view="widget"><span class="nav-glyph">💬</span>Chat Widget</button>
+        <button class="nav-item" data-view="conversations"><span class="nav-glyph">✉</span>Conversations</button>
+        <button class="nav-item" data-view="customers"><span class="nav-glyph">👤</span>Customers & Memory</button>
+        <button class="nav-item" data-view="tools"><span class="nav-glyph">⚙</span>Tools & Integrations</button>
+        <button class="nav-item" data-view="usage"><span class="nav-glyph">↗</span>Usage</button>
+        <button class="nav-item" data-view="docs"><span class="nav-glyph">📖</span>Documentation</button>
+        <button class="nav-item" data-view="settings"><span class="nav-glyph">⚙</span>Settings</button>
+      </nav>
 
-      const renderProjects=()=>{
-        const options=state.projects.map(project=>`<option value="${escapeHtml(project.id)}" ${project.id===state.projectId?'selected':''}>${escapeHtml(project.name)}</option>`).join('');
-        $('#project-select').innerHTML=options||'<option value="">No project selected</option>';
-        const cards=state.projects.map(project=>`<article class="project-item"><strong>${escapeHtml(project.name)}</strong><small>${escapeHtml(project.id)} · ${escapeHtml(project.status)}</small><div style="display:flex;gap:7px;margin-top:12px"><button class="btn secondary small" data-action="select-project" data-id="${escapeHtml(project.id)}">Open project</button></div></article>`).join('')||'<div class="empty">No projects yet. Create one to issue a key.</div>';
-        $('#projects-list').innerHTML=cards;$('#overview-projects').innerHTML=cards;$('#project-count').textContent=`${state.projects.length} project${state.projects.length===1?'':'s'}`;
-        const plan = state.organization?.plan || { name: state.organization?.planName || 'starter', maxProjects: 3, maxRequestsPer15Min: 120 };
-        const billing = state.organizationBilling?.billing || {};
-        const statusMeta = billing.billingStatus ? ` · billing ${billing.billingStatus}` : '';
-        $('#overview-sub').textContent = selectedProject()
-          ? `Usage and customer activity for ${selectedProject().name}. Plan: ${plan.name}${statusMeta} · ${plan.maxProjects} project cap · ${plan.maxRequestsPer15Min} req/15m.`
-          : `Plan: ${plan.name}${statusMeta} · ${plan.maxProjects} project cap · ${plan.maxRequestsPer15Min} req/15m.`;
-        $('#quickstart-code').textContent=state.projectId ? `curl -X POST ${location.origin}/v1/support/chat --header "Authorization: Bearer $CONTINUITY_API_KEY" --header "Content-Type: application/json" --data '{"user_id":"customer_123","message":"My issue is still happening."}'` : 'Create a project and test key to see your request example.';
-      };
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <strong id="side-name">Loading user</strong>
+          <small id="side-email"></small>
+        </div>
+        <button class="logout-btn" id="signout" title="Log out">Sign out ↗</button>
+      </div>
+    </aside>
 
-      const renderWorkspaceHealth=()=>{
-        const billing = state.organizationBilling?.billing || {};
-        const usage = state.organizationUsage?.usage || {};
-        if (!billing.planName && !usage.planName) return;
-        const orgSummary = [
-          `<div class="metric"><div class="metric-label">Plan</div><div class="metric-value" style="font-size:20px">${escapeHtml(billing.planName || usage.planName || 'starter')}</div><div class="metric-note">Current workspace tier</div></div>`,
-          `<div class="metric"><div class="metric-label">Outstanding</div><div class="metric-value" style="font-size:20px">${escapeHtml(formatMoney(billing.outstandingBalanceCents || 0))}</div><div class="metric-note">Unpaid invoice total</div></div>`,
-          `<div class="metric"><div class="metric-label">Paid</div><div class="metric-value" style="font-size:20px">${escapeHtml(formatMoney(billing.paidBalanceCents || 0))}</div><div class="metric-note">Collected in current ledger</div></div>`,
-          `<div class="metric"><div class="metric-label">Projects</div><div class="metric-value" style="font-size:20px">${escapeHtml(String(usage.projectCount || 0))}/${escapeHtml(String(usage.projectLimit || 0))}</div><div class="metric-note">Workspace utilization</div></div>`,
-        ].join('');
-        $('#overview-projects').innerHTML = orgSummary;
-      };
+    <!-- Main Stage -->
+    <main class="main-stage">
+      <header class="topbar">
+        <div class="page-title" id="page-title">Overview</div>
+        <div class="topbar-actions">
+          <a class="btn btn-secondary btn-small" href="/admin">Platform Admin ↗</a>
+          <button class="btn btn-primary btn-small" data-action="new-project">+ New Project</button>
+        </div>
+      </header>
 
-      const renderKeys=()=>{
-        const tbody=$('#keys-table');$('#key-count').textContent=`${state.keys.length} key${state.keys.length===1?'':'s'}`;
-        if(!state.keys.length){tbody.innerHTML='<tr><td colspan="6" class="empty">No keys yet. Create one for this project.</td></tr>';return}
-        tbody.innerHTML=state.keys.map(key=>`<tr><td><strong>${escapeHtml(key.name)}</strong></td><td class="mono">${escapeHtml(key.prefix)}••••••</td><td>${escapeHtml(key.environment)}</td><td><span class="status ${key.status==='active'?'':'revoked'}">${escapeHtml(key.status)}</span></td><td class="muted">${new Date(key.createdAt).toLocaleDateString()}</td><td>${key.status==='active'?`<button class="btn danger small" data-action="revoke-key" data-id="${escapeHtml(key.id)}">Revoke</button>`:''}</td></tr>`).join('');
-      };
+      <div class="content">
+        <!-- VIEW: OVERVIEW -->
+        <section class="view active" id="view-overview">
+          <div class="view-header">
+            <div>
+              <div class="view-eyebrow">Project Intelligence</div>
+              <h1 class="view-title">Workspace Overview</h1>
+              <p class="view-desc" id="overview-sub">Persistent customer memory and support operations.</p>
+            </div>
+            <button class="btn btn-primary" data-action="new-project">Create Project</button>
+          </div>
 
-      const renderCustomers=()=>{
-        $('#customer-count').textContent=`${state.customers.length} shown`;
-        $('#customers-list').innerHTML=state.customers.map(customer=>`<button class="customer-row" data-action="inspect-customer" data-id="${escapeHtml(customer.userId)}" style="display:flex;width:100%;justify-content:space-between;gap:12px;padding:12px 3px;border:0;border-bottom:1px solid #edf0eb;background:transparent;text-align:left;color:var(--ink);cursor:pointer"><span><strong class="mono">${escapeHtml(customer.userId)}</strong><small style="display:block;margin-top:5px;color:var(--muted)">Last seen ${new Date(customer.lastSeenAt).toLocaleString()}</small></span><span style="color:var(--green)">Inspect →</span></button>`).join('')||'<div class="empty">No customers recorded for this project yet.</div>';
-      };
+          <div class="grid-4">
+            <div class="stat-card">
+              <div class="stat-label">Requests (30 Days)</div>
+              <div class="stat-val" id="metric-requests">0</div>
+              <div class="stat-sub">Active support requests</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Successful</div>
+              <div class="stat-val" style="color: var(--success)" id="metric-success">0</div>
+              <div class="stat-sub">Resolved context-aware replies</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Errors</div>
+              <div class="stat-val" style="color: var(--danger)" id="metric-failed">0</div>
+              <div class="stat-sub">HTTP 4xx/5xx responses</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Average Latency</div>
+              <div class="stat-val" id="metric-latency">0 ms</div>
+              <div class="stat-sub">Inference + Memory recall</div>
+            </div>
+          </div>
 
-      const loadProjectData=async()=>{
-        if(!state.projectId){state.keys=[];state.customers=[];renderKeys();renderCustomers();return}
-        const [keys,usage,customers]=await Promise.all([api(projectUrl('/api-keys')),api(projectUrl('/usage')),api(`/v1/support/customers?project_id=${encodeURIComponent(state.projectId)}`)]);
-        state.keys=keys.keys||[];state.customers=customers.customers||[];renderKeys();renderCustomers();
-        const row=usage.usage||{};
-        for(const prefix of ['metric','usage']){
-          $(`#${prefix}-requests`).textContent=Number(row.total_requests||0).toLocaleString();
-          $(`#${prefix}-success`).textContent=Number(row.successful_requests||0).toLocaleString();
-          $(`#${prefix}-failed`).textContent=Number(row.failed_requests||0).toLocaleString();
-        }
-        $('#metric-latency').innerHTML=`${Math.round(Number(row.average_response_time_ms||0))}<span style="font-size:12px"> ms</span>`;
-        $('#usage-latency').textContent=`${Math.round(Number(row.average_response_time_ms||0))} ms average`;
-        $('#usage-memory').textContent=Number(row.memory_operations||0).toLocaleString();
-        renderProjects();
-      };
+          <div class="grid-2">
+            <div class="glass-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 15px; font-weight: 700;">Active Projects</h3>
+                <button class="btn btn-secondary btn-small" data-view="projects">View All</button>
+              </div>
+              <div id="overview-projects-list" style="display: grid; gap: 10px;">
+                <p style="color: var(--muted)">Loading projects…</p>
+              </div>
+            </div>
 
-      const load=async()=>{
-        const session=await api('/v1/auth/session');
-        if(!session.user){location.replace('/login');return}
-        state.user=session.user;$('#side-name').textContent=session.user.name;$('#side-email').textContent=session.user.email;$('#welcome-title').textContent=`Welcome, ${session.user.name.split(' ')[0]}.`;
-        const [organization, billing, usage, projects] = await Promise.all([
-          api('/v1/organization').then((response)=>response.organization).catch(() => null),
-          api('/v1/organization/billing').then((response)=>response.billing ? response : { billing: {} }).catch(() => ({ billing: {} })),
-          api('/v1/organization/usage').then((response)=>response.usage ? response : { usage: {} }).catch(() => ({ usage: {} })),
-          api('/v1/projects').catch(() => ({ projects: [] })),
-        ]);
-        state.organization = organization;
-        state.organizationBilling = billing;
-        state.organizationUsage = usage;
-        state.projects = projects.projects || [];
-        const previous=localStorage.getItem('continuity_project');state.projectId=state.projects.some(project=>project.id===previous)?previous:state.projects[0]?.id||'';
-        renderProjects();renderWorkspaceHealth();await loadProjectData();
-        if(!state.projects.length)$('#project-dialog').showModal();
-      };
+            <div class="glass-card">
+              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">Quick Integration</h3>
+              <p style="color: var(--muted); margin-bottom: 14px; font-size: 12px;">Call the Contextis support engine directly with your project key:</p>
+              <div class="code-box" id="quickstart-code">Create a project and key to view integration snippet.</div>
+              <div style="margin-top: 14px; display: flex; gap: 10px;">
+                <button class="btn btn-secondary btn-small" data-view="keys">Manage Keys</button>
+                <button class="btn btn-secondary btn-small" data-view="widget">Configure Widget</button>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      document.addEventListener('click',async event=>{
-        const nav=event.target.closest('[data-view]');if(nav){showView(nav.dataset.view);return}
-        const action=event.target.closest('[data-action]');if(!action)return;
-        try{
-          if(action.dataset.action==='new-project'){$('#project-notice').textContent='';$('#project-form').reset();$('#project-dialog').showModal()}
-          if(action.dataset.action==='select-project'){state.projectId=action.dataset.id;localStorage.setItem('continuity_project',state.projectId);$('#project-select').value=state.projectId;await loadProjectData();showView('overview')}
-          if(action.dataset.action==='revoke-key'&&confirm('Revoke this key? Requests using it will stop working immediately.')){await api(projectUrl(`/api-keys/${encodeURIComponent(action.dataset.id)}`),{method:'DELETE'});await loadProjectData();toast('API key revoked')}
-          if(action.dataset.action==='inspect-customer'){state.customerId=action.dataset.id;const data=await api(`/v1/support/customers/${encodeURIComponent(state.customerId)}/memory?project_id=${encodeURIComponent(state.projectId)}`);const facts=data.memory||[];$('#memory-detail').innerHTML=facts.map(fact=>`<div class="memory-fact"><strong>${escapeHtml(fact.category||'Support context')}</strong><span>${escapeHtml(fact.fact||'')}</span></div>`).join('')||'<div class="empty">No remembered facts for this customer.</div>';$('#clear-memory').disabled=false}
-        }catch(error){toast(error.message)}
-      });
+        <!-- VIEW: PROJECTS -->
+        <section class="view" id="view-projects">
+          <div class="view-header">
+            <div>
+              <div class="view-eyebrow">Environments</div>
+              <h1 class="view-title">Projects</h1>
+              <p class="view-desc">Each project isolates API keys, customer identities, conversations, and long-term memory.</p>
+            </div>
+            <button class="btn btn-primary" data-action="new-project">+ Create Project</button>
+          </div>
+          <div class="glass-card">
+            <div class="table-box">
+              <table>
+                <thead>
+                  <tr><th>Project Name</th><th>ID</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="projects-table-body">
+                  <tr><td colspan="5" style="color: var(--muted)">Loading projects…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
-      $('#project-select').addEventListener('change',async event=>{state.projectId=event.target.value;localStorage.setItem('continuity_project',state.projectId);state.customerId='';$('#memory-detail').textContent='Select a customer to inspect its memory.';$('#clear-memory').disabled=true;try{await loadProjectData()}catch(error){toast(error.message)}});
-      $('#project-form').addEventListener('submit',async event=>{event.preventDefault();const button=event.submitter;button.disabled=true;$('#project-notice').textContent='';try{const result=await api('/v1/projects',{method:'POST',body:JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)))});state.projects.unshift(result.project);state.projectId=result.project.id;localStorage.setItem('continuity_project',state.projectId);$('#project-dialog').close();renderProjects();await loadProjectData();showView('keys');toast('Project created')}catch(error){$('#project-notice').textContent=error.message}finally{button.disabled=false}});
-      $('#cancel-project').addEventListener('click',()=>$('#project-dialog').close());
-      $('#key-form').addEventListener('submit',async event=>{event.preventDefault();if(!state.projectId){$('#key-notice').textContent='Create or select a project first.';return}const button=event.submitter;button.disabled=true;$('#key-notice').textContent='';try{const created=await api(projectUrl('/api-keys'),{method:'POST',body:JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)))});state.apiKey=created.key;$('#secret-value').textContent=created.key;$('#secret-dialog').showModal();event.currentTarget.reset();await loadProjectData()}catch(error){$('#key-notice').textContent=error.message}finally{button.disabled=false}});
-      $('#copy-key').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(state.apiKey);toast('API key copied')}catch{toast('Clipboard access is unavailable')}});
-      const closeSecret=()=>{$('#secret-dialog').close();$('#secret-value').textContent='';state.apiKey=''};
-      $('#close-secret').addEventListener('click',closeSecret);$('#secret-dialog').addEventListener('close',()=>{$('#secret-value').textContent='';state.apiKey=''});
-      $('#clear-memory').addEventListener('click',async()=>{if(!state.customerId||!confirm(`Permanently delete memory for ${state.customerId} in this project?`))return;try{await api(`/v1/support/customers/${encodeURIComponent(state.customerId)}/memory?project_id=${encodeURIComponent(state.projectId)}`,{method:'DELETE'});$('#memory-detail').innerHTML='<div class="empty">Memory deleted.</div>';toast('Customer memory deleted')}catch(error){toast(error.message)}});
-      $('#signout').addEventListener('click',async()=>{try{await api('/v1/auth/logout',{method:'POST'});localStorage.removeItem('continuity_project');location.assign('/login')}catch(error){toast(error.message)}});
-      load().catch(error=>{if(error.message!=='Your session expired.')toast(error.message)});
-    </script>
+        <!-- VIEW: API KEYS -->
+        <section class="view" id="view-keys">
+          <div class="view-header">
+            <div>
+              <div class="view-eyebrow">Credentials</div>
+              <h1 class="view-title">API Keys</h1>
+              <p class="view-desc">Use Secret Keys (sk_) on your servers and Public Keys (pk_) in client-side widgets.</p>
+            </div>
+            <button class="btn btn-primary" data-action="new-key">+ Create API Key</button>
+          </div>
+          <div class="glass-card">
+            <div class="table-box">
+              <table>
+                <thead>
+                  <tr><th>Key Name</th><th>Prefix</th><th>Type</th><th>Environment</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="keys-table-body">
+                  <tr><td colspan="7" style="color: var(--muted)">Select a project to inspect keys.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: CHAT WIDGET -->
+        <section class="view" id="view-widget">
+          <div class="view-header">
+            <div>
+              <div class="view-eyebrow">Embeddable Experience</div>
+              <h1 class="view-title">Chat Widget Customizer</h1>
+              <p class="view-desc">Customize the appearance, agent persona, and embed snippet for your web application.</p>
+            </div>
+            <button class="btn btn-primary" id="save-widget-btn">Save Changes</button>
+          </div>
+
+          <div class="grid-2">
+            <div class="glass-card">
+              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px;">Widget Configuration</h3>
+              <form id="widget-settings-form" class="form-grid">
+                <div class="field">
+                  <label>Agent Name</label>
+                  <input id="w-agent-name" value="Contextis Support" />
+                </div>
+                <div class="field">
+                  <label>Welcome Message</label>
+                  <textarea id="w-welcome" rows="2">Hi! How can we help you today?</textarea>
+                </div>
+                <div class="grid-2">
+                  <div class="field">
+                    <label>Accent Color</label>
+                    <input type="color" id="w-color" value="#38bdf8" style="height: 42px; padding: 2px;" />
+                  </div>
+                  <div class="field">
+                    <label>Position</label>
+                    <select id="w-position">
+                      <option value="bottom-right">Bottom Right</option>
+                      <option value="bottom-left">Bottom Left</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Input Placeholder</label>
+                  <input id="w-placeholder" value="Type your message..." />
+                </div>
+              </form>
+
+              <div style="margin-top: 24px;">
+                <h4 style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;">Embed Snippet</h4>
+                <div class="code-box" id="widget-embed-code">Loading snippet…</div>
+              </div>
+            </div>
+
+            <div class="glass-card" style="display: flex; flex-direction: column;">
+              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px;">Live Preview</h3>
+              <div class="preview-container" id="widget-preview-area">
+                <div style="text-align: center; color: var(--muted);">
+                  <div style="font-size: 32px; margin-bottom: 8px;">💬</div>
+                  <p>Widget will launch in your website as a sleek floating bubble.</p>
+                  <a class="btn btn-secondary btn-small" href="/widget" target="_blank" style="margin-top: 14px;">Open Widget Playground ↗</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: CONVERSATIONS -->
+        <section class="view" id="view-conversations">
+          <div class="view-header">
+            <div>
+              <div class="view-eyebrow">Customer Transcripts</div>
+              <h1 class="view-title">Conversations</h1>
+              <p class="view-desc">Inspect conversation histories, customer requests, and agent responses.</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="glass-card">
+              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 14px;">Recent Threads</h3>
+              <div id="conversations-list" style="display: grid; gap: 8px; max-height: 540px; overflow-y: auto;">
+                <p style="color: var(--muted)">Loading conversations…</p>
+              </div>
+            </div>
+
+            <div class="glass-card" style="display: flex; flex-direction: column; min-height: 480px;">
+              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 14px;" id="conv-transcript-title">Transcript</h3>
+              <div id="conv-messages-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 12px; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid var(--card-border);">
+                <p style="color: var(--muted); text-align: center; margin-top: 40px;">Select a conversation to view messages.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: CUSTOMERS & MEMORY -->
+        <section class="view" id="view-customers">
+          <div class="view-header">
+            <div>
+              <div class="view-eyebrow">Context Store</div>
+              <h1 class="view-title">Customers & Memory</h1>
+              <p class="view-desc">Inspect persistent memory banks scoped to this project and customer IDs.</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="glass-card">
+              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 14px;">Recorded Customers</h3>
+              <div id="customers-list" style="display: grid; gap: 8px;">
+                <p style="color: var(--muted)">Select a project to inspect customers.</p>
+              </div>
+            </div>
+
+            <div class="glass-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="font-size: 15px; font-weight: 700;" id="memory-target-title">Remembered Context</h3>
+                <button class="btn btn-danger btn-small" id="clear-memory-btn" disabled>Delete Memory</button>
+              </div>
+              <div id="memory-facts-box" style="min-height: 200px; padding: 14px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--card-border);">
+                <p style="color: var(--muted)">Select a customer to view remembered facts.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: TOOLS & INTEGRATIONS -->
+        <section class="view" id="view-tools">
+          <div class="view-header">
+            <div>
+              <div class="view-eyebrow">Autonomous Actions</div>
+              <h1 class="view-title">Tools & Integrations</h1>
+              <p class="view-desc">Equip the AI agent with controlled business software integrations.</p>
+            </div>
+            <button class="btn btn-primary" data-action="new-tool">+ Add Tool</button>
+          </div>
+
+          <div class="glass-card">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px;">Configured Project Tools</h3>
+            <div class="table-box">
+              <table>
+                <thead>
+                  <tr><th>Tool Name</th><th>Sensitivity</th><th>Permissions</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="tools-table-body">
+                  <tr><td colspan="5" style="color: var(--muted)">Loading tools…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">Pre-built Business Templates</h3>
+            <p style="color: var(--muted); font-size: 12px; margin-bottom: 16px;">Quickly install verified support tools with strict validation guardrails:</p>
+            <div id="tool-templates-list" class="grid-2">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: USAGE -->
+        <section class="view" id="view-usage">
+          <div class="view-header">
+            <div>
+              <div class="view-eyebrow">Telemetry</div>
+              <h1 class="view-title">Usage & Limits</h1>
+              <p class="view-desc">Monitor API volume, memory operations, and plan quotas.</p>
+            </div>
+          </div>
+
+          <div class="grid-4">
+            <div class="stat-card">
+              <div class="stat-label">Total Requests</div>
+              <div class="stat-val" id="usage-requests">0</div>
+              <div class="stat-sub">Last 30 days</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Successful</div>
+              <div class="stat-val" id="usage-success" style="color: var(--success)">0</div>
+              <div class="stat-sub">Resolved queries</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Failed</div>
+              <div class="stat-val" id="usage-failed" style="color: var(--danger)">0</div>
+              <div class="stat-sub">Non-2xx status</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Memory Ops</div>
+              <div class="stat-val" id="usage-memory" style="color: var(--accent)">0</div>
+              <div class="stat-sub">Recalls & Retentions</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: DOCUMENTATION -->
+        <section class="view" id="view-docs">
+          <div class="view-header">
+            <div>
+              <div class="view-eyebrow">Integration Guide</div>
+              <h1 class="view-title">Developer Documentation</h1>
+              <p class="view-desc">Quickly connect Contextis into your stack.</p>
+            </div>
+            <a class="btn btn-secondary" href="/docs" target="_blank">Full API Explorer (Swagger) ↗</a>
+          </div>
+
+          <div class="glass-card">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">1. Support Chat API</h3>
+            <p style="color: var(--muted); margin-bottom: 14px;">POST to <code>/v1/support/chat</code> with your project secret key:</p>
+            <div class="code-box">
+curl -X POST http://localhost:3000/v1/support/chat \
+  -H "Authorization: Bearer sk_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "customer_482",
+    "message": "My invoice has an incorrect charge.",
+    "conversation_id": "conv_demo_1"
+  }'
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">2. Embeddable Widget</h3>
+            <p style="color: var(--muted); margin-bottom: 14px;">Add this snippet to your web frontend with your public key:</p>
+            <div class="code-box">
+&lt;script src="http://localhost:3000/widget.js"
+  data-project-id="prj_..."
+  data-public-key="pk_live_..."&gt;
+&lt;/script&gt;
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: SETTINGS -->
+        <section class="view" id="view-settings">
+          <div class="view-header">
+            <div>
+              <div class="view-eyebrow">Workspace Configuration</div>
+              <h1 class="view-title">Settings</h1>
+              <p class="view-desc">Manage workspace members and subscription tier.</p>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 14px;">Workspace Details</h3>
+            <div class="grid-2">
+              <div class="field">
+                <label>Workspace Name</label>
+                <input id="setting-org-name" readonly />
+              </div>
+              <div class="field">
+                <label>Current Plan</label>
+                <input id="setting-plan-name" readonly />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Dialog: New Project -->
+    <dialog id="new-project-dialog">
+      <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">Create a Project</h2>
+      <p style="color: var(--muted); font-size: 12px; margin-bottom: 18px;">Projects isolate API keys, customer identities, and memory banks.</p>
+      <form id="new-project-form" class="form-grid">
+        <div class="field">
+          <label>Project Name</label>
+          <input id="new-proj-name" placeholder="E-commerce Production" required minlength="2" maxlength="80" />
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
+          <button type="button" class="btn btn-secondary" id="close-proj-dialog">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Project</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Dialog: New API Key -->
+    <dialog id="new-key-dialog">
+      <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">Issue an API Key</h2>
+      <p style="color: var(--muted); font-size: 12px; margin-bottom: 18px;">Public keys (pk_) are safe for client widgets. Secret keys (sk_) are for server integrations.</p>
+      <form id="new-key-form" class="form-grid">
+        <div class="field">
+          <label>Key Name</label>
+          <input id="new-key-name" placeholder="Website Widget Key" required />
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Key Type</label>
+            <select id="new-key-type">
+              <option value="secret">Secret Key (sk_)</option>
+              <option value="public">Public Widget Key (pk_)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Environment</label>
+            <select id="new-key-env">
+              <option value="test">Test</option>
+              <option value="live">Live</option>
+            </select>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
+          <button type="button" class="btn btn-secondary" id="close-key-dialog">Cancel</button>
+          <button type="submit" class="btn btn-primary">Generate Key</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Dialog: Show Secret Once -->
+    <dialog id="show-secret-dialog">
+      <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">Copy Your API Key</h2>
+      <p style="color: var(--muted); font-size: 12px; margin-bottom: 18px;">This key will never be displayed again. Store it securely.</p>
+      <div class="code-box" id="displayed-secret" style="user-select: all; font-size: 13px; color: var(--accent); margin-bottom: 20px;"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary" id="copy-secret-btn">Copy to Clipboard</button>
+        <button class="btn btn-primary" id="close-secret-btn">I have copied it</button>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" hidden>Notification</div>
+
+    <script src="/dashboard.js" defer></script>
   </body>
 </html>

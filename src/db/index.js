@@ -144,6 +144,7 @@ const runSqliteMigrations = () => {
       continue;
     }
 
+    db.exec('PRAGMA foreign_keys = OFF;');
     db.exec('BEGIN IMMEDIATE');
     try {
       db.exec(migration.sql);
@@ -153,6 +154,8 @@ const runSqliteMigrations = () => {
     } catch (error) {
       db.exec('ROLLBACK');
       throw error;
+    } finally {
+      db.exec('PRAGMA foreign_keys = ON;');
     }
   }
 };

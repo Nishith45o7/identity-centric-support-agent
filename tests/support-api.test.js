@@ -306,6 +306,16 @@ describe('Identity-Centric Support API', () => {
     expect(response.text).toContain('/api/openapi.json');
   });
 
+  test('serves the admin login and signup pages at their public routes', async () => {
+    const login = await request(app).get('/login');
+    const signup = await request(app).get('/signup');
+
+    expect(login.status).toBe(200);
+    expect(login.text).toContain('Welcome back.');
+    expect(signup.status).toBe(200);
+    expect(signup.text).toContain('Create your workspace.');
+  });
+
   test('serves a developer dashboard for tenant and key management', async () => {
     const response = await request(app).get('/developer');
 
@@ -313,6 +323,14 @@ describe('Identity-Centric Support API', () => {
     expect(response.text).toContain('Developer Dashboard');
     expect(response.text).toContain('/v1/developer/summary');
     expect(response.text).toContain('Create Tenant');
+  });
+
+  test('serves the project dashboard with its controller as a same-origin script', async () => {
+    const response = await request(app).get('/dashboard');
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('src="/dashboard.js"');
+    expect((await request(app).get('/dashboard.js')).status).toBe(200);
   });
 
   test('serves a standalone chat widget demo for embedded customer support', async () => {

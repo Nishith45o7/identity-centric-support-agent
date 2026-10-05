@@ -1,177 +1,274 @@
-# Identity-Centric Support Platform
+# Contextis
 
-A production-oriented, multi-tenant AI support SaaS for managing developer workspaces, projects, customer-facing support agents, team access, and billing-aware usage limits.
+> **AI support that remembers every customer.**
 
-## What this platform includes
+Contextis is an enterprise-grade AI customer-support infrastructure SaaS platform. It allows businesses and developers to integrate an identity-aware, memory-persistent support agent into their applications using a high-throughput REST API or a drop-in embeddable chat widget.
 
-- Developer authentication and workspace membership management
-- Multi-project support environments with customer isolation
-- Project API keys with revocation and access control
-- Project-scoped support chat endpoints and customer memory storage
-- Embeddable support widget and dashboard UI
-- Organization plan management, billing summaries, and invoice history
-- Usage summaries and member/audit tracking for operational visibility
-- PostgreSQL-ready schema with SQLite fallback for local and test environments
+---
 
-## Architecture
+## 1. Platform Architecture
 
-- Backend: Node.js + Express
-- Database: SQLite for local/dev/tests, PostgreSQL-ready migrations for production
-- Auth: developer session cookies and project-scoped API keys
-- AI support flow: support agent service with Hindsight and Groq integration
-- Frontend: dashboard and embeddable widget assets under the public folder
-- Security: request validation, origin checks, rate limits, project isolation, audit logging
+```text
+                         CONTEXTIS
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+          REST API                   CHAT WIDGET
+              │                           │
+              └─────────────┬─────────────┘
+                            ▼
+                    CONTEXTIS ENGINE
+                            │
+            ┌───────────────┼───────────────┐
+            ▼               ▼               ▼
+        Identity         Hindsight         Groq
+        Context           Memory          Inference
+            │               │               │
+            └───────────────┼───────────────┘
+                            ▼
+                     AGENT ORCHESTRATOR
+                            │
+                            ▼
+                       TOOL ROUTER
+                            │
+             ┌──────────────┼──────────────┐
+             ▼              ▼              ▼
+        Customer API    Order API       Auth API
+             │              │              │
+             └──────────────┼──────────────┘
+                            ▼
+                    CUSTOMER'S SOFTWARE
+```
 
-## Core product model
+---
 
-The system is organized around workspaces and projects:
+## 2. Three Types of Users
 
-- Developer user signs up and logs in
-- User belongs to an organization/workspace
-- Workspace contains members, projects, and billing metadata
-- Each project owns customer data, support keys, and tool definitions
-- Support requests are authenticated by project API keys, not just developer sessions
+1. **Contextis Platform Admin (SaaS Owner)**
+   - Global multi-tenant visibility across all customer organizations, projects, and users.
+   - Live health checks across APIs, PostgreSQL / SQLite databases, Hindsight memory banks, and Groq inference models.
+   - Subscription distribution, quota enforcement, tenant suspension/reactivation, and cross-platform audit logging.
 
-This keeps customer data isolated across projects while preserving a developer dashboard for operational control.
+2. **Contextis Business / Developer Customer (e.g. Acme Store)**
+   - Creates projects and manages separate `live` and `test` environments.
+   - Generates and rotates API keys (`sk_live_...` for backends, `pk_live_...` for widgets).
+   - Customizes the embeddable chat widget (agent name, themes, accents, greeting messages).
+   - Inspects customer conversation transcripts, memory facts, tool executions, and usage records.
 
-## Quick start
+3. **End Customer (e.g. Alice)**
+   - Interacts with support via the chat widget on the business's website or mobile app.
+   - Identified by compound key `(organization_id, project_id, external_user_id)`.
+   - Never needs a Contextis account; their context and memory persist seamlessly across visits.
+
+---
+
+## 3. Core Principles
+
+- **Memory is Context, NOT Authentication:** The agent recalls past issues, orders, and customer preferences, but remembered facts never grant cryptographic privileges or bypass login.
+- **Never Ask for Passwords:** For sensitive flows like password resets, the agent invokes authorized backend authentication endpoints (`send_password_reset`) that dispatch verified emails or OTPs directly from the customer's own identity provider.
+- **Strict Server-Side Isolation:** Tenant IDs and project boundaries are always validated cryptographically on the server. Client-provided tenant headers are never blindly trusted.
+
+---
+
+## 4. Key Capabilities
+
+- **Multi-Tenant PostgreSQL Architecture:** Complete relational schema with automated migrations supporting organizations, projects, API keys, conversations, messages, widget settings, usage records, tools, and audit logs (with SQLite fallback for local development).
+- **Public & Secret Key Separation:**
+  - `pk_live_...` / `pk_test_...`: Public browser-safe keys restricted to chat widget endpoints.
+  - `sk_live_...` / `sk_test_...`: Secure hashed server keys for administrative and backend API access.
+- **Shadow DOM Chat Widget:** Zero CSS leakage, responsive mobile floating launcher, customizable branding, typing indicators, and markdown formatting.
+- **Business Action & Tool Router:** Declarative tool definitions with strict permission tiers (`READ`, `WRITE`, `SENSITIVE`, `ADMIN`) and input validation.
+- **Platform & Developer Consoles:** Minimal, premium glassmorphism dashboards with high information density, responsive tables, real-time charts, and audit stream inspection.
+
+---
+
+## 5. Quick Start
+
+### Prerequisites
+- Node.js >= 18
+- npm >= 9
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/Nishith45o7/identity-centric-support-agent.git
+cd identity-centric-support-agent
+
+# Install dependencies
 npm install
+
+# Run database migrations & config check
 npm run validate:config
+
+# Execute test suite
 npm test
+
+# Start the development server
 npm run dev
 ```
 
-The app serves the dashboard and widgets locally on:
+Visit the platform locally at:
+- **Landing Page:** `http://localhost:3000`
+- **Developer Console:** `http://localhost:3000/dashboard`
+- **Platform Admin Control Plane:** `http://localhost:3000/admin`
+- **Chat Widget Playground:** `http://localhost:3000/widget`
+- **Developer Documentation:** `http://localhost:3000/docs`
 
-```text
-http://localhost:3000
-```
+---
 
-## Environment variables
+## 6. Environment Variables
+
+Create a `.env` file based on `.env.example`:
 
 ```bash
 PORT=3000
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:3000
+
+# Database (PostgreSQL / Neon; defaults to local SQLite if unset)
 DATABASE_URL=
-SUPPORT_API_KEY=
-BILLING_WEBHOOK_SECRET=
-API_KEY_PEPPER=
+
+# AI & Memory Providers
 GROQ_API_KEY=
 HINDSIGHT_API_KEY=
 HINDSIGHT_BASE_URL=https://api.hindsight.vectorize.io
 MEMORY_MODE=on
+
+# Cryptographic Salt / Pepper
+API_KEY_PEPPER=your-secure-pepper-for-key-hashing
+SESSION_SECRET=your-session-secret
+
+# Billing & Support Secrets
+SUPPORT_API_KEY=
+BILLING_WEBHOOK_SECRET=
 ```
 
-Production deployments must provide all required secrets before booting the service. Use:
+---
+
+---
+
+## 7. REST API Reference
+
+All requests must include a valid Contextis Secret Key (`sk_live_...` or `sk_test_...`):
 
 ```bash
-npm run validate:config
+Authorization: Bearer sk_live_...
 ```
 
-Notes:
-- When `DATABASE_URL` is unset, the app uses SQLite.
-- When `GROQ_API_KEY` or `HINDSIGHT_API_KEY` is missing, the app falls back to local demo-safe behavior instead of failing the request lifecycle.
-- Billing and workspace secrets are expected to stay server-side only.
+Every response returns an `X-Request-ID` header matching the payload `request_id`.
 
-## Developer and workspace APIs
+### Core Chat Endpoint
+`POST /v1/support/chat`
 
-### Auth
-
-```bash
-POST /v1/auth/signup
-POST /v1/auth/login
-POST /v1/auth/logout
-GET /v1/auth/session
+Request:
+```json
+{
+  "user_id": "cust_10482",
+  "message": "Where is my shipment?",
+  "conversation_id": "conv_948210",
+  "metadata": {
+    "source": "website",
+    "language": "en"
+  }
+}
 ```
 
-### Organization and teams
-
-```bash
-GET /v1/organization
-GET /v1/organization/members
-POST /v1/organization/members
-DELETE /v1/organization/members/:userId
-PATCH /v1/organization/members/:userId/role
-GET /v1/organization/audit
-POST /v1/organization/plan
-GET /v1/organization/billing
-GET /v1/organization/usage
-GET /v1/organization/invoices
-POST /v1/organization/invoices
-GET /v1/organization/billing-events
-POST /v1/organization/billing/webhook
+Response:
+```json
+{
+  "request_id": "req_1728148920_abc123",
+  "conversation_id": "conv_948210",
+  "user_id": "cust_10482",
+  "response": "I remember that you ordered the Ergonomic Chair yesterday. Tracking shows it is currently in transit with FedEx Express.",
+  "memory_used": true
+}
 ```
 
-### Projects
+### End Conversation & Retain Memory
+`POST /v1/support/end`
 
-```bash
-GET /v1/projects
-POST /v1/projects
-GET /v1/projects/:projectId
-PATCH /v1/projects/:projectId
-DELETE /v1/projects/:projectId
-POST /v1/projects/:projectId/api-keys
-GET /v1/projects/:projectId/api-keys
-DELETE /v1/projects/:projectId/api-keys/:keyId
-POST /v1/projects/:projectId/tools
-GET /v1/projects/:projectId/tools
-POST /v1/projects/:projectId/tools/:toolId/execute
+Request:
+```json
+{
+  "user_id": "cust_10482",
+  "messages": [
+    "I'm on macOS Sonoma and using the Safari browser."
+  ]
+}
 ```
 
-### Support routes
-
-```bash
-POST /v1/support/chat
-POST /v1/support/end
-GET /v1/support/memory/:userId
-DELETE /v1/support/memory/:userId
+Response:
+```json
+{
+  "request_id": "req_1728148920_def456",
+  "user_id": "cust_10482",
+  "factsStored": 1,
+  "retainedFacts": [
+    {
+      "category": "platform",
+      "fact": "macOS Sonoma, Safari"
+    }
+  ]
+}
 ```
 
-### Public endpoints
+### Query Customer Memory
+`GET /v1/support/memory/:userId`
 
-```bash
-GET /api/health
-GET /docs
-GET /widget
-GET /widget.js
+Response:
+```json
+{
+  "request_id": "req_1728148920_ghi789",
+  "user_id": "cust_10482",
+  "memory": [
+    {
+      "category": "platform",
+      "fact": "macOS Sonoma, Safari"
+    }
+  ]
+}
 ```
 
-## Example flow
+---
 
-1. Sign up as a developer and create a workspace.
-2. Create a project for a product or customer cohort.
-3. Generate a project API key for the support client or widget.
-4. Send support requests through the support API using the project key.
-5. Review workspace members, billing data, audit events, and usage summaries from the dashboard.
-6. Update the plan or invoice state through the billing endpoints or webhook simulation.
+## 8. Embeddable Widget Snippet
 
-## Security notes
+Add this script tag right before the closing `</body>` tag on any page:
 
-- Project API keys are stored as hashes, never plain text.
-- Customer memory is isolated by project and user context.
-- Sensitive fields like tokens, passwords, and secrets are filtered before persistence.
-- Workspace membership and project ownership checks are enforced on route access.
-- Rate limiting and origin validation are enabled for public-facing endpoints.
+```html
+<script
+  src="https://cdn.contextis.io/widget.js"
+  data-project-id="your_project_id"
+  data-public-key="pk_live_your_public_key"
+  data-user-id="optional_logged_in_user_id"
+  data-user-name="optional_customer_name"
+  defer>
+</script>
+```
 
-## Testing
+---
+
+## 9. Testing & Quality Assurance
+
+Run the test suite:
 
 ```bash
 npm test -- --runInBand
 ```
 
-The project includes integration tests covering signup, project creation, key revocation, support access, workspace management, billing, usage tracking, and multi-user memory isolation.
+The test suite covers:
+- User signup, login, session validation, and logout.
+- Multi-tenant organization isolation and project boundaries.
+- Public (`pk_`) and Secret (`sk_`) key issuance and hashing.
+- Conversation message persistence and widget configuration.
+- Platform Admin management and organization suspension.
+- Hindsight memory retrieval and retention flows.
+- Groq AI inference orchestration and tool router dispatch.
+- Rate limiting, subscription enforcement, and security defenses.
 
-## Current status
+---
 
-The project is in a production-oriented SaaS state with the core operating layers in place:
-- developer workspace auth
-- project isolation
-- billing and plan management
-- member removal and access revocation
-- invoice history and billing events
-- usage reporting and operational audit logs
+## 10. License
 
-It remains suitable as a foundation for real payment-provider integration, broader production hardening, and operational deployment workflows.
+Proprietary — Contextis Platform Inc. All rights reserved.

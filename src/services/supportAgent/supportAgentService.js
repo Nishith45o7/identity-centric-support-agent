@@ -12,13 +12,13 @@ const isMemoryEnabled = (value) => {
   return value !== false;
 };
 
-const processSupportMessage = async ({ userId, message, memoryMode = config.memoryMode, tenantId = 'default', projectId = 'default' }) => {
+const processSupportMessage = async ({ userId, message, memoryMode = config.memoryMode, tenantId = 'default', projectId = 'default', environment = 'live' }) => {
   const resolvedUserId = resolveIdentity({ userId });
   const modeEnabled = isMemoryEnabled(memoryMode);
 
   let recalledFacts = [];
   if (modeEnabled) {
-    const recallResult = await memoryService.recall(resolvedUserId, message, tenantId, projectId);
+    const recallResult = await memoryService.recall(resolvedUserId, message, tenantId, projectId, environment);
     recalledFacts = recallResult.facts;
   }
 
@@ -37,7 +37,7 @@ const processSupportMessage = async ({ userId, message, memoryMode = config.memo
   };
 };
 
-const finalizeSession = async ({ userId, messages = [], tenantId = 'default', projectId = 'default' }) => {
+const finalizeSession = async ({ userId, messages = [], tenantId = 'default', projectId = 'default', environment = 'live' }) => {
   const resolvedUserId = resolveIdentity({ userId });
   const allText = messages.map((entry) => sanitizeText(entry)).filter(Boolean).join(' ');
   const extracted = extractFactCandidates(allText);
@@ -51,7 +51,7 @@ const finalizeSession = async ({ userId, messages = [], tenantId = 'default', pr
     };
   }
 
-  await memoryService.retain(resolvedUserId, facts, tenantId, projectId);
+  await memoryService.retain(resolvedUserId, facts, tenantId, projectId, environment);
 
   return {
     success: true,
@@ -60,14 +60,14 @@ const finalizeSession = async ({ userId, messages = [], tenantId = 'default', pr
   };
 };
 
-const getMemorySnapshot = async ({ userId, tenantId = 'default', projectId = 'default' }) => {
+const getMemorySnapshot = async ({ userId, tenantId = 'default', projectId = 'default', environment = 'live' }) => {
   const resolvedUserId = resolveIdentity({ userId });
-  return memoryService.snapshot(resolvedUserId, tenantId, projectId);
+  return memoryService.snapshot(resolvedUserId, tenantId, projectId, environment);
 };
 
-const clearMemory = async ({ userId, tenantId = 'default', projectId = 'default' }) => {
+const clearMemory = async ({ userId, tenantId = 'default', projectId = 'default', environment = 'live' }) => {
   const resolvedUserId = resolveIdentity({ userId });
-  return memoryService.clear(resolvedUserId, tenantId, projectId);
+  return memoryService.clear(resolvedUserId, tenantId, projectId, environment);
 };
 
 module.exports = {

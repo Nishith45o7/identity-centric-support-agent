@@ -3,50 +3,442 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Identity-Centric Support API Docs</title>
+    <title>Contextis Developer Documentation & API Reference</title>
     <link rel="stylesheet" href="/swagger-ui/swagger-ui.css" />
     <style>
-      html {
-        box-sizing: border-box;
-        overflow: -moz-scrollbars-vertical;
-        overflow-y: scroll;
+      :root {
+        --bg: #090d16;
+        --surface: rgba(18, 24, 38, 0.7);
+        --surface-border: rgba(255, 255, 255, 0.08);
+        --accent: #2563eb;
+        --accent-glow: rgba(37, 99, 235, 0.25);
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --code-bg: #030712;
       }
-      *, *:before, *:after {
-        box-sizing: inherit;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        margin: 0;
-        background: #0f172a;
-        color: #e2e8f0;
-        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text-primary);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.6;
+        min-height: 100vh;
       }
-      #swagger-ui {
-        max-width: 1200px;
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(9, 13, 22, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--surface-border);
+        padding: 0.9rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 700;
+        font-size: 1.15rem;
+        color: white;
+        text-decoration: none;
+      }
+      .brand-mark {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        box-shadow: 0 0 12px var(--accent-glow);
+      }
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+      }
+      .nav-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.15s;
+      }
+      .nav-links a:hover { color: white; }
+      .tab-bar {
+        display: flex;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.25rem;
+        border-radius: 8px;
+        border: 1px solid var(--surface-border);
+      }
+      .tab-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        padding: 0.4rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.15s;
+      }
+      .tab-btn.active {
+        background: var(--accent);
+        color: white;
+      }
+      .container {
+        max-width: 1280px;
         margin: 0 auto;
-        padding: 1.5rem;
+        padding: 2.5rem 2rem;
       }
-      .topbar {
+      .doc-section {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 3rem;
+      }
+      .doc-sidebar {
+        position: sticky;
+        top: 5rem;
+        height: fit-content;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        border-right: 1px solid var(--surface-border);
+        padding-right: 1.5rem;
+      }
+      .doc-sidebar h4 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b;
+        margin-top: 1rem;
+        margin-bottom: 0.25rem;
+      }
+      .doc-sidebar a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.88rem;
+        padding: 0.3rem 0.5rem;
+        border-radius: 6px;
+        transition: all 0.15s;
+      }
+      .doc-sidebar a:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .doc-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: 12px;
+        padding: 1.75rem;
+        backdrop-filter: blur(12px);
+      }
+      h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+      h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; color: #f8fafc; }
+      h3 { font-size: 1.15rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #e2e8f0; }
+      p { color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.95rem; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; background: rgba(255,255,255,0.08); padding: 0.15em 0.35em; border-radius: 4px; }
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--surface-border);
+        border-radius: 8px;
+        padding: 1.25rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: #38bdf8;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      .badge-post { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+      .badge-get { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+      .badge-secret { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+      .badge-public { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+      #swagger-container {
         display: none;
       }
+      #swagger-ui {
+        background: #0f172a;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--surface-border);
+      }
+      .swagger-ui .topbar { display: none; }
+      .swagger-ui { filter: invert(88%) hue-rotate(180deg); }
+      .swagger-ui .model-box, .swagger-ui .opblock { filter: invert(0%); }
     </style>
   </head>
   <body>
-    <div id="swagger-ui"></div>
+    <header>
+      <a class="brand" href="/">
+        <span class="brand-mark">C</span>
+        <span>Contextis <small style="font-weight: normal; font-size: 0.8rem; color: var(--text-secondary); margin-left: 0.5rem;">Docs</small></span>
+      </a>
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-guides-btn">Developer Guides</button>
+        <button class="tab-btn" id="tab-swagger-btn">API Reference (OpenAPI)</button>
+      </div>
+      <div class="nav-links">
+        <a href="/dashboard">Developer Console</a>
+        <a href="/widget">Widget Playground</a>
+        <a href="/admin">Platform Admin</a>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- VIEW 1: DEVELOPER GUIDES -->
+      <div id="guides-container" class="doc-section">
+        <aside class="doc-sidebar">
+          <h4>Getting Started</h4>
+          <a href="#overview">Overview & Positioning</a>
+          <a href="#quickstart">5-Minute Quickstart</a>
+          <a href="#auth-keys">API Keys & Authentication</a>
+
+          <h4>Core Integration</h4>
+          <a href="#chat-api">REST Chat API</a>
+          <a href="#chat-widget">Embeddable Chat Widget</a>
+          <a href="#identity-memory">Customer Identity & Memory</a>
+
+          <h4>Business Tools</h4>
+          <a href="#tools-actions">Tools & Actions Router</a>
+          <a href="#password-reset">Password Reset Flow</a>
+          <a href="#order-tracking">Order Tracking Tool</a>
+
+          <h4>Security & Limits</h4>
+          <a href="#rate-limits">Rate Limits & Plans</a>
+          <a href="#security-tenancy">Security & Multi-Tenancy</a>
+          <a href="#error-codes">Error Handling</a>
+        </aside>
+
+        <article class="doc-content">
+          <section id="overview">
+            <h1>Contextis Developer Documentation</h1>
+            <p style="font-size: 1.15rem; color: #cbd5e1;">AI support infrastructure that remembers every customer across their entire lifecycle.</p>
+            <div class="card">
+              <h3>Core Positioning</h3>
+              <p>Contextis enables software teams to integrate an intelligent support agent into their applications using a modern REST API and an embeddable chat widget. The agent recalls customer preferences, past issues, and authorized tool results without requiring manual prompt engineering or memory management from the host application.</p>
+            </div>
+          </section>
+
+          <section id="quickstart">
+            <h2>5-Minute Quickstart</h2>
+            <div class="card">
+              <p>1. Sign up for a Contextis developer account at <a href="/signup" style="color: #60a5fa;">contextis.io/signup</a>.</p>
+              <p>2. Create your project in the Developer Console and copy your <code>pk_live_...</code> (widget) or <code>sk_live_...</code> (server) key.</p>
+              <p>3. Drop the embeddable script onto your website, or call the REST chat endpoint from your backend.</p>
+            </div>
+          </section>
+
+          <section id="auth-keys">
+            <h2>API Keys & Environments</h2>
+            <div class="card">
+              <p>Contextis separates client-side identifiers from server-side secrets with distinct key prefixes and environments:</p>
+              <div style="margin: 1rem 0;">
+                <p><span class="badge badge-public">Public Keys</span> <code>pk_live_...</code> or <code>pk_test_...</code>: Safe for public browsers and mobile apps. Restricted to chat widget initialization and public customer endpoints.</p>
+                <p><span class="badge badge-secret">Secret Keys</span> <code>sk_live_...</code> or <code>sk_test_...</code>: For server-to-server operations. Hashes are securely stored. Secret keys are never exposed in browser code.</p>
+              </div>
+              <h3>Passing API Keys</h3>
+              <p>Pass your secret key in the standard <code>Authorization</code> header:</p>
+              <pre>Authorization: Bearer sk_live_your_secret_key_here</pre>
+            </div>
+          </section>
+
+          <section id="chat-api">
+            <h2>REST Chat API</h2>
+            <div class="card">
+              <p><span class="badge badge-post">POST</span> <code>/v1/support/chat</code></p>
+              <p>Sends a customer message to the Contextis agent orchestrator, retrieves historical memory, executes authorized tools if needed, and returns the response.</p>
+              <h3>Request Example</h3>
+              <pre>curl -X POST https://api.contextis.io/v1/support/chat \
+  -H "Authorization: Bearer sk_live_example123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "cust_alice_99",
+    "message": "Is my package still delayed?",
+    "conversationId": "conv_849201"
+  }'</pre>
+              <h3>Response Example</h3>
+              <pre>{
+  "reply": "Hello Alice! I checked order #ORD-8492 and tracking indicates it cleared customs today.",
+  "conversationId": "conv_849201",
+  "requestId": "req_01j7xyz901",
+  "memoryContext": [
+    { "text": "Customer reported delayed shipment on order ORD-8492" }
+  ]
+}</pre>
+            </div>
+          </section>
+
+          <section id="chat-widget">
+            <h2>Embeddable Chat Widget</h2>
+            <div class="card">
+              <p>Embed the Contextis widget directly onto any webpage using a single tag. It features shadow-DOM CSS isolation, zero layout shift, customizable themes, and customer identification.</p>
+              <h3>Installation Snippet</h3>
+              <pre>&lt;script
+  src="https://cdn.contextis.io/widget.js"
+  data-project-id="proj_your_project_id"
+  data-public-key="pk_live_your_public_key"
+  data-user-id="cust_alice_99"
+  data-user-name="Alice Smith"
+  defer&gt;
+&lt;/script&gt;</pre>
+            </div>
+          </section>
+
+          <section id="identity-memory">
+            <h2>Customer Identity & Memory Architecture</h2>
+            <div class="card">
+              <p>Every customer is identified uniquely by the compound key: <code>(organization_id, project_id, external_user_id)</code>.</p>
+              <h3>Key Rule: Memory is Context, NOT Authentication</h3>
+              <p>Contextis automatically extracts useful preferences, past friction points, and unresolved tickets. However, remembered data is purely conversational context—it never replaces cryptographic authorization or account passwords.</p>
+            </div>
+          </section>
+
+          <section id="tools-actions">
+            <h2>Tools & Business Action Router</h2>
+            <div class="card">
+              <p>Configure business APIs (e.g. order tracking, invoice search, ticket submission) that the agent can call dynamically. Tools execute within a strict permission matrix:</p>
+              <ul style="margin-left: 1.5rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                <li><code>READ</code>: Fetch orders, tracking status, shipping updates</li>
+                <li><code>WRITE</code>: Create ticket, add order note, update notification preference</li>
+                <li><code>SENSITIVE</code>: Trigger verified password reset, send confirmation code</li>
+                <li><code>ADMIN</code>: Account changes requiring explicit human confirmation</li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="password-reset">
+            <h2>Secure Password Reset Workflow</h2>
+            <div class="card">
+              <p><strong>Crucial Rule:</strong> The Contextis agent NEVER asks for, records, or accepts raw user passwords.</p>
+              <pre>Customer: "I forgot my password."
+Agent:    "I can help send a secure reset link. What email is on your account?"
+Customer: "alice@example.com"
+Agent:    [Calls send_password_reset tool via business authentication provider]
+Response: "A verified reset email has been dispatched to alice@example.com."</pre>
+            </div>
+          </section>
+
+          <section id="order-tracking">
+            <h2>Order Tracking Simulation</h2>
+            <div class="card">
+              <p>Pre-configured standard tool template available in the Developer Console:</p>
+              <pre>{
+  "name": "track_order",
+  "description": "Look up package tracking and status by order number",
+  "sensitivity": "READ",
+  "schema": {
+    "type": "object",
+    "required": ["orderNumber"],
+    "properties": { "orderNumber": { "type": "string" } }
+  }
+}</pre>
+            </div>
+          </section>
+
+          <section id="rate-limits">
+            <h2>Plans & Rate Limits</h2>
+            <div class="card">
+              <p>API quotas are enforced per organization subscription tier:</p>
+              <table style="width: 100%; border-collapse: collapse; margin-top: 0.5rem; color: var(--text-secondary);">
+                <thead><tr style="text-align: left; border-bottom: 1px solid var(--surface-border);"><th style="padding: 0.5rem;">Plan</th><th>Monthly Requests</th><th>Projects</th><th>Rate Limit</th></tr></thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);"><td style="padding: 0.5rem; color: white;">Starter</td><td>10,000</td><td>3</td><td>60 req/min</td></tr>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);"><td style="padding: 0.5rem; color: white;">Growth</td><td>100,000</td><td>10</td><td>300 req/min</td></tr>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);"><td style="padding: 0.5rem; color: white;">Scale</td><td>1,000,000</td><td>50</td><td>1,200 req/min</td></tr>
+                  <tr><td style="padding: 0.5rem; color: white;">Enterprise</td><td>Custom</td><td>Unlimited</td><td>Custom SLA</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="security-tenancy">
+            <h2>Security & Multi-Tenancy</h2>
+            <div class="card">
+              <p>Strict multi-tenant isolation is enforced server-side on every request. Client-supplied tenant IDs are never trusted. All database queries, memory lookups, and audit trails scope to the authenticated organization.</p>
+            </div>
+          </section>
+
+          <section id="error-codes">
+            <h2>Standard Error Codes</h2>
+            <div class="card">
+              <p>All API errors return consistent JSON payloads with an unambiguous <code>requestId</code>:</p>
+              <pre>{
+  "error": {
+    "code": "ORGANIZATION_SUSPENDED",
+    "message": "This organization has been suspended. Please contact platform support.",
+    "requestId": "req_839023471"
+  }
+}</pre>
+            </div>
+          </section>
+        </article>
+      </div>
+
+      <!-- VIEW 2: SWAGGER UI INTERACTIVE EXPLORER -->
+      <div id="swagger-container">
+        <div id="swagger-ui"></div>
+      </div>
+    </main>
 
     <script src="/swagger-ui/swagger-ui-bundle.js"></script>
     <script src="/swagger-ui/swagger-ui-standalone-preset.js"></script>
     <script>
+      const guidesContainer = document.getElementById('guides-container');
+      const swaggerContainer = document.getElementById('swagger-container');
+      const tabGuidesBtn = document.getElementById('tab-guides-btn');
+      const tabSwaggerBtn = document.getElementById('tab-swagger-btn');
+
+      tabGuidesBtn.addEventListener('click', () => {
+        tabGuidesBtn.classList.add('active');
+        tabSwaggerBtn.classList.remove('active');
+        guidesContainer.style.display = 'grid';
+        swaggerContainer.style.display = 'none';
+      });
+
+      tabSwaggerBtn.addEventListener('click', () => {
+        tabSwaggerBtn.classList.add('active');
+        tabGuidesBtn.classList.remove('active');
+        guidesContainer.style.display = 'none';
+        swaggerContainer.style.display = 'block';
+        if (!window.uiLoaded) {
+          window.uiLoaded = true;
+          window.ui = SwaggerUIBundle({
+            url: '/api/openapi.json',
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+            plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+            layout: 'StandaloneLayout',
+            persistAuthorization: false,
+          });
+        }
+      });
+
+      // Default load Swagger UI in background so SwaggerUIBundle is initialized
       window.onload = function () {
-        const ui = SwaggerUIBundle({
-          url: '/api/openapi.json',
-          dom_id: '#swagger-ui',
-          deepLinking: true,
-          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
-          plugins: [SwaggerUIBundle.plugins.DownloadUrl],
-          layout: 'StandaloneLayout',
-          persistAuthorization: false,
-        });
-        window.ui = ui;
+        if (location.hash === '#openapi' || location.hash === '#swagger') {
+          tabSwaggerBtn.click();
+        }
       };
     </script>
   </body>

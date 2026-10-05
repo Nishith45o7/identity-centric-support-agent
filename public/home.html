@@ -3,99 +3,443 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Persistent identity-linked memory for AI customer support." />
-    <title>Continuity for customer support</title>
+    <meta name="description" content="Contextis — AI support that remembers every customer. Embeddable widget and developer REST API with persistent identity-linked memory." />
+    <title>Contextis · AI support that remembers every customer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <style>
-      :root { --ink: #172522; --muted: #65736e; --paper: #f4f5ef; --white: #fff; --line: #dce3dc; --green: #146b54; --green-dark: #0c4739; --coral: #f08368; --mono: 'DM Mono', monospace; --sans: 'Manrope', sans-serif; }
-      * { box-sizing: border-box; }
-      body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+      :root {
+        --bg: #070d1e;
+        --card-bg: rgba(13, 23, 49, 0.65);
+        --card-border: rgba(148, 163, 184, 0.12);
+        --accent: #38bdf8;
+        --accent-glow: rgba(56, 189, 248, 0.25);
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+        --mono: 'JetBrains Mono', monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        min-height: 100vh;
+        font-family: var(--sans);
+        background: radial-gradient(circle at 75% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+                    radial-gradient(circle at 20% 70%, rgba(99, 102, 241, 0.07) 0%, transparent 50%),
+                    var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+      }
       a { color: inherit; text-decoration: none; }
-      .bar { height: 72px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 6vw, 88px); }
-      .brand { display: flex; align-items: center; gap: 11px; font-size: 14px; font-weight: 800; }
-      .mark { width: 28px; height: 28px; display: grid; place-items: center; color: white; background: var(--green); border-radius: 7px; font: 15px var(--mono); }
-      nav { display: flex; align-items: center; gap: 27px; color: var(--muted); font-size: 13px; }
-      nav a:hover { color: var(--green); }
-      .nav-cta { padding: 10px 15px; background: var(--green); color: white; border-radius: 5px; font-weight: 700; }
-      .hero { min-height: 660px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(360px, .8fr); gap: 7vw; align-items: center; padding: 72px clamp(20px, 9vw, 136px) 82px; background: radial-gradient(ellipse at 81% 48%, rgba(20,107,84,.08), transparent 43%), var(--paper); }
-      .eyebrow { display: flex; align-items: center; gap: 10px; color: var(--green); font: 11px var(--mono); text-transform: uppercase; }
-      .eyebrow:before { content: ''; width: 24px; height: 1px; background: var(--coral); }
-      h1 { max-width: 700px; margin: 23px 0; font-size: clamp(44px, 6vw, 78px); line-height: 1.03; letter-spacing: 0; font-weight: 600; }
-      h1 em { color: var(--green); font-style: normal; }
-      .intro { max-width: 570px; color: var(--muted); font-size: 17px; line-height: 1.75; }
-      .actions { display: flex; align-items: center; gap: 24px; margin-top: 32px; font-size: 13px; font-weight: 700; }
-      .primary { display: inline-flex; align-items: center; gap: 12px; color: white; background: var(--green); padding: 15px 19px; border-radius: 5px; }
-      .primary span { font: 18px var(--mono); }
-      .secondary { color: var(--green-dark); border-bottom: 1px solid #aebfb3; padding: 8px 0; }
-      .diagram { position: relative; min-height: 410px; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
-      .step { display: grid; grid-template-columns: 46px 1fr auto; align-items: center; gap: 14px; padding: 17px 18px; background: var(--white); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 10px 30px rgba(25,54,44,.035); animation: arrive .55s both; }
-      .step:nth-child(2) { margin-left: 24px; animation-delay: .08s; }
-      .step:nth-child(3) { margin-left: 48px; animation-delay: .16s; }
-      .step:nth-child(4) { margin-left: 72px; animation-delay: .24s; }
-      .step:nth-child(5) { margin-left: 96px; animation-delay: .32s; }
-      .number { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; color: var(--green); background: #e7f2eb; font: 12px var(--mono); }
-      .step strong { font-size: 13px; }
-      .step small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
-      .step code { color: var(--green); font: 10px var(--mono); }
-      .connector { height: 7px; margin-left: 40px; border-left: 1px solid #a6b9ae; }
-      .section { padding: 82px clamp(20px, 9vw, 136px); background: var(--white); border-top: 1px solid var(--line); }
-      .section-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 36px; }
-      .section h2 { max-width: 580px; margin: 12px 0 0; font-size: clamp(29px, 4vw, 45px); line-height: 1.15; font-weight: 600; }
-      .section-head p { max-width: 360px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
-      .code-sample { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-      .code-copy { padding: 26px; }
-      .code-copy h3 { margin: 0 0 11px; font-size: 15px; }
-      .code-copy p { color: var(--muted); font-size: 13px; line-height: 1.7; }
-      pre { min-height: 190px; margin: 0; overflow: auto; padding: 26px; color: #d9f0e5; background: var(--green-dark); font: 12px/1.8 var(--mono); }
-      footer { padding: 24px clamp(20px, 6vw, 88px); display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
-      @keyframes arrive { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
-      @media (max-width: 850px) { .hero { grid-template-columns: 1fr; gap: 34px; padding-top: 60px; } .diagram { min-height: auto; } .step:nth-child(n) { margin-left: min(calc((var(--i, 0) * 10px)), 40px); } .section-head { display: block; } .section-head p { margin-top: 18px; } }
-      @media (max-width: 600px) { .bar { height: auto; min-height: 64px; } nav { gap: 12px; } nav a:not(.nav-cta) { display: none; } .hero { min-height: auto; } .step:nth-child(n) { margin-left: 0; } .step code { display: none; } .code-sample { grid-template-columns: 1fr; } footer { gap: 12px; flex-wrap: wrap; } }
-      @media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; } }
+      .nav {
+        height: 76px;
+        padding: 0 clamp(20px, 7vw, 100px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--card-border);
+        background: rgba(7, 13, 30, 0.7);
+        backdrop-filter: blur(16px);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+        color: #031525;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .nav-links a:hover { color: var(--accent); }
+      .cta-btn {
+        padding: 9px 18px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        color: #031525;
+        font-weight: 700;
+        font-size: 13px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .cta-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+      }
+      .hero {
+        padding: 90px clamp(20px, 8vw, 120px) 70px;
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 60px;
+        align-items: center;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 24px;
+      }
+      h1 {
+        font-size: clamp(38px, 5.5vw, 68px);
+        line-height: 1.08;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 24px;
+      }
+      h1 span {
+        background: linear-gradient(135deg, #38bdf8 0%, #a5b4fc 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero p.lead {
+        font-size: 18px;
+        line-height: 1.65;
+        color: var(--muted);
+        max-width: 560px;
+        margin-bottom: 36px;
+      }
+      .hero-actions {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+      .btn-primary {
+        padding: 13px 28px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        color: #031525;
+        font-weight: 700;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 10px 24px rgba(56, 189, 248, 0.25);
+        transition: transform 0.15s ease;
+      }
+      .btn-primary:hover { transform: translateY(-2px); }
+      .btn-secondary {
+        padding: 13px 24px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--card-border);
+        color: var(--text);
+        font-weight: 600;
+        font-size: 14px;
+        transition: background 0.15s ease;
+      }
+      .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+      .card-glass {
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+      }
+      .memory-flow {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .flow-step {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid var(--card-border);
+      }
+      .flow-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: rgba(56, 189, 248, 0.15);
+        color: var(--accent);
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .flow-text strong { display: block; font-size: 13px; font-weight: 600; }
+      .flow-text small { color: var(--muted); font-size: 11px; }
+      .flow-code { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--accent); }
+      .features {
+        max-width: 1400px;
+        margin: 60px auto 90px;
+        padding: 0 clamp(20px, 8vw, 120px);
+      }
+      .section-head {
+        text-align: center;
+        max-width: 680px;
+        margin: 0 auto 50px;
+      }
+      .section-head h2 {
+        font-size: clamp(28px, 4vw, 44px);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 12px;
+      }
+      .section-head p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .feature-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 28px;
+        backdrop-filter: blur(16px);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+      .feature-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(56, 189, 248, 0.3);
+      }
+      .feature-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(56, 189, 248, 0.12);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-bottom: 20px;
+      }
+      .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+      .feature-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+      .code-section {
+        max-width: 1100px;
+        margin: 0 auto 100px;
+        padding: 0 24px;
+      }
+      .code-window {
+        background: #020617;
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+      }
+      .code-bar {
+        padding: 12px 18px;
+        background: rgba(15, 23, 42, 0.8);
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .dot { width: 10px; height: 10px; border-radius: 50%; }
+      .dot.red { background: #ef4444; }
+      .dot.yellow { background: #f59e0b; }
+      .dot.green { background: #10b981; }
+      .code-bar-title { margin-left: 12px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+      pre {
+        padding: 28px;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.7;
+        color: #e2e8f0;
+        overflow-x: auto;
+      }
+      footer {
+        padding: 40px clamp(20px, 8vw, 120px);
+        border-top: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; }
+        .grid-3 { grid-template-columns: 1fr; }
+      }
     </style>
   </head>
   <body>
-    <header class="bar">
-      <a class="brand" href="/"><span class="mark">ic</span> Continuity API</a>
-      <nav aria-label="Main navigation">
-        <a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/login">Log in</a><a class="nav-cta" href="/signup">Start building</a>
-      </nav>
-    </header>
+    <nav class="nav">
+      <a class="brand" href="/"><span class="brand-mark">C</span> Contextis</a>
+      <div class="nav-links">
+        <a href="/widget">Chat Widget</a>
+        <a href="/docs">Documentation</a>
+        <a href="/dashboard">Developer Dashboard</a>
+        <a href="/admin">Platform Admin</a>
+        <a href="/login">Log in</a>
+        <a class="cta-btn" href="/signup">Start Free</a>
+      </div>
+    </nav>
+
     <main>
       <section class="hero">
         <div>
-          <div class="eyebrow">Identity-linked support infrastructure</div>
-          <h1>Support that remembers <em>every customer.</em></h1>
-          <p class="intro">Give your support experience durable customer context with one API. Your app sends a customer ID and a message; Continuity handles memory, reasoning, and the reply.</p>
-          <div class="actions"><a class="primary" href="/signup">Create your workspace <span>↗</span></a><a class="secondary" href="/docs">Read the quick start</a></div>
+          <div class="badge">✦ Persistent Identity-Centric Support</div>
+          <h1>AI support that remembers <span>every customer.</span></h1>
+          <p class="lead">
+            Contextis gives your support experience durable customer context with one API or an embeddable widget. Your app sends a customer ID; Contextis recalls memory, reasons, and resolves problems.
+          </p>
+          <div class="hero-actions">
+            <a class="btn-primary" href="/signup">Start Free <span>→</span></a>
+            <a class="btn-secondary" href="/docs">Documentation</a>
+            <a class="btn-secondary" href="/widget">Live Widget Demo</a>
+          </div>
         </div>
-        <div class="diagram" aria-label="Support request flow">
-          <div class="step"><span class="number">01</span><div><strong>Your application</strong><small>Send customer identity + message</small></div><code>POST /v1/support/chat</code></div>
-          <div class="connector"></div>
-          <div class="step"><span class="number">02</span><div><strong>Project API key</strong><small>Resolve the owning project</small></div><code>sk_live_•••</code></div>
-          <div class="connector"></div>
-          <div class="step"><span class="number">03</span><div><strong>Relevant history</strong><small>Recall context for this customer</small></div><code>memory scoped</code></div>
-          <div class="connector"></div>
-          <div class="step"><span class="number">04</span><div><strong>Context-aware reply</strong><small>Continue from what is already known</small></div><code>response</code></div>
+
+        <div class="card-glass">
+          <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 16px;">
+            The Contextis Engine Flow
+          </h3>
+          <div class="memory-flow">
+            <div class="flow-step">
+              <span class="flow-num">01</span>
+              <div class="flow-text">
+                <strong>Customer Identity</strong>
+                <small>Send stable user_id + message</small>
+              </div>
+              <span class="flow-code">POST /v1/support/chat</span>
+            </div>
+            <div class="flow-step">
+              <span class="flow-num">02</span>
+              <div class="flow-text">
+                <strong>Project Key Isolation</strong>
+                <small>Authenticate tenant & project</small>
+              </div>
+              <span class="flow-code">pk_live_••• / sk_live_•••</span>
+            </div>
+            <div class="flow-step">
+              <span class="flow-num">03</span>
+              <div class="flow-text">
+                <strong>Hindsight Memory Recall</strong>
+                <small>Retrieve durable customer facts</small>
+              </div>
+              <span class="flow-code">scoped context</span>
+            </div>
+            <div class="flow-step">
+              <span class="flow-num">04</span>
+              <div class="flow-text">
+                <strong>Reasoning & Tool Router</strong>
+                <small>Controlled action execution</small>
+              </div>
+              <span class="flow-code">permission check</span>
+            </div>
+            <div class="flow-step">
+              <span class="flow-num">05</span>
+              <div class="flow-text">
+                <strong>Context-Aware Response</strong>
+                <small>Answer without asking customer to repeat</small>
+              </div>
+              <span class="flow-code">reply + retain</span>
+            </div>
+          </div>
         </div>
       </section>
-      <section class="section">
+
+      <section class="features">
         <div class="section-head">
-          <div><div class="eyebrow">A smaller integration surface</div><h2>Keep your customer experience. We’ll keep the context.</h2></div>
-          <p>Project keys define the security boundary. Customer memory is isolated by organization, project, and the stable user ID your app already owns.</p>
+          <h2>Everything you need for intelligent support</h2>
+          <p>Developers integrate once. Customers enjoy seamless, personalized problem resolution.</p>
         </div>
-        <div class="code-sample">
-          <div class="code-copy"><h3>Your first request</h3><p>No memory-bank setup, provider credentials, or prompt plumbing in your application. Start with a project and a test key.</p><a class="secondary" href="/docs">Open developer docs</a></div>
-          <pre><code>curl -X POST http://localhost:3000/v1/support/chat \
-  -H "Authorization: Bearer $CONTINUITY_API_KEY" \
+
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="feature-icon">🧠</div>
+            <h3>Persistent Customer Memory</h3>
+            <p>Remembers customer preferences, equipment, prior issues, and account states without re-asking questions.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">💬</div>
+            <h3>Embeddable Chat Widget</h3>
+            <p>Drop-in JavaScript widget with Shadow DOM style isolation, customizable themes, and zero secret key leakage.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Developer REST API</h3>
+            <p>Versioned /v1 endpoints for programmatic support chats, memory snapshots, tool routing, and usage monitoring.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>Controlled Business Tools</h3>
+            <p>AI never runs arbitrary SQL or code. Actions pass through strict schema validation and permission checks.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔐</div>
+            <h3>Password Reset Guardrails</h3>
+            <p>Memory is context, never authentication. AI never asks for or stores passwords; triggers secure business flows only.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Multi-Tenant SaaS Control</h3>
+            <p>Complete workspace isolation, plan enforcement, usage recording, and platform-level administration.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="code-section">
+        <div class="code-window">
+          <div class="code-bar">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="code-bar-title">curl — integration example</span>
+          </div>
+          <pre><code>curl -X POST https://api.contextis.com/v1/support/chat \
+  -H "Authorization: Bearer $CONTEXTIS_SECRET_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"user_id":"customer_123", \
-       "message":"My login issue is still happening."}'</code></pre>
+  -d '{
+    "user_id": "customer_123",
+    "message": "My login problem is still happening.",
+    "conversation_id": "conv_982",
+    "metadata": {
+      "source": "website",
+      "os": "macOS"
+    }
+  }'</code></pre>
         </div>
       </section>
     </main>
-    <footer><span>Continuity API · Identity-centric support</span><span><a href="/playground">Try the support playground</a> · <a href="/reference">API reference</a></span></footer>
+
+    <footer>
+      <div>© 2026 Contextis. All rights reserved. Identity-centric AI customer support infrastructure.</div>
+      <div style="display: flex; gap: 20px;">
+        <a href="/widget">Widget Demo</a>
+        <a href="/docs">Docs</a>
+        <a href="/dashboard">Developer</a>
+        <a href="/admin">Platform Admin</a>
+      </div>
+    </footer>
   </body>
 </html>

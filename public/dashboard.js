@@ -568,6 +568,48 @@
     location.assign('/login');
   });
 
+  const loadOnboarding = async () => {
+    try {
+      const res = await api('/v1/onboarding');
+      const card = $('#onboarding-card');
+      const container = $('#onboarding-steps-container');
+      const progEl = $('#onboarding-progress');
+      if (!card || !container || !res.onboarding) return;
+
+      const steps = res.onboarding.steps || [];
+      const completedCount = steps.filter((s) => s.completed).length;
+
+      progEl.textContent = `${completedCount} of ${steps.length} steps completed`;
+      card.style.display = 'block';
+
+      container.innerHTML = steps.map((s, idx) => `
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid ${s.completed ? 'rgba(52, 211, 153, 0.35)' : (s.id === res.onboarding.currentStep ? 'var(--accent)' : 'var(--card-border)')}; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 700; color: ${s.completed ? 'var(--success)' : 'var(--muted)'};">STEP 0${idx + 1}</span>
+            <span style="font-size: 13px;">${s.completed ? '✅' : '○'}</span>
+          </div>
+          <strong style="font-size: 12px;">${escapeHtml(s.title)}</strong>
+          <div style="margin-top: auto;">
+            ${!s.completed && s.id === 'create_project' ? '<button class="btn btn-primary btn-small" style="width:100%" data-action="new-project">+ Create</button>' : ''}
+            ${!s.completed && s.id === 'generate_key' ? '<button class="btn btn-primary btn-small" style="width:100%" data-view="keys">API Keys</button>' : ''}
+            ${!s.completed && s.id === 'test_request' ? '<button class="btn btn-secondary btn-small" style="width:100%" data-view="docs">Test API</button>' : ''}
+            ${!s.completed && s.id === 'embed_widget' ? '<button class="btn btn-secondary btn-small" style="width:100%" data-view="widget">Widget</button>' : ''}
+            ${s.completed ? '<span style="font-size: 11px; color: var(--success); font-weight: 600;">Completed</span>' : ''}
+          </div>
+        </div>
+      `).join('');
+
+      container.querySelectorAll('[data-view]').forEach((b) => {
+        b.addEventListener('click', () => showView(b.dataset.view));
+      });
+      container.querySelectorAll('[data-action="new-project"]').forEach((b) => {
+        b.addEventListener('click', () => $('#new-project-dialog')?.showModal());
+      });
+    } catch {
+      // ignore
+    }
+  };
+
   // Initialization
   const init = async () => {
     try {
@@ -595,6 +637,7 @@
       $('#setting-plan-name').value = (state.organization.planName || 'starter').toUpperCase();
 
       renderProjectOptions();
+      loadOnboarding();
       if (state.projectId) {
         loadProjectDetails();
       }

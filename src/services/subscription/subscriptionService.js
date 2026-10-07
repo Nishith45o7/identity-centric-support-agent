@@ -112,6 +112,51 @@ const mapPlanRow = (row) => {
   };
 };
 
+const listPublicPlans = async () => {
+  let dbPlans = [];
+  try {
+    const { rows } = await query(
+      `SELECT * FROM plans WHERE is_active = 1 ORDER BY monthly_requests ASC`
+    );
+    if (rows && rows.length > 0) {
+      dbPlans = rows.map(mapPlanRow);
+    }
+  } catch {
+    // fallback to static plan definitions
+  }
+
+  const baseList = dbPlans.length > 0
+    ? dbPlans
+    : [PLAN_FALLBACKS.free, PLAN_FALLBACKS.starter, PLAN_FALLBACKS.pro, PLAN_FALLBACKS.business, PLAN_FALLBACKS.enterprise];
+
+  const pricingTable = {
+    free: { price: 0, priceDisplay: '$0', period: 'forever', highlighted: false, cta: 'Start Free' },
+    starter: { price: 29, priceDisplay: '$29', period: 'month', highlighted: false, cta: 'Get Started' },
+    pro: { price: 79, priceDisplay: '$79', period: 'month', highlighted: true, cta: 'Start Pro Trial' },
+    growth: { price: 149, priceDisplay: '$149', period: 'month', highlighted: false, cta: 'Upgrade to Growth' },
+    business: { price: 299, priceDisplay: '$299', period: 'month', highlighted: false, cta: 'Contact Sales' },
+    enterprise: { price: null, priceDisplay: 'Custom', period: 'annual', highlighted: false, cta: 'Talk to Enterprise' },
+  };
+
+  return baseList.map((plan) => {
+    const priceMeta = pricingTable[plan.slug] || { price: 0, priceDisplay: '$0', period: 'month', highlighted: false, cta: 'Get Started' };
+    return {
+      ...plan,
+      ...priceMeta,
+      features: [
+        `${plan.monthlyRequests.toLocaleString()} monthly AI requests`,
+        `${plan.maxProjects === 9999 ? 'Unlimited' : plan.maxProjects} project${plan.maxProjects === 1 ? '' : 's'}`,
+        `${plan.maxApiKeys === 9999 ? 'Unlimited' : plan.maxApiKeys} API keys`,
+        `${plan.maxCustomers.toLocaleString()} unique customers remembered`,
+        `${plan.memoryOperations.toLocaleString()} persistent memory operations`,
+        `${plan.toolExecutions.toLocaleString()} business tool executions`,
+        `${plan.rateLimitPerMinute} requests / min rate limit`,
+        plan.slug === 'enterprise' ? 'Custom SLA & dedicated engineer' : 'Community & email support',
+      ],
+    };
+  });
+};
+
 const getPlan = async (slugOrId) => {
   const normalized = String(slugOrId || 'starter').trim().toLowerCase();
   try {
@@ -292,6 +337,7 @@ const updateOrganizationPlan = async (organizationId, planSlug) => {
 module.exports = {
   getPlan,
   getOrganizationPlan,
+  listPublicPlans,
   checkPlanLimits,
   checkRateLimit,
   updateOrganizationPlan,

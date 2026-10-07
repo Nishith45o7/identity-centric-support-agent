@@ -142,8 +142,30 @@ const requireProjectApiKey = asyncHandler(async (req, res, next) => {
   req.billingStatus = organizationProfile.rows[0]?.billingStatus || 'active';
   req.organizationStatus = key.organizationStatus;
 
-  if (req.billingStatus !== 'active') {
-    return sendError(req, res, 402, 'BILLING_REQUIRED', 'Workspace billing is not active.');
+  // Domain whitelisting check for public keys
+  if (key.keyType === 'public') {
+    const origin = req.get('origin');
+    if (origin) {
+      const widgetSettings = await projectService.getWidgetSettings(key.projectId);
+      if (widgetSettings.allowedDomains && widgetSettings.allowedDomains !== '*') {
+        const allowedList = widgetSettings.allowedDomains.split(',').map((d) => d.trim().toLowerCase()).filter(Boolean);
+        let requestHost = '';
+        try {
+          requestHost = new URL(origin).hostname.toLowerCase();
+        } catch {
+          requestHost = origin.toLowerCase();
+        }
+        const isAllowed = allowedList.some((domain) => {
+          if (domain === '*' || domain === requestHost) return true;
+          if (domain.startsWith('*.') && requestHost.endsWith(domain.slice(2))) return true;
+          if (requestHost.endsWith(`.${domain}`)) return true;
+          return false;
+        });
+        if (!isAllowed) {
+          return sendError(req, res, 403, 'DOMAIN_NOT_ALLOWED', `The origin '${requestHost}' is not authorized to use this public key.`);
+        }
+      }
+    }
   }
 
   return next();
@@ -214,6 +236,57 @@ router.post('/auth/logout', requireSameOrigin, asyncHandler(async (req, res) => 
   await developerAuth.logout(cookieValue(req, SESSION_COOKIE));
   clearSessionCookie(res);
   return res.json({ success: true });
+}));
+
+router.get('/public/plans', asyncHandler(async (req, res) => {
+  const plans = await subscriptionService.listPublicPlans();
+  res.setHeader('Cache-Control', 'public, max-age=60');
+  return res.json({ plans });
+}));
+
+router.get('/onboarding', requireDeveloperSession, requireOrganizationMembership, asyncHandler(async (req, res) => {
+  const projectsCount = await query(
+    `SELECT COUNT(*) AS count FROM projects WHERE organization_id = ?`,
+    [req.organizationId]
+  );
+  const keysCount = await query(
+    `SELECT COUNT(*) AS count FROM project_api_keys
+     JOIN projects ON projects.id = project_api_keys.project_id
+     WHERE projects.organization_id = ?`,
+    [req.organizationId]
+  );
+  const usageCount = await query(
+    `SELECT COUNT(*) AS count FROM usage_records WHERE organization_id = ?`,
+    [req.organizationId]
+  );
+
+  const hasProject = Number(projectsCount.rows[0]?.count || 0) > 0;
+  const hasKey = Number(keysCount.rows[0]?.count || 0) > 0;
+  const hasUsage = Number(usageCount.rows[0]?.count || 0) > 0;
+
+  let currentStep = 'create_project';
+  if (!hasProject) currentStep = 'create_project';
+  else if (!hasKey) currentStep = 'generate_key';
+  else if (!hasUsage) currentStep = 'test_request';
+  else currentStep = 'completed';
+
+  return res.json({
+    onboarding: {
+      organizationCreated: true,
+      projectCreated: hasProject,
+      apiKeyCreated: hasKey,
+      firstRequestSent: hasUsage,
+      completed: hasUsage,
+      currentStep,
+      steps: [
+        { id: 'create_org', title: 'Create Organization', completed: true },
+        { id: 'create_project', title: 'Create Project & Environment', completed: hasProject },
+        { id: 'generate_key', title: 'Generate API Keys', completed: hasKey },
+        { id: 'test_request', title: 'Test First Support Request', completed: hasUsage },
+        { id: 'embed_widget', title: 'Embed Chat Widget or Integrate API', completed: hasUsage },
+      ],
+    },
+  });
 }));
 
 router.get('/organization', requireDeveloperSession, requireOrganizationMembership, asyncHandler(async (req, res) => {
@@ -908,6 +981,10 @@ router.get('/projects/:projectId/tools/:toolId', requireDeveloperSession, asyncH
 }));
 
 router.post('/projects/:projectId/tools/:toolId/execute', requireProjectApiKey, asyncHandler(async (req, res) => {
+  if (req.projectKey?.keyType === 'public') {
+    return sendError(req, res, 403, 'FORBIDDEN', 'Public API keys (pk_*) cannot execute tools directly. Use a secret key (sk_*).');
+  }
+
   if (req.projectId !== req.params.projectId) {
     return sendError(req, res, 403, 'PROJECT_MISMATCH', 'This API key is not valid for the selected project.');
   }
@@ -1224,6 +1301,22 @@ const supportLimiter = rateLimit({
   handler: (req, res) => sendError(req, res, 429, 'RATE_LIMIT_EXCEEDED', 'Too many requests. Please retry later.'),
 });
 
+const conversationExperienceEngine = require('../services/conversation/conversationExperienceEngine');
+
+router.post('/support/opening', requireProjectApiKey, supportLimiter, asyncHandler(async (req, res) => {
+  const result = await conversationExperienceEngine.generateOpeningContext({
+    userId: req.body?.user_id || req.body?.userId,
+    projectId: req.projectId,
+    organizationId: req.organizationId,
+    environment: req.projectEnvironment || req.projectKey?.environment || 'live',
+    timezone: req.body?.timezone || req.headers['x-timezone'],
+    language: req.body?.language || req.headers['accept-language'],
+    pageContext: req.body?.page_context || req.body?.pageContext,
+    customGreetingPolicy: req.body?.greeting_policy || 'friendly',
+  });
+  return res.json({ request_id: req.requestId, ...result });
+}));
+
 router.post('/support/chat', requireProjectApiKey, supportLimiter, asyncHandler(async (req, res) => {
   const result = await supportService.handleChatRequest({
     authenticatedKey: req.projectKey,
@@ -1250,6 +1343,38 @@ router.post('/support/end', requireProjectApiKey, supportLimiter, asyncHandler(a
     requestId: req.requestId,
   });
   return res.json(result);
+}));
+
+const feedbackService = require('../services/feedback/feedbackService');
+const escalationService = require('../services/escalation/escalationService');
+
+router.post('/support/feedback', requireProjectApiKey, supportLimiter, asyncHandler(async (req, res) => {
+  const result = await feedbackService.recordFeedback({
+    projectId: req.projectId,
+    conversationId: req.body?.conversation_id || req.body?.conversationId,
+    messageId: req.body?.message_id || req.body?.messageId,
+    customerId: req.body?.customer_id || req.body?.customerId || req.body?.userId,
+    requestId: req.body?.request_id || req.requestId,
+    rating: req.body?.rating,
+    reason: req.body?.reason,
+    comment: req.body?.comment,
+  });
+  return res.json({ request_id: req.requestId, ...result });
+}));
+
+router.post('/support/escalate', requireProjectApiKey, supportLimiter, asyncHandler(async (req, res) => {
+  try {
+    const result = await escalationService.createEscalation({
+      projectId: req.projectId,
+      userId: req.body?.user_id || req.body?.userId,
+      conversationId: req.body?.conversation_id || req.body?.conversationId,
+      reason: req.body?.reason,
+      metadata: req.body?.metadata,
+    });
+    return res.json({ request_id: req.requestId, ...result });
+  } catch (err) {
+    return sendError(req, res, err.statusCode || 500, err.code || 'ESCALATION_ERROR', err.message);
+  }
 }));
 
 router.get('/support/memory/:userId', requireProjectApiKey, asyncHandler(async (req, res) => {
@@ -1421,6 +1546,27 @@ router.get('/widget/config', asyncHandler(async (req, res) => {
   }
 
   const settings = await projectService.getWidgetSettings(targetProjectId);
+
+  const origin = req.get('origin') || req.get('referer');
+  if (origin && settings.allowedDomains && settings.allowedDomains !== '*') {
+    const allowedList = settings.allowedDomains.split(',').map((d) => d.trim().toLowerCase()).filter(Boolean);
+    let requestHost = '';
+    try {
+      requestHost = new URL(origin).hostname.toLowerCase();
+    } catch {
+      requestHost = origin.toLowerCase();
+    }
+    const isAllowed = allowedList.some((domain) => {
+      if (domain === '*' || domain === requestHost) return true;
+      if (domain.startsWith('*.') && requestHost.endsWith(domain.slice(2))) return true;
+      if (requestHost.endsWith(`.${domain}`)) return true;
+      return false;
+    });
+    if (!isAllowed) {
+      return sendError(req, res, 403, 'DOMAIN_NOT_ALLOWED', `The origin '${requestHost}' is not authorized to initialize this widget.`);
+    }
+  }
+
   return res.json({ success: true, config: settings, settings, widget: settings });
 }));
 
@@ -1433,6 +1579,88 @@ router.get('/projects/:projectId/tool-templates', requireDeveloperSession, async
   if (!project) return sendError(req, res, 404, 'PROJECT_NOT_FOUND', 'Project not found.');
 
   return res.json({ templates: projectToolService.getStandardToolTemplates() });
+}));
+
+// ==========================================
+// PHASE 12: ANALYTICS, ESCALATIONS & WEBHOOKS
+// ==========================================
+
+const webhookService = require('../services/webhook/webhookService');
+const analyticsService = require('../services/analytics/analyticsService');
+
+router.get('/projects/:projectId/analytics', requireDeveloperSession, asyncHandler(async (req, res) => {
+  const project = await projectService.getOwnedProject(req.developer.id, req.params.projectId);
+  if (!project) return sendError(req, res, 404, 'PROJECT_NOT_FOUND', 'Project not found.');
+
+  const analytics = await analyticsService.getProjectAnalytics(req.params.projectId, {
+    range: req.query.range || '7d',
+  });
+  return res.json({ analytics });
+}));
+
+router.get('/projects/:projectId/escalations', requireDeveloperSession, asyncHandler(async (req, res) => {
+  const project = await projectService.getOwnedProject(req.developer.id, req.params.projectId);
+  if (!project) return sendError(req, res, 404, 'PROJECT_NOT_FOUND', 'Project not found.');
+
+  const escalations = await escalationService.listEscalations(req.params.projectId, {
+    status: req.query.status,
+    limit: req.query.limit,
+  });
+  return res.json({ escalations });
+}));
+
+router.patch('/projects/:projectId/escalations/:escalationId', requireSameOrigin, requireDeveloperSession, asyncHandler(async (req, res) => {
+  const project = await projectService.getOwnedProject(req.developer.id, req.params.projectId);
+  if (!project) return sendError(req, res, 404, 'PROJECT_NOT_FOUND', 'Project not found.');
+
+  const status = req.body?.status;
+  const assignedTo = req.body?.assignedTo || req.body?.assigned_to;
+  const now = new Date().toISOString();
+
+  const validStatuses = ['requested', 'created', 'assigned', 'in_progress', 'waiting', 'resolved', 'cancelled'];
+  if (status && !validStatuses.includes(status)) {
+    return sendError(req, res, 400, 'INVALID_REQUEST', `Status must be one of: ${validStatuses.join(', ')}`);
+  }
+
+  const { changes } = await query(
+    `UPDATE escalations SET status = COALESCE(?, status), assigned_to = COALESCE(?, assigned_to), updated_at = ?
+     WHERE id = ? AND project_id = ?`,
+    [status || null, assignedTo || null, now, req.params.escalationId, req.params.projectId]
+  );
+
+  if (!changes) return sendError(req, res, 404, 'NOT_FOUND', 'Escalation ticket not found.');
+
+  return res.json({ success: true, updated_at: now });
+}));
+
+router.get('/projects/:projectId/webhooks', requireDeveloperSession, asyncHandler(async (req, res) => {
+  const project = await projectService.getOwnedProject(req.developer.id, req.params.projectId);
+  if (!project) return sendError(req, res, 404, 'PROJECT_NOT_FOUND', 'Project not found.');
+
+  const webhooks = await webhookService.listWebhooks(req.params.projectId);
+  return res.json({ webhooks });
+}));
+
+router.post('/projects/:projectId/webhooks', requireSameOrigin, requireDeveloperSession, asyncHandler(async (req, res) => {
+  const project = await projectService.getOwnedProject(req.developer.id, req.params.projectId);
+  if (!project) return sendError(req, res, 404, 'PROJECT_NOT_FOUND', 'Project not found.');
+
+  const created = await webhookService.createWebhook({
+    projectId: req.params.projectId,
+    name: req.body?.name,
+    url: req.body?.url,
+    events: req.body?.events,
+  });
+  return res.status(201).json({ webhook: created });
+}));
+
+router.delete('/projects/:projectId/webhooks/:webhookId', requireSameOrigin, requireDeveloperSession, asyncHandler(async (req, res) => {
+  const project = await projectService.getOwnedProject(req.developer.id, req.params.projectId);
+  if (!project) return sendError(req, res, 404, 'PROJECT_NOT_FOUND', 'Project not found.');
+
+  const deleted = await webhookService.deleteWebhook(req.params.projectId, req.params.webhookId);
+  if (!deleted) return sendError(req, res, 404, 'NOT_FOUND', 'Webhook endpoint not found.');
+  return res.json({ success: true });
 }));
 
 // ==========================================

@@ -396,6 +396,18 @@
             <button class="btn btn-primary" data-action="new-project">Create Project</button>
           </div>
 
+          <!-- Onboarding Wizard -->
+          <div class="glass-card" id="onboarding-card" style="margin-bottom: 24px; border-color: rgba(56, 189, 248, 0.3); display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <div>
+                <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: var(--accent); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase;">SaaS Onboarding Wizard</span>
+                <h3 style="font-size: 16px; font-weight: 800; margin-top: 6px;">Setup Your Identity-Centric Support Engine</h3>
+              </div>
+              <span id="onboarding-progress" style="font-size: 12px; font-weight: 700; color: var(--accent);">0 of 5 steps completed</span>
+            </div>
+            <div id="onboarding-steps-container" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;"></div>
+          </div>
+
           <div class="grid-4">
             <div class="stat-card">
               <div class="stat-label">Requests (30 Days)</div>

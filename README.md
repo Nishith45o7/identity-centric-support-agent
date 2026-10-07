@@ -249,7 +249,29 @@ Add this script tag right before the closing `</body>` tag on any page:
 
 ---
 
-## 9. Testing & Quality Assurance
+## 9. Phase 9–12 Product Capabilities
+
+### 9.1 Public Onboarding & Dynamic Pricing
+- `GET /v1/public/plans`: Data-driven public subscription plans and feature limits.
+- `GET /v1/onboarding`: Live SaaS onboarding wizard progress tracking.
+
+### 9.2 Conversation Experience Engine & Widget 2.0
+- `POST /v1/support/opening`: Evaluates IANA timezone, time-of-day period, returning customer status, unresolved friction points, and generates contextual greetings and active tool suggestion chips.
+- `POST /v1/support/feedback`: Records positive/negative feedback with reason categories (`Did not solve my issue`, `Too complicated`).
+- `POST /v1/support/escalate`: Packages conversation transcript, durable customer memory, and attempted actions into a structured human agent dossier.
+
+### 9.3 Developer Experience & Interactive Console
+- Multi-language code snippets for **cURL**, **JavaScript (Browser)**, **Node.js**, and **Python**.
+- Live Interactive API Console built into `/docs` for test request dispatching with real-time latency measurement and response inspection.
+
+### 9.4 Growth, Analytics & Outbound Webhooks
+- `GET /v1/projects/:projectId/analytics`: Real database-backed metrics for conversations, satisfaction rate, AI resolution rate, latency, and tool executions.
+- `GET /v1/projects/:projectId/escalations`: Escalation ticket review and assignment queue.
+- `POST /v1/projects/:projectId/webhooks`: Configures HTTPS endpoints receiving signed `X-Contextis-Signature` HMAC-SHA256 event notifications.
+
+---
+
+## 10. Testing & Quality Assurance
 
 Run the test suite:
 
@@ -258,17 +280,19 @@ npm test -- --runInBand
 ```
 
 The test suite covers:
-- User signup, login, session validation, and logout.
+- User signup, login, session validation, and onboarding wizard progress.
 - Multi-tenant organization isolation and project boundaries.
-- Public (`pk_`) and Secret (`sk_`) key issuance and hashing.
-- Conversation message persistence and widget configuration.
-- Platform Admin management and organization suspension.
-- Hindsight memory retrieval and retention flows.
-- Groq AI inference orchestration and tool router dispatch.
-- Rate limiting, subscription enforcement, and security defenses.
+- Public (`pk_`) and Secret (`sk_`) key issuance, validation, and permission sandboxing.
+- Time-aware salutations, customer memory personalization, and unresolved issue prioritization.
+- Developer documentation, OpenAPI 3.0 spec validation, and multi-language key transports.
+- Outbound signed webhooks (HMAC-SHA256) and time-series analytics aggregation.
+- Human escalation ticket creation, context dossier generation, and status lifecycles.
+- GDPR customer memory inspection and permanent deletion.
+- Groq AI inference orchestration, Hindsight memory recall, and tool router dispatch.
+- Rate limiting, subscription plan enforcement, and security defenses.
 
 ---
 
-## 10. License
+## 11. License
 
 Proprietary — Contextis Platform Inc. All rights reserved.

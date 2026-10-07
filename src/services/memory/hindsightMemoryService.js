@@ -30,9 +30,10 @@ class HindsightMemoryService {
       throw err;
     }
 
-    const scope = [tenantId || 'default', projectId || 'default', environment || 'live', String(userId).trim()].join('\u0000');
+    const normalizedEnv = String(environment || 'live').toLowerCase();
+    const scope = [tenantId || 'default', projectId || 'default', normalizedEnv, String(userId).trim()].join('\u0000');
     const digest = crypto.createHash('sha256').update(scope).digest('hex');
-    return `ctx_${digest}`;
+    return `ctx_${normalizedEnv}_${digest}`;
   }
 
   getBank(userId, tenantId = 'default', projectId = 'default', environment = 'live') {

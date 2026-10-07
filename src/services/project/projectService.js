@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { config } = require('../../config');
 const { query } = require('../../db');
+const subscriptionService = require('../subscription/subscriptionService');
 
 const makeId = (prefix) => `${prefix}_${crypto.randomUUID().replace(/-/g, '')}`;
 const hashApiKey = (key) => {
@@ -146,7 +147,7 @@ const DEFAULT_PUBLIC_SCOPES = [
   'widget:load',
 ];
 
-const createApiKey = async (userId, projectId, { name, environment = 'test', type = 'secret', scopes } = {}) => {
+const createApiKey = async (userId, projectId, { name, environment = 'test', type, keyType, scopes } = {}) => {
   const project = await getOwnedProject(userId, projectId);
   if (!project) {
     return null;
@@ -163,12 +164,12 @@ const createApiKey = async (userId, projectId, { name, environment = 'test', typ
     throw error;
   }
 
-  const subscriptionService = require('../subscription/subscriptionService');
   await subscriptionService.checkPlanLimits(project.organizationId, 'api_keys', 1);
 
   const normalizedName = String(name || '').trim();
   const normalizedEnvironment = String(environment).toLowerCase();
-  const normalizedType = String(type || 'secret').toLowerCase() === 'public' ? 'public' : 'secret';
+  const candidateType = keyType || type || 'secret';
+  const normalizedType = String(candidateType).toLowerCase() === 'public' ? 'public' : 'secret';
 
   if (normalizedName.length < 1 || normalizedName.length > 100 || !['test', 'live'].includes(normalizedEnvironment)) {
     const error = new Error('Provide a key name and environment of test or live.');

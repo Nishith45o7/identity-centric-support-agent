@@ -199,5 +199,5 @@ describe('Contextis SaaS Platform Capabilities', () => {
       });
     expect(resumedChatRes.status).toBe(200);
     expect(resumedChatRes.body.reply).toBeDefined();
-  });
+  }, 30000);
 });

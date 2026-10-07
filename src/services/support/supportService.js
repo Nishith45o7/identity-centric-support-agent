@@ -8,6 +8,7 @@ const subscriptionService = require('../subscription/subscriptionService');
 const memoryService = require('../memory/hindsightMemoryService');
 const { generateSupportReply } = require('../llm/groqService');
 const projectToolService = require('../tool/projectToolService');
+const webhookService = require('../webhook/webhookService');
 const { sanitizeText, sanitizeFacts, extractFactCandidates, validateUserId } = require('../../utils/sanitizers');
 
 class SupportService {
@@ -234,6 +235,21 @@ class SupportService {
         requestId,
       });
 
+      // Dispatch Webhook Event (Non-blocking)
+      try {
+        webhookService.dispatch({
+          projectId: project.id,
+          event: 'conversation.created',
+          data: {
+            conversationId: conversation.id,
+            customerId: normalizedUserId,
+            requestId,
+          },
+        }).catch(() => {});
+      } catch {
+        // safe fallback
+      }
+
       return {
         request_id: requestId,
         requestId,
@@ -364,6 +380,7 @@ class SupportService {
       user_id: normalizedUserId,
       userId: normalizedUserId,
       facts_stored: factsStored,
+      factsStored,
     };
   }
 }

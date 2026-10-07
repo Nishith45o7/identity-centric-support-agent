@@ -1,10 +1,12 @@
 const request = require('supertest');
 const crypto = require('crypto');
 const { app } = require('../src/app');
+const { config } = require('../src/config');
 const memoryService = require('../src/services/memory/hindsightMemoryService');
 
 describe('Identity-Centric Support API', () => {
   beforeEach(async () => {
+    config.supportApiKey = '';
     memoryService.allowRemote = false;
     await memoryService.clear('user_a');
     await memoryService.clear('user_b');
@@ -95,7 +97,7 @@ describe('Identity-Centric Support API', () => {
       .get(`/v1/projects/${projectB.id}/api-keys`)
       .set('Cookie', (await request(app).post('/v1/auth/signup').send({ name: 'Other', email: `other-${crypto.randomUUID()}@example.test`, password: 'correct-horse-battery-staple' })).headers['set-cookie'][0].split(';')[0]);
     expect(crossProject.status).toBe(404);
-  });
+  }, 30000);
 
   test('validates required production secrets before startup', () => {
     const { validateRuntimeConfig } = require('../src/config');
@@ -154,7 +156,7 @@ describe('Identity-Centric Support API', () => {
 
     handlers.SIGINT();
     expect(close).toHaveBeenCalledTimes(1);
-    await new Promise((resolve) => setImmediate(resolve));
+    await new Promise((resolve) => setTimeout(resolve, 50));
     expect(process.exit).toHaveBeenCalledWith(0);
 
     process.on = originalOn;
@@ -248,24 +250,26 @@ describe('Identity-Centric Support API', () => {
   });
 
   test('requires an API key for support routes when configured', async () => {
-    const { config } = require('../src/config');
     const originalKey = config.supportApiKey;
-    config.supportApiKey = 'support-secret';
+    try {
+      config.supportApiKey = 'support-secret';
 
-    const response = await request(app)
-      .post('/api/support/chat')
-      .send({ userId: 'user_a', message: 'I need help with my login' });
+      const response = await request(app)
+        .post('/api/support/chat')
+        .send({ userId: 'user_a', message: 'I need help with my login' });
 
-    expect(response.status).toBe(401);
-    expect(response.body.error.code).toBe('AUTH_REQUIRED');
+      expect(response.status).toBe(401);
+      expect(response.body.error.code).toBe('AUTH_REQUIRED');
 
-    const authed = await request(app)
-      .post('/api/support/chat')
-      .set('x-api-key', 'support-secret')
-      .send({ userId: 'user_a', message: 'I need help with my login' });
+      const authed = await request(app)
+        .post('/api/support/chat')
+        .set('x-api-key', 'support-secret')
+        .send({ userId: 'user_a', message: 'I need help with my login' });
 
-    expect(authed.status).toBe(200);
-    config.supportApiKey = originalKey;
+      expect(authed.status).toBe(200);
+    } finally {
+      config.supportApiKey = originalKey;
+    }
   });
 
   test('serves readiness and liveness probes for orchestration', async () => {

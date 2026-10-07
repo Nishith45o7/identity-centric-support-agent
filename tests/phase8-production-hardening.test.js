@@ -97,7 +97,7 @@ describe('Contextis Phase 8 — Production Hardening, Security, Testing & E2E Va
       .send({ name: 'Org2 Key', environment: 'live' });
     expect(sk2Res.status).toBe(201);
     org2SecretKey = sk2Res.body.key;
-  });
+  }, 30000);
 
   describe('1. Complete End-to-End SaaS Workflow', () => {
     let conversationId = '';

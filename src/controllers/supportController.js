@@ -21,21 +21,37 @@ const health = (req, res) => {
   });
 };
 
-const ready = (req, res) => {
-  res.json({
-    success: true,
-    service: packageJson.name,
-    version: packageJson.version,
-    status: 'ready',
-    ready: true,
-    memoryMode: config.memoryMode,
-    nodeEnv: config.nodeEnv,
-    port: config.port,
-    hindsightConfigured: Boolean(config.hindsightApiKey),
-    groqConfigured: Boolean(config.groqApiKey),
-    uptimeSeconds: Number(process.uptime().toFixed(2)),
-    requestId: req.requestId,
-  });
+const ready = async (req, res) => {
+  try {
+    const { query } = require('../db');
+    await query('SELECT 1');
+    res.json({
+      success: true,
+      service: packageJson.name,
+      version: packageJson.version,
+      status: 'ready',
+      ready: true,
+      database: 'connected',
+      memoryMode: config.memoryMode,
+      nodeEnv: config.nodeEnv,
+      port: config.port,
+      hindsightConfigured: Boolean(config.hindsightApiKey),
+      groqConfigured: Boolean(config.groqApiKey),
+      uptimeSeconds: Number(process.uptime().toFixed(2)),
+      requestId: req.requestId,
+    });
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      service: packageJson.name,
+      version: packageJson.version,
+      status: 'not_ready',
+      ready: false,
+      database: 'disconnected',
+      error: 'Database probe failed',
+      requestId: req.requestId,
+    });
+  }
 };
 
 const live = (req, res) => {

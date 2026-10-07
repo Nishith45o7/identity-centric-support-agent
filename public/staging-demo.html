@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Contextis Staging Playground & Demonstration Environment" />
+    <title>Contextis · Staging Environment Sandbox</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #090e1a;
+        --card-bg: rgba(15, 23, 42, 0.85);
+        --border: rgba(148, 163, 184, 0.16);
+        --accent: #38bdf8;
+        --accent-glow: rgba(56, 189, 248, 0.25);
+        --warning-bg: rgba(245, 158, 11, 0.15);
+        --warning-border: rgba(245, 158, 11, 0.4);
+        --warning-text: #fbbf24;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+        --mono: 'JetBrains Mono', monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        min-height: 100vh;
+        font-family: var(--sans);
+        background: radial-gradient(circle at 85% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                    radial-gradient(circle at 15% 85%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                    var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+      .banner {
+        width: 100%;
+        max-width: 1000px;
+        background: var(--warning-bg);
+        border: 1px solid var(--warning-border);
+        border-radius: 12px;
+        padding: 12px 20px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .banner-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .badge {
+        background: var(--warning-text);
+        color: #000;
+        font-weight: 800;
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .banner-text {
+        font-size: 13px;
+        color: #fde68a;
+      }
+      .container {
+        width: 100%;
+        max-width: 1000px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      @media (max-width: 860px) {
+        .container { grid-template-columns: 1fr; }
+      }
+      .panel {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      }
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .panel-title {
+        font-size: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel-sub {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      select, input {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      select:focus, input:focus {
+        border-color: var(--accent);
+      }
+      .btn-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .btn {
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        color: var(--accent);
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+      }
+      .btn:hover {
+        background: rgba(56, 189, 248, 0.2);
+        border-color: var(--accent);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #030712;
+        border: none;
+        font-weight: 700;
+      }
+      .btn-primary:hover {
+        background: #7dd3fc;
+      }
+      .console-log {
+        background: #020617;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px;
+        font-family: var(--mono);
+        font-size: 12px;
+        height: 280px;
+        overflow-y: auto;
+        color: #94a3b8;
+        line-height: 1.6;
+      }
+      .log-entry { margin-bottom: 6px; word-break: break-all; }
+      .log-info { color: #38bdf8; }
+      .log-success { color: #4ade80; }
+      .log-warn { color: #fbbf24; }
+      .log-error { color: #f87171; }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        background: rgba(74, 222, 128, 0.1);
+        color: #4ade80;
+        border: 1px solid rgba(74, 222, 128, 0.3);
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="banner-left">
+        <span class="badge">Staging Mode</span>
+        <span class="banner-text"><strong>STAGING ENVIRONMENT — NOT FOR PRODUCTION USE</strong>. All conversations, tool actions, and memory banks are isolated to the staging namespace.</span>
+      </div>
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span>Staging Live</span>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Staging Control Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Staging Customer Selector</h2>
+            <p class="panel-sub">Simulate synthetic customers with distinct identities & memories</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="customerSelect">Synthetic Customer Persona</label>
+          <select id="customerSelect">
+            <option value="customer_demo_001">customer_demo_001 — First-Time Visitor (Fresh Memory)</option>
+            <option value="customer_returning_001">customer_returning_001 — Returning Customer (MacBook Pro)</option>
+            <option value="customer_tool_test_001">customer_tool_test_001 — Tool Testing (Order #ORD-8492)</option>
+            <option value="customer_handoff_001">customer_handoff_001 — Human Handoff (Locked Account)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="customUserId">Or Custom Staging User ID</label>
+          <input type="text" id="customUserId" placeholder="e.g. cust_staging_user_42" />
+        </div>
+
+        <div class="form-group">
+          <label for="environmentSelect">Environment Scope</label>
+          <input type="text" id="environmentSelect" value="staging" readonly style="opacity: 0.8; cursor: not-allowed;" />
+        </div>
+
+        <div class="btn-grid">
+          <button class="btn btn-primary" id="btnMountWidget">Mount Chat Widget</button>
+          <button class="btn" id="btnTestOpening">Probe Greeting Context</button>
+          <button class="btn" id="btnSimulateMemory">Inspect Staging Memory</button>
+          <button class="btn" id="btnClearConsole">Clear Log Console</button>
+        </div>
+      </div>
+
+      <!-- Real-Time Telemetry Console -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Telemetry & Isolation Log</h2>
+            <p class="panel-sub">Live audit trail of requests, memory recalls, and tool executions</p>
+          </div>
+          <span id="pingBadge" class="status-pill" style="font-size: 11px;">DB: Checking...</span>
+        </div>
+
+        <div class="console-log" id="consoleLog">
+          <div class="log-entry log-info">[System] Staging playground initialized.</div>
+          <div class="log-entry">[System] Ready to test synthetic customer interactions.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Contextis Widget Integration -->
+    <script src="/widget.js"></script>
+    <script>
+      const logBox = document.getElementById('consoleLog');
+      const pingBadge = document.getElementById('pingBadge');
+
+      function appendLog(text, level = 'info') {
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${level}`;
+        const time = new Date().toLocaleTimeString();
+        entry.textContent = `[${time}] ${text}`;
+        logBox.appendChild(entry);
+        logBox.scrollTop = logBox.scrollHeight;
+      }
+
+      // Check Readiness
+      fetch('/ready')
+        .then(res => res.json())
+        .then(data => {
+          if (data.ready) {
+            pingBadge.innerHTML = `<span class="status-dot"></span> DB: Ready (${data.database})`;
+            appendLog(`Application readiness probe passed: DB ${data.database}, NodeEnv: ${data.nodeEnv}`, 'success');
+          } else {
+            pingBadge.style.color = '#f87171';
+            pingBadge.textContent = 'DB: Not Ready';
+            appendLog(`Readiness probe failed: ${data.error}`, 'error');
+          }
+        })
+        .catch(err => {
+          pingBadge.style.color = '#f87171';
+          pingBadge.textContent = 'API Offline';
+          appendLog(`Failed to contact /ready probe: ${err.message}`, 'error');
+        });
+
+      function getSelectedUserId() {
+        const custom = document.getElementById('customUserId').value.trim();
+        return custom || document.getElementById('customerSelect').value;
+      }
+
+      document.getElementById('btnClearConsole').addEventListener('click', () => {
+        logBox.innerHTML = '';
+        appendLog('Console cleared.');
+      });
+
+      document.getElementById('btnTestOpening').addEventListener('click', async () => {
+        const userId = getSelectedUserId();
+        appendLog(`Probing opening context for customer: ${userId}...`);
+        try {
+          const res = await fetch('/v1/support/opening', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              pageContext: 'Staging Sandbox Page',
+              environment: 'staging'
+            })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            appendLog(`Opening salutation: "${data.salutation}" (Visitor type: ${data.visitorType || 'customer'})`, 'success');
+          } else {
+            appendLog(`Opening probe returned ${res.status}: ${data.error?.message || 'Error'}`, 'warn');
+          }
+        } catch (err) {
+          appendLog(`Error probing opening: ${err.message}`, 'error');
+        }
+      });
+
+      document.getElementById('btnSimulateMemory').addEventListener('click', async () => {
+        const userId = getSelectedUserId();
+        appendLog(`Querying memory facts for ${userId} in environment 'staging'...`);
+        try {
+          const res = await fetch(`/api/support/memory?userId=${encodeURIComponent(userId)}&environment=staging`);
+          const data = await res.json();
+          if (res.ok) {
+            const count = data.memory?.length || 0;
+            appendLog(`Staging memory recalled: ${count} facts found for ${userId}.`, 'success');
+            if (count > 0) {
+              data.memory.forEach(f => appendLog(`  • [${f.category}] ${f.fact}`, 'info'));
+            }
+          } else {
+            appendLog(`Memory lookup returned: ${res.status} ${data.error?.message || ''}`, 'warn');
+          }
+        } catch (err) {
+          appendLog(`Memory query failed: ${err.message}`, 'error');
+        }
+      });
+
+      document.getElementById('btnMountWidget').addEventListener('click', () => {
+        const userId = getSelectedUserId();
+        appendLog(`Mounting Contextis widget for customer: ${userId}...`);
+
+        if (window.ContextisWidget) {
+          window.ContextisWidget.init({
+            projectId: 'staging_demo_project',
+            publicKey: 'pk_test_staging_demo_key',
+            userId: userId,
+            environment: 'staging',
+            accentColor: '#38bdf8',
+            agentName: 'Contextis Staging Assistant'
+          });
+          appendLog(`Widget initialized. Click the floating chat bubble on the bottom right.`, 'success');
+        } else {
+          appendLog('Widget script loaded. Initializing embedded container...', 'info');
+        }
+      });
+    </script>
+  </body>
+</html>

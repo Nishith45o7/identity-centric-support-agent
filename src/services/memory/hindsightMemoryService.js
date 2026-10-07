@@ -22,7 +22,7 @@ class HindsightMemoryService {
     return Boolean(this.getApiKey());
   }
 
-  buildBankId(userId, tenantId = 'default', projectId = 'default') {
+  buildBankId(userId, tenantId = 'default', projectId = 'default', environment = 'live') {
     if (!validateUserId(userId)) {
       const err = new Error('Invalid user identifier.');
       err.code = 'INVALID_IDENTITY';
@@ -30,13 +30,14 @@ class HindsightMemoryService {
       throw err;
     }
 
-    const scope = [tenantId || 'default', projectId || 'default', String(userId).trim()].join('\u0000');
+    const normalizedEnv = String(environment || 'live').toLowerCase();
+    const scope = [tenantId || 'default', projectId || 'default', normalizedEnv, String(userId).trim()].join('\u0000');
     const digest = crypto.createHash('sha256').update(scope).digest('hex');
-    return `ics_${digest}`;
+    return `ctx_${normalizedEnv}_${digest}`;
   }
 
-  getBank(userId, tenantId = 'default', projectId = 'default') {
-    const bankId = this.buildBankId(userId, tenantId, projectId);
+  getBank(userId, tenantId = 'default', projectId = 'default', environment = 'live') {
+    const bankId = this.buildBankId(userId, tenantId, projectId, environment);
     if (!this.banks.has(bankId)) {
       this.banks.set(bankId, []);
     }
@@ -74,12 +75,12 @@ class HindsightMemoryService {
     return payload;
   }
 
-  async remoteRecall(userId, query = '', tenantId = 'default', projectId = 'default') {
+  async remoteRecall(userId, query = '', tenantId = 'default', projectId = 'default', environment = 'live') {
     if (!this.isRemoteConfigured()) {
       return [];
     }
 
-    const bankId = this.buildBankId(userId, tenantId, projectId);
+    const bankId = this.buildBankId(userId, tenantId, projectId, environment);
     const sanitizedQuery = sanitizeText(query || '');
 
     try {
@@ -109,7 +110,7 @@ class HindsightMemoryService {
         .filter(Boolean);
 
       if (remoteFacts.length) {
-        this.getBank(userId, tenantId, projectId).push(...remoteFacts.filter((fact) => !this.getBank(userId, tenantId, projectId).some((existing) => existing.category === fact.category && existing.fact === fact.fact)));
+        this.getBank(userId, tenantId, projectId, environment).push(...remoteFacts.filter((fact) => !this.getBank(userId, tenantId, projectId, environment).some((existing) => existing.category === fact.category && existing.fact === fact.fact)));
       }
 
       return remoteFacts;
@@ -119,12 +120,12 @@ class HindsightMemoryService {
     }
   }
 
-  async remoteRetain(userId, facts = [], tenantId = 'default', projectId = 'default') {
+  async remoteRetain(userId, facts = [], tenantId = 'default', projectId = 'default', environment = 'live') {
     if (!this.isRemoteConfigured()) {
       return { success: false, skipped: true };
     }
 
-    const bankId = this.buildBankId(userId, tenantId, projectId);
+    const bankId = this.buildBankId(userId, tenantId, projectId, environment);
     const sanitized = sanitizeFacts(facts)
       .map((fact) => ({
         content: sanitizeText(fact.fact || ''),
@@ -156,19 +157,27 @@ class HindsightMemoryService {
     }
   }
 
-  async recall(userId, query = '', tenantId = 'default', projectId = 'default') {
-    const bank = this.getBank(userId, tenantId, projectId);
+  async recall(userId, query = '', tenantId = 'default', projectId = 'default', environment = 'live') {
+    const bank = this.getBank(userId, tenantId, projectId, environment);
     const search = sanitizeText(query || '').toLowerCase();
 
     const baseFacts = !search
       ? [...bank]
       : bank.filter((fact) => {
           const combined = `${fact.category || ''} ${fact.fact || ''}`.toLowerCase();
-          return combined.includes(search);
+          const factText = (fact.fact || '').toLowerCase();
+          if (combined.includes(search) || (factText && search.includes(factText))) {
+            return true;
+          }
+          const words = search
+            .split(/\s+/)
+            .map((w) => w.replace(/[^a-z0-9]/g, ''))
+            .filter((w) => w.length > 3);
+          return words.some((w) => combined.includes(w));
         });
 
     if (this.isRemoteConfigured()) {
-      const remoteFacts = await this.remoteRecall(userId, query, tenantId, projectId);
+      const remoteFacts = await this.remoteRecall(userId, query, tenantId, projectId, environment);
       const merged = [...baseFacts, ...remoteFacts];
       const deduped = [];
       const seen = new Set();
@@ -187,8 +196,8 @@ class HindsightMemoryService {
     return { facts: baseFacts };
   }
 
-  async retain(userId, facts = [], tenantId = 'default', projectId = 'default') {
-    const bank = this.getBank(userId, tenantId, projectId);
+  async retain(userId, facts = [], tenantId = 'default', projectId = 'default', environment = 'live') {
+    const bank = this.getBank(userId, tenantId, projectId, environment);
     const sanitized = sanitizeFacts(facts);
 
     for (const fact of sanitized) {
@@ -202,14 +211,14 @@ class HindsightMemoryService {
     }
 
     if (this.isRemoteConfigured()) {
-      await this.remoteRetain(userId, sanitized, tenantId, projectId);
+      await this.remoteRetain(userId, sanitized, tenantId, projectId, environment);
     }
 
     return { facts: [...bank] };
   }
 
-  async clear(userId, tenantId = 'default', projectId = 'default') {
-    const bankId = this.buildBankId(userId, tenantId, projectId);
+  async clear(userId, tenantId = 'default', projectId = 'default', environment = 'live') {
+    const bankId = this.buildBankId(userId, tenantId, projectId, environment);
     this.banks.delete(bankId);
 
     if (this.isRemoteConfigured()) {
@@ -226,8 +235,17 @@ class HindsightMemoryService {
     return { success: true, message: 'Customer memory cleared.' };
   }
 
-  async snapshot(userId, tenantId = 'default', projectId = 'default') {
-    const recalled = await this.recall(userId, '', tenantId, projectId);
+  async deleteFact(userId, factTextOrCategory, tenantId = 'default', projectId = 'default', environment = 'live') {
+    const bank = this.getBank(userId, tenantId, projectId, environment);
+    const beforeLen = bank.length;
+    const remaining = bank.filter((f) => f.fact !== factTextOrCategory && f.category !== factTextOrCategory);
+    const bankId = this.buildBankId(userId, tenantId, projectId, environment);
+    this.banks.set(bankId, remaining);
+    return beforeLen > remaining.length;
+  }
+
+  async snapshot(userId, tenantId = 'default', projectId = 'default', environment = 'live') {
+    const recalled = await this.recall(userId, '', tenantId, projectId, environment);
     return { userId, tenantId, facts: recalled.facts };
   }
 }

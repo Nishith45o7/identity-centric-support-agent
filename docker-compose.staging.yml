@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  staging-db:
+    image: postgres:16-alpine
+    container_name: contextis-staging-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: contextis_staging
+      POSTGRES_USER: contextis_staging_user
+      POSTGRES_PASSWORD: staging_secure_pass_9988
+    ports:
+      - "5433:5432"
+    volumes:
+      - staging_pgdata:/var/lib/postgresql/data
+    networks:
+      - staging-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U contextis_staging_user -d contextis_staging"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  staging-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: contextis-staging-app
+    restart: unless-stopped
+    depends_on:
+      staging-db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: staging
+      PORT: 3000
+      CORS_ORIGIN: "http://localhost:3000,http://localhost:3001,https://staging.contextis.com,https://api-staging.contextis.com"
+      DATABASE_URL: "postgresql://contextis_staging_user:staging_secure_pass_9988@staging-db:5432/contextis_staging?sslmode=disable"
+      API_KEY_PEPPER: "staging-pepper-crypto-hash-998877665544332211"
+      BILLING_WEBHOOK_SECRET: "whsec_staging_test_secret_998877"
+      SUPPORT_API_KEY: "sup_staging_key_88776655"
+      MEMORY_MODE: "on"
+      RUN_MIGRATIONS: "true"
+      PLATFORM_ADMIN_EMAILS: "admin@contextis.test,staging-admin@contextis.test"
+    ports:
+      - "3001:3000"
+    networks:
+      - staging-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  staging_pgdata:
+
+networks:
+  staging-network:
+    driver: bridge

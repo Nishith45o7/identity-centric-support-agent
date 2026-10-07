@@ -12,6 +12,7 @@ const notFoundHandler = require('./middleware/notFound');
 const supportRoutes = require('./routes/supportRoutes');
 const platformRoutes = require('./routes/platformRoutes');
 const v1Routes = require('./routes/v1Routes');
+const { health, ready, live } = require('./controllers/supportController');
 
 const app = express();
 
@@ -41,7 +42,7 @@ const requireSupportApiKey = (req, res, next) => {
 };
 
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'same-site' },
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
   hidePoweredBy: true,
 }));
 app.use((req, res, next) => {
@@ -54,22 +55,37 @@ app.use((req, res, next) => {
 
   next();
 });
+
+const isPublicCorsEndpoint = (reqPath) =>
+  reqPath === '/widget.js' ||
+  reqPath.startsWith('/widget') ||
+  reqPath.startsWith('/v1/support/') ||
+  reqPath.startsWith('/v1/public/') ||
+  reqPath.startsWith('/api/') ||
+  reqPath.startsWith('/swagger-ui') ||
+  reqPath === '/health' ||
+  reqPath === '/ready' ||
+  reqPath === '/live' ||
+  reqPath === '/docs' ||
+  reqPath === '/staging';
+
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
+  cors((req, callback) => {
+    const origin = req.header('Origin');
 
-      if (config.corsOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
+    if (!origin) {
+      return callback(null, { origin: true, credentials: true });
+    }
 
-      callback(new Error('Origin not allowed by CORS policy.'));
-    },
-    credentials: true,
+    if (isPublicCorsEndpoint(req.path)) {
+      return callback(null, { origin: true, credentials: false });
+    }
+
+    if (config.corsOrigins.includes(origin)) {
+      return callback(null, { origin: true, credentials: true });
+    }
+
+    return callback(null, { origin: false });
   }),
 );
 
@@ -78,7 +94,7 @@ app.use(requestLogger);
 
 const supportLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 60,
+  max: config.nodeEnv === 'test' ? 10000 : 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -101,8 +117,18 @@ app.use('/api', (req, res, next) => {
 app.use('/api', supportRoutes);
 app.use('/v1', platformRoutes);
 app.use('/v1', v1Routes);
+app.get('/widget/config', (req, res, next) => {
+  req.url = `/widget/config${req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''}`;
+  return platformRoutes(req, res, next);
+});
 
 app.use('/swagger-ui', express.static(getAbsoluteFSPath()));
+app.get('/health', health);
+app.get('/ready', ready);
+app.get('/live', live);
+app.get('/staging', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/staging-demo.html'));
+});
 app.get('/docs', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/docs.html'));
 });
@@ -112,10 +138,28 @@ app.get('/developer', (req, res) => {
 app.get('/widget', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/widget.html'));
 });
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/dashboard.html'));
+});
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/login.html'));
+});
+app.get('/signup', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/signup.html'));
+});
+app.get('/home', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/home.html'));
+});
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/home.html'));
+});
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.get('*', (req, res) => {
-  if (req.path.startsWith('/api')) {
+  if (req.path.startsWith('/api') || req.path.startsWith('/v1')) {
     return notFoundHandler(req, res);
   }
 

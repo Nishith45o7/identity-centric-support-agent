@@ -3,99 +3,836 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Persistent identity-linked memory for AI customer support." />
-    <title>Continuity for customer support</title>
+    <title>Contextis — AI Support That Remembers Every Customer</title>
+    <meta name="description" content="Contextis gives modern applications persistent AI customer support with memory. Powered by customer identity, Hindsight vector banks, Groq Llama 3.3, and business tools." />
+    <meta name="keywords" content="customer support AI, persistent memory support, identity-centric support, AI chat widget, SaaS support API" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://contextis.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Contextis — AI Support That Remembers Every Customer" />
+    <meta property="og:description" content="Give every customer a support experience that remembers their history, understands their context, and helps resolve issues without making them repeat themselves." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://contextis.com/" />
+    <meta property="og:site_name" content="Contextis" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Contextis — AI Support That Remembers Every Customer" />
+    <meta name="twitter:description" content="AI support that remembers every customer. REST API and embeddable chat widget with persistent memory." />
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Contextis",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web, Cloud",
+        "description": "Multi-tenant AI customer-support SaaS platform with persistent memory, REST API, and embeddable widget.",
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "USD",
+          "lowPrice": "0",
+          "highPrice": "299",
+          "offerCount": "4"
+        }
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <style>
-      :root { --ink: #172522; --muted: #65736e; --paper: #f4f5ef; --white: #fff; --line: #dce3dc; --green: #146b54; --green-dark: #0c4739; --coral: #f08368; --mono: 'DM Mono', monospace; --sans: 'Manrope', sans-serif; }
-      * { box-sizing: border-box; }
-      body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+      :root {
+        --bg: #070d1e;
+        --card-bg: rgba(13, 23, 49, 0.65);
+        --card-border: rgba(148, 163, 184, 0.12);
+        --accent: #38bdf8;
+        --accent-glow: rgba(56, 189, 248, 0.25);
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        --mono: 'JetBrains Mono', monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        min-height: 100vh;
+        font-family: var(--sans);
+        background: radial-gradient(circle at 75% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+                    radial-gradient(circle at 20% 70%, rgba(99, 102, 241, 0.07) 0%, transparent 50%),
+                    var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+      }
       a { color: inherit; text-decoration: none; }
-      .bar { height: 72px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 6vw, 88px); }
-      .brand { display: flex; align-items: center; gap: 11px; font-size: 14px; font-weight: 800; }
-      .mark { width: 28px; height: 28px; display: grid; place-items: center; color: white; background: var(--green); border-radius: 7px; font: 15px var(--mono); }
-      nav { display: flex; align-items: center; gap: 27px; color: var(--muted); font-size: 13px; }
-      nav a:hover { color: var(--green); }
-      .nav-cta { padding: 10px 15px; background: var(--green); color: white; border-radius: 5px; font-weight: 700; }
-      .hero { min-height: 660px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(360px, .8fr); gap: 7vw; align-items: center; padding: 72px clamp(20px, 9vw, 136px) 82px; background: radial-gradient(ellipse at 81% 48%, rgba(20,107,84,.08), transparent 43%), var(--paper); }
-      .eyebrow { display: flex; align-items: center; gap: 10px; color: var(--green); font: 11px var(--mono); text-transform: uppercase; }
-      .eyebrow:before { content: ''; width: 24px; height: 1px; background: var(--coral); }
-      h1 { max-width: 700px; margin: 23px 0; font-size: clamp(44px, 6vw, 78px); line-height: 1.03; letter-spacing: 0; font-weight: 600; }
-      h1 em { color: var(--green); font-style: normal; }
-      .intro { max-width: 570px; color: var(--muted); font-size: 17px; line-height: 1.75; }
-      .actions { display: flex; align-items: center; gap: 24px; margin-top: 32px; font-size: 13px; font-weight: 700; }
-      .primary { display: inline-flex; align-items: center; gap: 12px; color: white; background: var(--green); padding: 15px 19px; border-radius: 5px; }
-      .primary span { font: 18px var(--mono); }
-      .secondary { color: var(--green-dark); border-bottom: 1px solid #aebfb3; padding: 8px 0; }
-      .diagram { position: relative; min-height: 410px; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
-      .step { display: grid; grid-template-columns: 46px 1fr auto; align-items: center; gap: 14px; padding: 17px 18px; background: var(--white); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 10px 30px rgba(25,54,44,.035); animation: arrive .55s both; }
-      .step:nth-child(2) { margin-left: 24px; animation-delay: .08s; }
-      .step:nth-child(3) { margin-left: 48px; animation-delay: .16s; }
-      .step:nth-child(4) { margin-left: 72px; animation-delay: .24s; }
-      .step:nth-child(5) { margin-left: 96px; animation-delay: .32s; }
-      .number { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; color: var(--green); background: #e7f2eb; font: 12px var(--mono); }
-      .step strong { font-size: 13px; }
-      .step small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
-      .step code { color: var(--green); font: 10px var(--mono); }
-      .connector { height: 7px; margin-left: 40px; border-left: 1px solid #a6b9ae; }
-      .section { padding: 82px clamp(20px, 9vw, 136px); background: var(--white); border-top: 1px solid var(--line); }
-      .section-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 36px; }
-      .section h2 { max-width: 580px; margin: 12px 0 0; font-size: clamp(29px, 4vw, 45px); line-height: 1.15; font-weight: 600; }
-      .section-head p { max-width: 360px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
-      .code-sample { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-      .code-copy { padding: 26px; }
-      .code-copy h3 { margin: 0 0 11px; font-size: 15px; }
-      .code-copy p { color: var(--muted); font-size: 13px; line-height: 1.7; }
-      pre { min-height: 190px; margin: 0; overflow: auto; padding: 26px; color: #d9f0e5; background: var(--green-dark); font: 12px/1.8 var(--mono); }
-      footer { padding: 24px clamp(20px, 6vw, 88px); display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
-      @keyframes arrive { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
-      @media (max-width: 850px) { .hero { grid-template-columns: 1fr; gap: 34px; padding-top: 60px; } .diagram { min-height: auto; } .step:nth-child(n) { margin-left: min(calc((var(--i, 0) * 10px)), 40px); } .section-head { display: block; } .section-head p { margin-top: 18px; } }
-      @media (max-width: 600px) { .bar { height: auto; min-height: 64px; } nav { gap: 12px; } nav a:not(.nav-cta) { display: none; } .hero { min-height: auto; } .step:nth-child(n) { margin-left: 0; } .step code { display: none; } .code-sample { grid-template-columns: 1fr; } footer { gap: 12px; flex-wrap: wrap; } }
-      @media (prefers-reduced-motion: reduce) { *, *:before, *:after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; } }
+      .nav {
+        height: 76px;
+        padding: 0 clamp(20px, 7vw, 100px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--card-border);
+        background: rgba(7, 13, 30, 0.7);
+        backdrop-filter: blur(16px);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+        color: #031525;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .nav-links a:hover { color: var(--accent); }
+      .cta-btn {
+        padding: 9px 18px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        color: #031525;
+        font-weight: 700;
+        font-size: 13px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .cta-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+      }
+      .hero {
+        padding: 90px clamp(20px, 8vw, 120px) 70px;
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 60px;
+        align-items: center;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      h1 {
+        font-size: clamp(38px, 4.5vw, 62px);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        margin-bottom: 24px;
+      }
+      h1 span {
+        background: linear-gradient(135deg, #38bdf8 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .lead {
+        font-size: clamp(16px, 1.4vw, 19px);
+        line-height: 1.6;
+        color: var(--muted);
+        margin-bottom: 36px;
+        max-width: 580px;
+      }
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .btn-primary {
+        padding: 13px 26px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        color: #031525;
+        font-weight: 700;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(56, 189, 248, 0.35);
+      }
+      .btn-secondary {
+        padding: 13px 24px;
+        border-radius: 12px;
+        background: rgba(148, 163, 184, 0.08);
+        border: 1px solid var(--card-border);
+        color: var(--text);
+        font-weight: 600;
+        font-size: 14px;
+        transition: background 0.15s ease, border-color 0.15s ease;
+      }
+      .btn-secondary:hover {
+        background: rgba(148, 163, 184, 0.14);
+        border-color: rgba(148, 163, 184, 0.25);
+      }
+      .card-glass {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 32px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      }
+      .memory-flow {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .flow-step {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 18px;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.08);
+      }
+      .flow-num {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .flow-text strong {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .flow-text small {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .flow-code {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 11px;
+        color: #34d399;
+      }
+
+      /* Sections */
+      .section-wrap {
+        padding: 80px clamp(20px, 8vw, 120px);
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .section-head {
+        text-align: center;
+        max-width: 760px;
+        margin: 0 auto 50px;
+      }
+      .section-head h2 {
+        font-size: clamp(28px, 3.2vw, 42px);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 16px;
+      }
+      .section-head p {
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      /* How it Works */
+      .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+      }
+      .step-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 24px;
+        position: relative;
+      }
+      .step-badge {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: rgba(56, 189, 248, 0.15);
+        color: var(--accent);
+        font-family: var(--mono);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+      .step-card h4 {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .step-card p {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* Features Grid */
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .feature-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        padding: 28px;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+      .feature-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(56, 189, 248, 0.35);
+      }
+      .feature-icon {
+        font-size: 24px;
+        margin-bottom: 16px;
+      }
+      .feature-card h3 {
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .feature-card p {
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      /* Pricing */
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+      }
+      .price-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 32px 28px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      .price-card.featured {
+        border-color: rgba(56, 189, 248, 0.45);
+        background: linear-gradient(180deg, rgba(13, 23, 49, 0.85) 0%, rgba(9, 15, 34, 0.95) 100%);
+        box-shadow: 0 0 40px rgba(56, 189, 248, 0.12);
+      }
+      .featured-pill {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+        color: #031525;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 4px 12px;
+        border-radius: 20px;
+      }
+      .plan-name { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+      .plan-price { font-size: 38px; font-weight: 800; letter-spacing: -0.03em; margin: 16px 0 6px; }
+      .plan-period { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+      .plan-features { list-style: none; margin: 20px 0 28px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+      .plan-features li {
+        font-size: 12px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .plan-features li::before {
+        content: "✓";
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .plan-btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 13px;
+        background: rgba(148, 163, 184, 0.1);
+        border: 1px solid var(--card-border);
+        color: var(--text);
+        transition: background 0.15s ease;
+      }
+      .plan-btn:hover { background: rgba(148, 163, 184, 0.2); }
+      .price-card.featured .plan-btn {
+        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        color: #031525;
+        border: 0;
+      }
+
+      /* Quickstart Journey */
+      .quickstart-box {
+        background: #020617;
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 36px;
+        box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+      }
+      .code-bar {
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .dot { width: 10px; height: 10px; border-radius: 50%; }
+      .dot.red { background: #ef4444; }
+      .dot.yellow { background: #f59e0b; }
+      .dot.green { background: #10b981; }
+      .code-bar-title { margin-left: 12px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+      pre {
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.7;
+        color: #e2e8f0;
+        overflow-x: auto;
+      }
+
+      /* Modal */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .modal-backdrop.open { display: flex; }
+      .modal-card {
+        background: #0d1731;
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        padding: 32px;
+        max-width: 480px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      }
+      .modal-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+      .modal-card p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+      .form-group { margin-bottom: 16px; }
+      .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+      .form-input {
+        width: 100%;
+        padding: 10px 14px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 13px;
+      }
+      .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+
+      footer {
+        padding: 40px clamp(20px, 8vw, 120px);
+        border-top: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      @media (max-width: 1100px) {
+        .steps-grid { grid-template-columns: repeat(2, 1fr); }
+        .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; }
+        .grid-3 { grid-template-columns: 1fr; }
+        .pricing-grid { grid-template-columns: 1fr; }
+        .steps-grid { grid-template-columns: 1fr; }
+      }
     </style>
   </head>
   <body>
-    <header class="bar">
-      <a class="brand" href="/"><span class="mark">ic</span> Continuity API</a>
-      <nav aria-label="Main navigation">
-        <a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/login">Log in</a><a class="nav-cta" href="/signup">Start building</a>
-      </nav>
-    </header>
+    <nav class="nav">
+      <a class="brand" href="/"><span class="brand-mark">C</span> Contextis</a>
+      <div class="nav-links">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="/widget">Chat Widget</a>
+        <a href="/docs">Documentation</a>
+        <a href="/dashboard">Developer Dashboard</a>
+        <a href="/login">Sign In</a>
+        <a class="cta-btn" href="/signup">Start Building</a>
+      </div>
+    </nav>
+
     <main>
+      <!-- Hero -->
       <section class="hero">
         <div>
-          <div class="eyebrow">Identity-linked support infrastructure</div>
-          <h1>Support that remembers <em>every customer.</em></h1>
-          <p class="intro">Give your support experience durable customer context with one API. Your app sends a customer ID and a message; Continuity handles memory, reasoning, and the reply.</p>
-          <div class="actions"><a class="primary" href="/signup">Create your workspace <span>↗</span></a><a class="secondary" href="/docs">Read the quick start</a></div>
+          <div class="badge">✦ Infrastructure for Intelligent Support</div>
+          <h1>AI support that remembers <span>every customer.</span></h1>
+          <p class="lead">
+            Give every customer a support experience that remembers their history, understands their context, and helps resolve issues without making them repeat themselves.
+          </p>
+          <div class="hero-actions">
+            <a class="btn-primary" href="/signup">Start Building <span>→</span></a>
+            <a class="btn-secondary" href="/docs">Explore Documentation</a>
+            <button class="btn-secondary" onclick="openSalesModal()">Talk to Sales</button>
+          </div>
         </div>
-        <div class="diagram" aria-label="Support request flow">
-          <div class="step"><span class="number">01</span><div><strong>Your application</strong><small>Send customer identity + message</small></div><code>POST /v1/support/chat</code></div>
-          <div class="connector"></div>
-          <div class="step"><span class="number">02</span><div><strong>Project API key</strong><small>Resolve the owning project</small></div><code>sk_live_•••</code></div>
-          <div class="connector"></div>
-          <div class="step"><span class="number">03</span><div><strong>Relevant history</strong><small>Recall context for this customer</small></div><code>memory scoped</code></div>
-          <div class="connector"></div>
-          <div class="step"><span class="number">04</span><div><strong>Context-aware reply</strong><small>Continue from what is already known</small></div><code>response</code></div>
+
+        <div class="card-glass">
+          <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 16px;">
+            Unified Contextis Support Engine Flow
+          </h3>
+          <div class="memory-flow">
+            <div class="flow-step">
+              <span class="flow-num">01</span>
+              <div class="flow-text">
+                <strong>Customer Identity</strong>
+                <small>Send business-controlled customer ID</small>
+              </div>
+              <span class="flow-code">user_id: "alex_492"</span>
+            </div>
+            <div class="flow-step">
+              <span class="flow-num">02</span>
+              <div class="flow-text">
+                <strong>Multi-Tenant Isolation</strong>
+                <small>Scoped by org, project, and environment</small>
+              </div>
+              <span class="flow-code">sha256(pepper + key)</span>
+            </div>
+            <div class="flow-step">
+              <span class="flow-num">03</span>
+              <div class="flow-text">
+                <strong>Hindsight Memory Bank</strong>
+                <small>Recall durable hardware, fixes, preferences</small>
+              </div>
+              <span class="flow-code">vector context</span>
+            </div>
+            <div class="flow-step">
+              <span class="flow-num">04</span>
+              <div class="flow-text">
+                <strong>AI Reasoning & Tool Router</strong>
+                <small>Execute authorized business tools safely</small>
+              </div>
+              <span class="flow-code">permission check</span>
+            </div>
+            <div class="flow-step">
+              <span class="flow-num">05</span>
+              <div class="flow-text">
+                <strong>Resolution & Learning</strong>
+                <small>Retain new durable facts automatically</small>
+              </div>
+              <span class="flow-code">durable retention</span>
+            </div>
+          </div>
         </div>
       </section>
-      <section class="section">
+
+      <!-- How it Works -->
+      <section class="section-wrap" id="how-it-works">
         <div class="section-head">
-          <div><div class="eyebrow">A smaller integration surface</div><h2>Keep your customer experience. We’ll keep the context.</h2></div>
-          <p>Project keys define the security boundary. Customer memory is isolated by organization, project, and the stable user ID your app already owns.</p>
+          <h2>How Contextis Works</h2>
+          <p>Contextis transforms support from isolated disconnected chat turns into a continuous customer memory lifecycle.</p>
         </div>
-        <div class="code-sample">
-          <div class="code-copy"><h3>Your first request</h3><p>No memory-bank setup, provider credentials, or prompt plumbing in your application. Start with a project and a test key.</p><a class="secondary" href="/docs">Open developer docs</a></div>
-          <pre><code>curl -X POST http://localhost:3000/v1/support/chat \
-  -H "Authorization: Bearer $CONTINUITY_API_KEY" \
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-badge">1</div>
+            <h4>Identify</h4>
+            <p>Contextis recognizes the customer using the business-provided external customer identity.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-badge">2</div>
+            <h4>Remember</h4>
+            <p>Contextis retrieves useful historical context from tenant-isolated vector memory banks.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-badge">3</div>
+            <h4>Understand</h4>
+            <p>The AI combines current message, memory, business context, and registered integrations.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-badge">4</div>
+            <h4>Act</h4>
+            <p>The AI safely uses authorized business tools with strict schema validation and credential guards.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-badge">5</div>
+            <h4>Resolve</h4>
+            <p>The customer gets a contextual answer or warm human handoff instead of starting from zero.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="section-wrap" id="features">
+        <div class="section-head">
+          <h2>Built for Modern SaaS & Engineering Teams</h2>
+          <p>A unified infrastructure platform designed for reliability, strict data privacy, and frictionless integration.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="feature-icon">🧠</div>
+            <h3>Persistent Customer Memory</h3>
+            <p>Remember the customer, not just the conversation. Retains devices, known issues, troubleshooting steps, and preferences across sessions.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">💬</div>
+            <h3>Context-Aware Support</h3>
+            <p>Understand what happened before the customer asked again. Time-aware and situation-aware greetings tailored to returning customers.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">⚙️</div>
+            <h3>Business Tools & Actions</h3>
+            <p>Connect support AI to the systems your business already uses (order lookup, ticket creation, password reset flows) under strict zero-trust permissions.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Developer REST API</h3>
+            <p>Integrate Contextis into any application backend. Fully versioned /v1 endpoints with JSON schemas, pagination, and SDK examples.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3>Embeddable Widget</h3>
+            <p>Add AI support to your website in minutes. Isolated Shadow DOM prevents CSS conflicts, with complete mobile responsiveness.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>Enterprise Tenant Isolation</h3>
+            <p>Multi-tenant SHA-256 HMAC hashed API keys, environment separation (test vs live), scoped permissions, and tamper-proof audit trails.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pricing -->
+      <section class="section-wrap" id="pricing">
+        <div class="section-head">
+          <h2>Transparent, Data-Driven Pricing</h2>
+          <p>Start free and scale seamlessly as your customer conversations and tool executions grow.</p>
+        </div>
+
+        <div class="pricing-grid" id="pricing-grid">
+          <!-- Populated dynamically from /v1/public/plans -->
+          <div class="price-card">
+            <div class="plan-name">Free</div>
+            <div class="plan-price">$0</div>
+            <div class="plan-period">forever</div>
+            <ul class="plan-features">
+              <li>1,000 monthly AI requests</li>
+              <li>1 project (live/test)</li>
+              <li>2 API keys</li>
+              <li>50 customers remembered</li>
+              <li>Community support</li>
+            </ul>
+            <a class="plan-btn" href="/signup">Start Free</a>
+          </div>
+
+          <div class="price-card">
+            <div class="plan-name">Starter</div>
+            <div class="plan-price">$29</div>
+            <div class="plan-period">per month</div>
+            <ul class="plan-features">
+              <li>10,000 monthly AI requests</li>
+              <li>3 projects</li>
+              <li>5 API keys</li>
+              <li>250 customers remembered</li>
+              <li>Standard tool execution</li>
+            </ul>
+            <a class="plan-btn" href="/signup?plan=starter">Get Started</a>
+          </div>
+
+          <div class="price-card featured">
+            <span class="featured-pill">Most Popular</span>
+            <div class="plan-name">Pro</div>
+            <div class="plan-price">$79</div>
+            <div class="plan-period">per month</div>
+            <ul class="plan-features">
+              <li>50,000 monthly AI requests</li>
+              <li>10 projects</li>
+              <li>20 API keys</li>
+              <li>2,500 customers remembered</li>
+              <li>Advanced memory vectoring</li>
+              <li>Priority email support</li>
+            </ul>
+            <a class="plan-btn" href="/signup?plan=pro">Start Pro Trial</a>
+          </div>
+
+          <div class="price-card">
+            <div class="plan-name">Enterprise</div>
+            <div class="plan-price">Custom</div>
+            <div class="plan-period">custom annual</div>
+            <ul class="plan-features">
+              <li>10,000,000+ monthly requests</li>
+              <li>Unlimited projects & keys</li>
+              <li>Unlimited customer memory</li>
+              <li>Dedicated PostgreSQL / VPC</li>
+              <li>99.99% uptime SLA</li>
+              <li>Custom tool integrations</li>
+            </ul>
+            <button class="plan-btn" onclick="openSalesModal()">Talk to Sales</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quickstart Code -->
+      <section class="section-wrap">
+        <div class="section-head">
+          <h2>Send Your First Request in 3 Minutes</h2>
+          <p>Initialize customer context, post a message, and receive a remembered answer in four lines of code.</p>
+        </div>
+
+        <div class="quickstart-box">
+          <div class="code-bar">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="code-bar-title">terminal — quickstart test</span>
+          </div>
+          <pre><code># 1. Send customer message with stable identity
+curl -X POST https://api.contextis.com/v1/support/chat \
+  -H "Authorization: Bearer sk_live_your_key_here" \
   -H "Content-Type: application/json" \
-  -d '{"user_id":"customer_123", \
-       "message":"My login issue is still happening."}'</code></pre>
+  -d '{
+    "user_id": "cust_alex_99",
+    "message": "My MacBook Pro M2 display is flickering on the external dock."
+  }'
+
+# Contextis recalls previous display fixes, answers intelligently,
+# and retains hardware specs for all future interactions.</code></pre>
         </div>
       </section>
     </main>
-    <footer><span>Continuity API · Identity-centric support</span><span><a href="/playground">Try the support playground</a> · <a href="/reference">API reference</a></span></footer>
+
+    <!-- Talk to Sales Modal -->
+    <div class="modal-backdrop" id="sales-modal">
+      <div class="modal-card">
+        <h3>Talk to Contextis Enterprise</h3>
+        <p>Tell us about your support volume, integration requirements, and timeline.</p>
+        <form onsubmit="handleSalesSubmit(event)">
+          <div class="form-group">
+            <label>Work Email</label>
+            <input type="email" class="form-input" id="sales-email" placeholder="name@company.com" required />
+          </div>
+          <div class="form-group">
+            <label>Company Name</label>
+            <input type="text" class="form-input" id="sales-company" placeholder="Acme Inc." required />
+          </div>
+          <div class="form-group">
+            <label>Expected Monthly Conversations</label>
+            <input type="text" class="form-input" id="sales-volume" placeholder="e.g. 50,000 - 250,000" required />
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" onclick="closeSalesModal()">Cancel</button>
+            <button type="submit" class="btn-primary">Submit Request</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <footer>
+      <div>© 2026 Contextis. AI support that remembers every customer.</div>
+      <div style="display: flex; gap: 20px;">
+        <a href="/widget">Widget Demo</a>
+        <a href="/docs">Documentation</a>
+        <a href="/dashboard">Developer Dashboard</a>
+        <a href="/admin">Platform Admin</a>
+      </div>
+    </footer>
+
+    <script>
+      function openSalesModal() {
+        document.getElementById('sales-modal').classList.add('open');
+      }
+      function closeSalesModal() {
+        document.getElementById('sales-modal').classList.remove('open');
+      }
+      function handleSalesSubmit(e) {
+        e.preventDefault();
+        const email = document.getElementById('sales-email').value;
+        alert('Thank you! Our enterprise solutions team will contact ' + email + ' within 1 business day.');
+        closeSalesModal();
+      }
+
+      // Dynamic plan loading from /v1/public/plans
+      async function loadPlans() {
+        try {
+          const res = await fetch('/v1/public/plans');
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data.plans || !data.plans.length) return;
+
+          const grid = document.getElementById('pricing-grid');
+          if (!grid) return;
+
+          grid.innerHTML = data.plans.map(function(plan) {
+            const isFeatured = plan.highlighted;
+            const featuresHtml = (plan.features || []).map(function(f) {
+              return '<li>' + f + '</li>';
+            }).join('');
+
+            const ctaBtn = plan.slug === 'enterprise'
+              ? '<button class="plan-btn" onclick="openSalesModal()">' + plan.cta + '</button>'
+              : '<a class="plan-btn" href="/signup?plan=' + plan.slug + '">' + plan.cta + '</a>';
+
+            return '<div class="price-card' + (isFeatured ? ' featured' : '') + '">' +
+              (isFeatured ? '<span class="featured-pill">Most Popular</span>' : '') +
+              '<div class="plan-name">' + plan.name + '</div>' +
+              '<div class="plan-price">' + plan.priceDisplay + '</div>' +
+              '<div class="plan-period">' + (plan.period === 'forever' ? 'forever' : 'per ' + plan.period) + '</div>' +
+              '<ul class="plan-features">' + featuresHtml + '</ul>' +
+              ctaBtn +
+              '</div>';
+          }).join('');
+        } catch (e) {
+          // Fallback static cards already present
+        }
+      }
+      document.addEventListener('DOMContentLoaded', loadPlans);
+    </script>
   </body>
 </html>

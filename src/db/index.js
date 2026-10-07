@@ -144,6 +144,7 @@ const runSqliteMigrations = () => {
       continue;
     }
 
+    db.exec('PRAGMA foreign_keys = OFF;');
     db.exec('BEGIN IMMEDIATE');
     try {
       db.exec(migration.sql);
@@ -153,6 +154,8 @@ const runSqliteMigrations = () => {
     } catch (error) {
       db.exec('ROLLBACK');
       throw error;
+    } finally {
+      db.exec('PRAGMA foreign_keys = ON;');
     }
   }
 };
@@ -166,11 +169,41 @@ if (!isPostgres) {
   migrateLegacyData(querySync);
 }
 
-const postgresQuery = async (sql, params = [], executor = pool) => {
+const prepareSqlForPostgres = (sql) => {
+  let prepared = sql;
+  prepared = prepared.replace(/\bAS\s+([A-Za-z0-9_]+)/g, (match, alias) => `AS "${alias}"`);
+  prepared = prepared.replace(/\b(excluded\.)?position\b(?!\s*\()/gi, (match, prefix) => {
+    return prefix ? 'EXCLUDED."position"' : '"position"';
+  });
+  return prepared;
+};
+
+const replacePlaceholders = (sql) => {
   let parameterIndex = 0;
-  const statement = sql.replace(/\?/g, () => `$${++parameterIndex}`);
+  return sql.replace(/'(?:''|[^'])*'|\?/g, (match) => {
+    if (match === '?') {
+      return `$${++parameterIndex}`;
+    }
+    return match;
+  });
+};
+
+const postgresQuery = async (sql, params = [], executor = pool) => {
+  const preparedSql = prepareSqlForPostgres(sql);
+  const statement = replacePlaceholders(preparedSql);
   const result = await executor.query(statement, params);
-  return { rows: result.rows, rowCount: result.rowCount, changes: result.rowCount };
+  const rows = result.rows.map((row) => {
+    if (!row || typeof row !== 'object') return row;
+    const mapped = { ...row };
+    for (const [key, value] of Object.entries(row)) {
+      const camel = key.replace(/_([a-z0-9])/g, (_, letter) => letter.toUpperCase());
+      if (!(camel in mapped)) {
+        mapped[camel] = value;
+      }
+    }
+    return mapped;
+  });
+  return { rows, rowCount: result.rowCount, changes: result.rowCount };
 };
 
 const importSqliteRegistry = async () => {
@@ -232,6 +265,94 @@ const migrateLegacyDataPostgres = async () => {
   }
 };
 
+const formatPostgresMigration = (version, sql) => {
+  if (version === '007_contextis_foundation.sql') {
+    return `
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS slug TEXT;
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS updated_at TEXT NOT NULL DEFAULT '';
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS plan_name TEXT NOT NULL DEFAULT 'starter';
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS billing_status TEXT NOT NULL DEFAULT 'active';
+CREATE INDEX IF NOT EXISTS organizations_slug_idx ON organizations(slug);
+
+ALTER TABLE organization_members DROP CONSTRAINT IF EXISTS organization_members_role_check;
+ALTER TABLE organization_members ADD CONSTRAINT organization_members_role_check CHECK (role IN ('owner', 'admin', 'member', 'viewer'));
+CREATE INDEX IF NOT EXISTS organization_members_user_idx ON organization_members(user_id, organization_id);
+
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS slug TEXT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS environment TEXT NOT NULL DEFAULT 'live';
+CREATE INDEX IF NOT EXISTS projects_env_idx ON projects(organization_id, environment, status);
+
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS environment TEXT NOT NULL DEFAULT 'live';
+CREATE INDEX IF NOT EXISTS customers_project_env_idx ON customers(project_id, environment, external_user_id);
+
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS environment TEXT NOT NULL DEFAULT 'live';
+CREATE INDEX IF NOT EXISTS conversations_project_env_idx ON conversations(project_id, environment, customer_id);
+
+ALTER TABLE conversation_messages ADD COLUMN IF NOT EXISTS request_id TEXT;
+
+ALTER TABLE usage_records ADD COLUMN IF NOT EXISTS organization_id TEXT;
+ALTER TABLE usage_records ADD COLUMN IF NOT EXISTS environment TEXT NOT NULL DEFAULT 'live';
+ALTER TABLE usage_records ADD COLUMN IF NOT EXISTS ai_requests INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE usage_records ADD COLUMN IF NOT EXISTS tool_executions INTEGER NOT NULL DEFAULT 0;
+CREATE INDEX IF NOT EXISTS usage_records_org_env_idx ON usage_records(organization_id, environment, created_at);
+
+CREATE TABLE IF NOT EXISTS plans (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  max_projects INTEGER NOT NULL,
+  max_api_keys INTEGER NOT NULL,
+  max_customers INTEGER NOT NULL,
+  monthly_requests INTEGER NOT NULL,
+  memory_operations INTEGER NOT NULL,
+  tool_executions INTEGER NOT NULL,
+  team_members INTEGER NOT NULL,
+  rate_limit_per_minute INTEGER NOT NULL,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL
+);
+
+INSERT INTO plans (id, name, slug, max_projects, max_api_keys, max_customers, monthly_requests, memory_operations, tool_executions, team_members, rate_limit_per_minute, is_active, created_at)
+VALUES
+  ('plan_free', 'Free', 'free', 1, 2, 50, 1000, 500, 200, 1, 30, 1, '2026-01-01T00:00:00.000Z'),
+  ('plan_starter', 'Starter', 'starter', 3, 5, 250, 10000, 5000, 2000, 3, 60, 1, '2026-01-01T00:00:00.000Z'),
+  ('plan_pro', 'Pro', 'pro', 10, 20, 2500, 50000, 25000, 10000, 10, 180, 1, '2026-01-01T00:00:00.000Z'),
+  ('plan_growth', 'Growth', 'growth', 10, 20, 5000, 100000, 50000, 20000, 10, 300, 1, '2026-01-01T00:00:00.000Z'),
+  ('plan_scale', 'Scale', 'scale', 50, 100, 50000, 1000000, 500000, 200000, 50, 1200, 1, '2026-01-01T00:00:00.000Z'),
+  ('plan_business', 'Business', 'business', 50, 100, 50000, 500000, 250000, 100000, 30, 600, 1, '2026-01-01T00:00:00.000Z'),
+  ('plan_enterprise', 'Enterprise', 'enterprise', 9999, 9999, 999999, 10000000, 5000000, 2000000, 999, 5000, 1, '2026-01-01T00:00:00.000Z')
+ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id TEXT PRIMARY KEY,
+  organization_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  plan_id TEXT NOT NULL REFERENCES plans(id),
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'past_due', 'canceled', 'trialing')),
+  current_period_start TEXT NOT NULL,
+  current_period_end TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  UNIQUE (organization_id)
+);
+CREATE INDEX IF NOT EXISTS subscriptions_org_status_idx ON subscriptions(organization_id, status);
+
+CREATE TABLE IF NOT EXISTS integrations (
+  id TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  config TEXT NOT NULL DEFAULT '{}',
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'disabled')),
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS integrations_project_status_idx ON integrations(project_id, status);
+`;
+  }
+
+  return sql.replace(/ADD COLUMN (?!IF NOT EXISTS)/g, 'ADD COLUMN IF NOT EXISTS ');
+};
+
 const runPostgresMigrations = async () => {
   await pool.query('CREATE TABLE IF NOT EXISTS schema_migrations (version TEXT PRIMARY KEY, applied_at TEXT NOT NULL)');
 
@@ -244,7 +365,8 @@ const runPostgresMigrations = async () => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      await client.query(migration.sql);
+      const sqlToExecute = formatPostgresMigration(migration.version, migration.sql);
+      await client.query(sqlToExecute);
       await client.query('INSERT INTO schema_migrations (version, applied_at) VALUES ($1, $2)', [migration.version, new Date().toISOString()]);
       await client.query('COMMIT');
     } catch (error) {
@@ -269,11 +391,18 @@ const initializePostgres = async () => {
   await migrateLegacyDataPostgres();
 };
 
-const ready = isPostgres ? initializePostgres() : Promise.resolve();
+let ready = isPostgres ? initializePostgres() : Promise.resolve();
+
+const ensureReady = async () => {
+  if (isPostgres && !pool) {
+    ready = initializePostgres();
+  }
+  await ready;
+};
 
 const query = async (sql, params = []) => {
   if (isPostgres) {
-    await ready;
+    await ensureReady();
     return postgresQuery(sql, params);
   }
 
@@ -281,7 +410,7 @@ const query = async (sql, params = []) => {
 };
 
 const transaction = async (operation) => {
-  await ready;
+  await ensureReady();
   if (!isPostgres) {
     db.exec('BEGIN IMMEDIATE');
     try {
@@ -310,7 +439,9 @@ const transaction = async (operation) => {
 
 const close = async () => {
   if (pool) {
-    await pool.end();
+    const activePool = pool;
+    pool = null;
+    await activePool.end();
   }
 };
 

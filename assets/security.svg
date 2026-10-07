@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-label="Security pipeline">
+<defs><filter id="glow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#050816"/><stop offset="1" stop-color="#0d1233"/></linearGradient></defs>
+<rect width="1200" height="360" rx="24" fill="url(#bg)"/>
+<circle cx="311" cy="247" r="1.4" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.5s" begin="0.7s" repeatCount="indefinite"/></circle>
+<circle cx="277" cy="53" r="0.8" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.2s" begin="0.5s" repeatCount="indefinite"/></circle>
+<circle cx="638" cy="77" r="0.9" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.3s" begin="3.4s" repeatCount="indefinite"/></circle>
+<circle cx="730" cy="5" r="0.9" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.4s" begin="3.5s" repeatCount="indefinite"/></circle>
+<circle cx="972" cy="290" r="1.5" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.2s" begin="3.8s" repeatCount="indefinite"/></circle>
+<circle cx="953" cy="92" r="1.5" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.5s" begin="3.0s" repeatCount="indefinite"/></circle>
+<circle cx="677" cy="155" r="1.0" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.3s" begin="1.3s" repeatCount="indefinite"/></circle>
+<circle cx="141" cy="295" r="1.5" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="5.0s" begin="2.8s" repeatCount="indefinite"/></circle>
+<circle cx="665" cy="269" r="0.7" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.0s" begin="1.8s" repeatCount="indefinite"/></circle>
+<circle cx="212" cy="73" r="1.2" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.8s" begin="1.8s" repeatCount="indefinite"/></circle>
+<circle cx="727" cy="142" r="0.7" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.5s" begin="0.9s" repeatCount="indefinite"/></circle>
+<circle cx="283" cy="70" r="1.0" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.2s" begin="2.6s" repeatCount="indefinite"/></circle>
+<circle cx="1144" cy="140" r="1.4" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.8s" begin="0.2s" repeatCount="indefinite"/></circle>
+<circle cx="170" cy="290" r="1.5" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.9s" begin="0.6s" repeatCount="indefinite"/></circle>
+<circle cx="496" cy="313" r="1.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.4s" begin="0.8s" repeatCount="indefinite"/></circle>
+<circle cx="1024" cy="135" r="1.4" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.4s" begin="3.9s" repeatCount="indefinite"/></circle>
+<circle cx="724" cy="260" r="0.8" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.9s" begin="2.3s" repeatCount="indefinite"/></circle>
+<circle cx="709" cy="129" r="1.4" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.0s" begin="1.2s" repeatCount="indefinite"/></circle>
+<circle cx="197" cy="246" r="0.7" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.7s" begin="0.3s" repeatCount="indefinite"/></circle>
+<circle cx="772" cy="200" r="1.2" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.1s" begin="1.8s" repeatCount="indefinite"/></circle>
+<circle cx="412" cy="33" r="0.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="5.0s" begin="0.5s" repeatCount="indefinite"/></circle>
+<circle cx="362" cy="97" r="1.3" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="2.2s" begin="1.9s" repeatCount="indefinite"/></circle>
+<circle cx="440" cy="300" r="0.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.0s" begin="2.0s" repeatCount="indefinite"/></circle>
+<circle cx="1164" cy="186" r="1.1" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.0s" begin="1.2s" repeatCount="indefinite"/></circle>
+<circle cx="38" cy="180" r="1.6" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.2s" begin="1.0s" repeatCount="indefinite"/></circle>
+<circle cx="821" cy="306" r="0.9" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.8s" begin="1.4s" repeatCount="indefinite"/></circle>
+<circle cx="293" cy="103" r="0.8" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.1s" begin="0.2s" repeatCount="indefinite"/></circle>
+<circle cx="477" cy="31" r="1.4" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.8s" begin="0.0s" repeatCount="indefinite"/></circle>
+<circle cx="929" cy="69" r="1.1" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="3.7s" begin="1.3s" repeatCount="indefinite"/></circle>
+<circle cx="347" cy="157" r="0.8" fill="#fff" opacity=".15"><animate attributeName="opacity" values=".08;.9;.08" dur="4.6s" begin="0.4s" repeatCount="indefinite"/></circle>
+<text x="600" y="52" font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace" font-size="14" font-weight="700" fill="#818cf8" text-anchor="middle" letter-spacing="6">SECURITY PIPELINE</text>
+<text x="600" y="76" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#64748b" text-anchor="middle" >every request clears five gates before it touches a model</text>
+<line x1="40" y1="170" x2="1160" y2="170" stroke="#1e293b" stroke-width="3"/>
+<line x1="40" y1="170" x2="1160" y2="170" stroke="#6366f1" stroke-opacity=".6" stroke-width="2.5" stroke-dasharray="6 8"><animate attributeName="stroke-dashoffset" values="0;-28" dur="1.2s" repeatCount="indefinite"/></line>
+<g transform="translate(190,0)"><rect x="-62" y="104" width="124" height="150" rx="18" fill="#0f172a" stroke="#22d3ee" stroke-opacity=".4"/>
+<rect x="-62" y="104" width="124" height="150" rx="18" fill="#22d3ee" fill-opacity=".12" stroke="#22d3ee" stroke-width="2.5" opacity="0" filter="url(#glow)"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.1071;0.1271;.9;.95;1" dur="10s" repeatCount="indefinite"/></rect>
+<circle cy="140" r="18" fill="#0b1226" stroke="#22d3ee" stroke-opacity=".6"/>
+<path d="M-8 140L-2 146L9 133" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.1071;0.1271;.9;.95;1" dur="10s" repeatCount="indefinite"/></path>
+<circle cy="140" r="18" fill="none" stroke="#22d3ee" stroke-opacity=".5"><animate attributeName="r" values="18;22;18" dur="3s" begin="0.0s" repeatCount="indefinite"/></circle>
+<text x="0" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" >Origin</text><text x="0" y="210" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >validation</text>
+<rect x="-18" y="226" width="36" height="4" rx="2" fill="#22d3ee" opacity=".7"/></g><g transform="translate(395,0)"><rect x="-62" y="104" width="124" height="150" rx="18" fill="#0f172a" stroke="#6366f1" stroke-opacity=".4"/>
+<rect x="-62" y="104" width="124" height="150" rx="18" fill="#6366f1" fill-opacity=".12" stroke="#6366f1" stroke-width="2.5" opacity="0" filter="url(#glow)"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.2536;0.2736;.9;.95;1" dur="10s" repeatCount="indefinite"/></rect>
+<circle cy="140" r="18" fill="#0b1226" stroke="#6366f1" stroke-opacity=".6"/>
+<path d="M-8 140L-2 146L9 133" fill="none" stroke="#6366f1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.2536;0.2736;.9;.95;1" dur="10s" repeatCount="indefinite"/></path>
+<circle cy="140" r="18" fill="none" stroke="#6366f1" stroke-opacity=".5"><animate attributeName="r" values="18;22;18" dur="3s" begin="0.4s" repeatCount="indefinite"/></circle>
+<text x="0" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" >Rate</text><text x="0" y="210" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >limiting</text>
+<rect x="-18" y="226" width="36" height="4" rx="2" fill="#6366f1" opacity=".7"/></g><g transform="translate(600,0)"><rect x="-62" y="104" width="124" height="150" rx="18" fill="#0f172a" stroke="#a78bfa" stroke-opacity=".4"/>
+<rect x="-62" y="104" width="124" height="150" rx="18" fill="#a78bfa" fill-opacity=".12" stroke="#a78bfa" stroke-width="2.5" opacity="0" filter="url(#glow)"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.4000;0.4200;.9;.95;1" dur="10s" repeatCount="indefinite"/></rect>
+<circle cy="140" r="18" fill="#0b1226" stroke="#a78bfa" stroke-opacity=".6"/>
+<path d="M-8 140L-2 146L9 133" fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.4000;0.4200;.9;.95;1" dur="10s" repeatCount="indefinite"/></path>
+<circle cy="140" r="18" fill="none" stroke="#a78bfa" stroke-opacity=".5"><animate attributeName="r" values="18;22;18" dur="3s" begin="0.8s" repeatCount="indefinite"/></circle>
+<text x="0" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" >API key</text><text x="0" y="210" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >hash check</text>
+<rect x="-18" y="226" width="36" height="4" rx="2" fill="#a78bfa" opacity=".7"/></g><g transform="translate(805,0)"><rect x="-62" y="104" width="124" height="150" rx="18" fill="#0f172a" stroke="#10b981" stroke-opacity=".4"/>
+<rect x="-62" y="104" width="124" height="150" rx="18" fill="#10b981" fill-opacity=".12" stroke="#10b981" stroke-width="2.5" opacity="0" filter="url(#glow)"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5464;0.5664;.9;.95;1" dur="10s" repeatCount="indefinite"/></rect>
+<circle cy="140" r="18" fill="#0b1226" stroke="#10b981" stroke-opacity=".6"/>
+<path d="M-8 140L-2 146L9 133" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5464;0.5664;.9;.95;1" dur="10s" repeatCount="indefinite"/></path>
+<circle cy="140" r="18" fill="none" stroke="#10b981" stroke-opacity=".5"><animate attributeName="r" values="18;22;18" dur="3s" begin="1.2000000000000002s" repeatCount="indefinite"/></circle>
+<text x="0" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" >RBAC</text><text x="0" y="210" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >roles</text>
+<rect x="-18" y="226" width="36" height="4" rx="2" fill="#10b981" opacity=".7"/></g><g transform="translate(1010,0)"><rect x="-62" y="104" width="124" height="150" rx="18" fill="#0f172a" stroke="#f59e0b" stroke-opacity=".4"/>
+<rect x="-62" y="104" width="124" height="150" rx="18" fill="#f59e0b" fill-opacity=".12" stroke="#f59e0b" stroke-width="2.5" opacity="0" filter="url(#glow)"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.6929;0.7129;.9;.95;1" dur="10s" repeatCount="indefinite"/></rect>
+<circle cy="140" r="18" fill="#0b1226" stroke="#f59e0b" stroke-opacity=".6"/>
+<path d="M-8 140L-2 146L9 133" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.6929;0.7129;.9;.95;1" dur="10s" repeatCount="indefinite"/></path>
+<circle cy="140" r="18" fill="none" stroke="#f59e0b" stroke-opacity=".5"><animate attributeName="r" values="18;22;18" dur="3s" begin="1.6s" repeatCount="indefinite"/></circle>
+<text x="0" y="190" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="700" fill="#fff" text-anchor="middle" >Audit</text><text x="0" y="210" font-family="'Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="400" fill="#94a3b8" text-anchor="middle" >logging</text>
+<rect x="-18" y="226" width="36" height="4" rx="2" fill="#f59e0b" opacity=".7"/></g>
+<circle r="7" cx="40" cy="170" fill="#34d399" opacity="0" filter="url(#glow)"><animate attributeName="cx" values="40;1160;1160" keyTimes="0;.8;1" dur="10s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;.03;.78;.84;1" dur="10s" repeatCount="indefinite"/></circle>
+<line x1="40" y1="296" x2="600" y2="296" stroke="#1e293b" stroke-width="2" stroke-dasharray="3 7"/>
+<circle r="6" cx="40" cy="296" fill="#f87171" opacity="0" filter="url(#glow)"><animate attributeName="cx" values="40;540;540" keyTimes="0;.45;1" dur="10s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;.03;.44;.47;1" dur="10s" repeatCount="indefinite"/></circle>
+<circle cx="552" cy="296" r="6" fill="none" stroke="#f87171" stroke-width="2" opacity="0"><animate attributeName="r" values="6;26" keyTimes="0;1" dur="10s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0;0;.9;0;0" keyTimes="0;.45;.46;.58;1" dur="10s" repeatCount="indefinite"/></circle>
+<text x="580" y="301" font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace" font-size="13" font-weight="500" fill="#fca5a5" text-anchor="start" opacity="0">✕ bad key · wrong origin · over limit → rejected<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;.46;.5;.9;.95;1" dur="10s" repeatCount="indefinite"/></text>
+<text x="40" y="330" font-family="'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace" font-size="13" font-weight="500" fill="#6ee7b7" text-anchor="start" >✓ valid requests flow through</text>
+</svg>

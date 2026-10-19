@@ -10,16 +10,20 @@ const registerGracefulShutdown = (server) => {
   const handleShutdown = (signal) => {
     console.log(`Received ${signal}. Shutting down gracefully...`);
 
+    const forceTimer = setTimeout(() => {
+      console.error('Forced shutdown after timeout.');
+      process.exit(1);
+    }, 10000);
+    if (typeof forceTimer.unref === 'function') {
+      forceTimer.unref();
+    }
+
     server.close(async () => {
+      clearTimeout(forceTimer);
       await closeDatabase();
       console.log('HTTP server closed.');
       process.exit(0);
     });
-
-    setTimeout(() => {
-      console.error('Forced shutdown after timeout.');
-      process.exit(1);
-    }, 10000).unref();
   };
 
   process.on('SIGINT', handleShutdown);

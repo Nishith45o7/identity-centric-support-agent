@@ -3,50 +3,829 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Identity-Centric Support API Docs</title>
+    <title>Contextis Developer Documentation & API Reference</title>
     <link rel="stylesheet" href="/swagger-ui/swagger-ui.css" />
     <style>
-      html {
-        box-sizing: border-box;
-        overflow: -moz-scrollbars-vertical;
-        overflow-y: scroll;
+      :root {
+        --bg: #090d16;
+        --surface: rgba(18, 24, 38, 0.7);
+        --surface-border: rgba(255, 255, 255, 0.08);
+        --accent: #2563eb;
+        --accent-glow: rgba(37, 99, 235, 0.25);
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --code-bg: #030712;
       }
-      *, *:before, *:after {
-        box-sizing: inherit;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
-        margin: 0;
-        background: #0f172a;
-        color: #e2e8f0;
-        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text-primary);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.6;
+        min-height: 100vh;
       }
-      #swagger-ui {
-        max-width: 1200px;
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(9, 13, 22, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--surface-border);
+        padding: 0.9rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 700;
+        font-size: 1.15rem;
+        color: white;
+        text-decoration: none;
+      }
+      .brand-mark {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        box-shadow: 0 0 12px var(--accent-glow);
+      }
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+      }
+      .nav-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.15s;
+      }
+      .nav-links a:hover { color: white; }
+      .tab-bar {
+        display: flex;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.25rem;
+        border-radius: 8px;
+        border: 1px solid var(--surface-border);
+      }
+      .tab-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        padding: 0.4rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.15s;
+      }
+      .tab-btn.active {
+        background: var(--accent);
+        color: white;
+      }
+      .container {
+        max-width: 1280px;
         margin: 0 auto;
-        padding: 1.5rem;
+        padding: 2.5rem 2rem;
       }
-      .topbar {
+      .doc-section {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 3rem;
+      }
+      .doc-sidebar {
+        position: sticky;
+        top: 5rem;
+        height: fit-content;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        border-right: 1px solid var(--surface-border);
+        padding-right: 1.5rem;
+      }
+      .doc-sidebar h4 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b;
+        margin-top: 1rem;
+        margin-bottom: 0.25rem;
+      }
+      .doc-sidebar a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.88rem;
+        padding: 0.3rem 0.5rem;
+        border-radius: 6px;
+        transition: all 0.15s;
+      }
+      .doc-sidebar a:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .doc-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: 12px;
+        padding: 1.75rem;
+        backdrop-filter: blur(12px);
+      }
+      h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+      h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; color: #f8fafc; }
+      h3 { font-size: 1.15rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #e2e8f0; }
+      p { color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.95rem; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; background: rgba(255,255,255,0.08); padding: 0.15em 0.35em; border-radius: 4px; }
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--surface-border);
+        border-radius: 8px;
+        padding: 1.25rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: #38bdf8;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      .badge-post { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+      .badge-get { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+      .badge-secret { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+      .badge-public { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+      .badge-live { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+      .badge-test { background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.4); }
+
+      /* Code Block & Copy Button */
+      .snippet-box {
+        position: relative;
+        background: var(--code-bg);
+        border: 1px solid var(--surface-border);
+        border-radius: 8px;
+        margin: 1rem 0;
+        overflow: hidden;
+      }
+      .snippet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid var(--surface-border);
+        padding: 0.5rem 0.75rem;
+      }
+      .snippet-lang-tabs {
+        display: flex;
+        gap: 0.35rem;
+      }
+      .snippet-tab-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .snippet-tab-btn:hover { color: white; }
+      .snippet-tab-btn.active {
+        background: rgba(37, 99, 235, 0.2);
+        border-color: rgba(37, 99, 235, 0.4);
+        color: #60a5fa;
+      }
+      .copy-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--surface-border);
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.3rem 0.65rem;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: all 0.15s;
+      }
+      .copy-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      .copy-btn.copied {
+        background: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+        border-color: rgba(34, 197, 94, 0.4);
+      }
+      .snippet-box pre {
+        margin: 0;
+        border: none;
+        border-radius: 0;
+        padding: 1rem;
+      }
+
+      /* Interactive API Console */
+      #console-container {
         display: none;
       }
+      .console-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+      @media (max-width: 900px) {
+        .console-grid { grid-template-columns: 1fr; }
+      }
+      .console-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .form-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #cbd5e1;
+      }
+      .form-input, .form-select, .form-textarea {
+        background: #020617;
+        border: 1px solid var(--surface-border);
+        color: white;
+        padding: 0.6rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .form-input:focus, .form-textarea:focus {
+        border-color: var(--accent);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.25rem;
+        border-radius: 7px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: opacity 0.15s;
+      }
+      .btn-primary:hover { opacity: 0.9; }
+      .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      #swagger-container {
+        display: none;
+      }
+      #swagger-ui {
+        background: #0f172a;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--surface-border);
+      }
+      .swagger-ui .topbar { display: none; }
+      .swagger-ui { filter: invert(88%) hue-rotate(180deg); }
+      .swagger-ui .model-box, .swagger-ui .opblock { filter: invert(0%); }
     </style>
   </head>
   <body>
-    <div id="swagger-ui"></div>
+    <header>
+      <a class="brand" href="/">
+        <span class="brand-mark">C</span>
+        <span>Contextis <small style="font-weight: normal; font-size: 0.8rem; color: var(--text-secondary); margin-left: 0.5rem;">Docs</small></span>
+      </a>
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-guides-btn">Developer Guides</button>
+        <button class="tab-btn" id="tab-console-btn">Interactive API Console</button>
+        <button class="tab-btn" id="tab-swagger-btn">API Reference (OpenAPI)</button>
+      </div>
+      <div class="nav-links">
+        <a href="/dashboard">Developer Console</a>
+        <a href="/widget">Widget Playground</a>
+        <a href="/home.html#pricing">Pricing</a>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- VIEW 1: DEVELOPER GUIDES -->
+      <div id="guides-container" class="doc-section">
+        <aside class="doc-sidebar">
+          <h4>Getting Started</h4>
+          <a href="#overview">Overview & Positioning</a>
+          <a href="#quickstart">5-Minute Quickstart</a>
+          <a href="#auth-keys">API Keys & Authentication</a>
+
+          <h4>Core Integration</h4>
+          <a href="#chat-api">REST Chat API</a>
+          <a href="#chat-widget">Embeddable Chat Widget</a>
+          <a href="#identity-memory">Customer Identity & Memory</a>
+
+          <h4>Business Tools</h4>
+          <a href="#tools-actions">Tools & Actions Router</a>
+          <a href="#password-reset">Password Reset Flow</a>
+          <a href="#order-tracking">Order Tracking Tool</a>
+
+          <h4>Security & Limits</h4>
+          <a href="#rate-limits">Rate Limits & Plans</a>
+          <a href="#security-tenancy">Security & Multi-Tenancy</a>
+          <a href="#error-codes">Error Handling</a>
+        </aside>
+
+        <article class="doc-content">
+          <section id="overview">
+            <h1>Contextis Developer Documentation</h1>
+            <p style="font-size: 1.15rem; color: #cbd5e1;">AI support infrastructure that remembers every customer across their entire lifecycle.</p>
+            <div class="card">
+              <h3>Core Positioning</h3>
+              <p>Contextis enables software teams to integrate an intelligent support agent into their applications using a modern REST API and an embeddable chat widget. The agent recalls customer preferences, past issues, and authorized tool results without requiring manual prompt engineering or memory management from the host application.</p>
+            </div>
+          </section>
+
+          <section id="quickstart">
+            <h2>5-Minute Quickstart</h2>
+            <div class="card">
+              <p>1. Sign up for a Contextis developer account at <a href="/signup" style="color: #60a5fa;">contextis.io/signup</a>.</p>
+              <p>2. Create your project in the Developer Console and copy your <code>pk_live_...</code> (widget) or <code>sk_live_...</code> (server) key.</p>
+              <p>3. Drop the embeddable script onto your website, or call the REST chat endpoint from your backend.</p>
+            </div>
+          </section>
+
+          <section id="auth-keys">
+            <h2>API Keys & Environments</h2>
+            <div class="card">
+              <p>Contextis separates client-side identifiers from server-side secrets with distinct key prefixes and environments:</p>
+              <div style="margin: 1rem 0;">
+                <p><span class="badge badge-public">Public Keys</span> <code>pk_live_...</code> or <code>pk_test_...</code>: Safe for public browsers and mobile apps. Restricted to chat widget initialization and public customer endpoints.</p>
+                <p><span class="badge badge-secret">Secret Keys</span> <code>sk_live_...</code> or <code>sk_test_...</code>: For server-to-server operations. Hashes are securely stored. Secret keys are never exposed in browser code.</p>
+              </div>
+              <h3>Passing API Keys</h3>
+              <p>Pass your secret key in the standard <code>Authorization</code> header:</p>
+              <pre>Authorization: Bearer sk_live_your_secret_key_here</pre>
+            </div>
+          </section>
+
+          <section id="chat-api">
+            <h2>REST Chat API</h2>
+            <div class="card">
+              <p><span class="badge badge-post">POST</span> <code>/v1/support/chat</code></p>
+              <p>Sends a customer message to the Contextis agent orchestrator, retrieves historical memory, executes authorized tools if needed, and returns the contextual response.</p>
+              
+              <h3>Request Snippet (Multi-Language)</h3>
+              <div class="snippet-box">
+                <div class="snippet-header">
+                  <div class="snippet-lang-tabs">
+                    <button class="snippet-tab-btn active" data-lang="curl" onclick="switchSnippetLang(this, 'curl')">cURL</button>
+                    <button class="snippet-tab-btn" data-lang="js" onclick="switchSnippetLang(this, 'js')">JavaScript</button>
+                    <button class="snippet-tab-btn" data-lang="node" onclick="switchSnippetLang(this, 'node')">Node.js</button>
+                    <button class="snippet-tab-btn" data-lang="python" onclick="switchSnippetLang(this, 'python')">Python</button>
+                  </div>
+                  <button class="copy-btn" onclick="copySnippetText(this)" aria-label="Copy code snippet">
+                    <span>Copy</span>
+                  </button>
+                </div>
+                <pre class="snippet-code-pane" data-lang="curl">curl -X POST https://api.contextis.io/v1/support/chat \
+  -H "Authorization: Bearer sk_live_your_secret_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "cust_alex_99",
+    "message": "Is my package still delayed?",
+    "conversation_id": "conv_849201"
+  }'</pre>
+                <pre class="snippet-code-pane" data-lang="js" style="display:none;">// Browser or Client-side (using Public Key pk_*)
+const response = await fetch('https://api.contextis.io/v1/support/chat', {
+  method: 'POST',
+  headers: {
+    'x-api-key': 'pk_live_your_public_key',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    user_id: 'cust_alex_99',
+    message: 'Is my package still delayed?',
+    conversation_id: 'conv_849201'
+  })
+});
+const data = await response.json();
+console.log(data.reply);</pre>
+                <pre class="snippet-code-pane" data-lang="node" style="display:none;">// Node.js Backend (Server-to-Server)
+import axios from 'axios';
+
+const { data } = await axios.post(
+  'https://api.contextis.io/v1/support/chat',
+  {
+    user_id: 'cust_alex_99',
+    message: 'Is my package still delayed?',
+    conversation_id: 'conv_849201'
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${process.env.CONTEXTIS_SECRET_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  }
+);
+
+console.log('AI Response:', data.reply);
+console.log('Memory Recalled:', data.memory_used);</pre>
+                <pre class="snippet-code-pane" data-lang="python" style="display:none;"># Python 3
+import requests
+import os
+
+response = requests.post(
+    "https://api.contextis.io/v1/support/chat",
+    headers={
+        "Authorization": f"Bearer {os.getenv('CONTEXTIS_SECRET_KEY')}",
+        "Content-Type": "application/json"
+    },
+    json={
+        "user_id": "cust_alex_99",
+        "message": "Is my package still delayed?",
+        "conversation_id": "conv_849201"
+    }
+)
+
+payload = response.json()
+print("AI Reply:", payload.get("reply"))</pre>
+              </div>
+
+              <h3>Response Example</h3>
+              <pre>{
+  "request_id": "req_01j7xyz901",
+  "conversation_id": "conv_849201",
+  "user_id": "cust_alex_99",
+  "reply": "Welcome back Alex! I checked order #ORD-8492 and tracking indicates it cleared customs today.",
+  "memory_used": true
+}</pre>
+            </div>
+          </section>
+
+          <section id="chat-widget">
+            <h2>Embeddable Chat Widget</h2>
+            <div class="card">
+              <p>Embed the Contextis widget directly onto any webpage with shadow-DOM CSS isolation, dynamic greeting engine, suggested actions, and human escalation support.</p>
+              <h3>Installation Snippet</h3>
+              <div class="snippet-box">
+                <div class="snippet-header">
+                  <span style="font-size:0.8rem; font-weight:600; color:#94a3b8;">HTML</span>
+                  <button class="copy-btn" onclick="copySnippetText(this)" aria-label="Copy widget script">
+                    <span>Copy</span>
+                  </button>
+                </div>
+                <pre>&lt;script
+  src="https://cdn.contextis.io/widget.js"
+  data-project-id="YOUR_PROJECT_ID"
+  data-public-key="pk_live_your_public_key"
+  data-user-id="cust_alex_99"
+  data-position="bottom-right"
+  defer&gt;
+&lt;/script&gt;</pre>
+              </div>
+            </div>
+          </section>
+
+          <section id="identity-memory">
+            <h2>Customer Identity & Memory Architecture</h2>
+            <div class="card">
+              <p>Every customer is identified uniquely by the compound key: <code>(organization_id, project_id, external_user_id)</code>.</p>
+              <h3>Key Rule: Memory is Context, NOT Authentication</h3>
+              <p>Contextis automatically extracts useful preferences, past friction points, and unresolved tickets. However, remembered data is purely conversational context—it never replaces cryptographic authorization or account passwords.</p>
+            </div>
+          </section>
+
+          <section id="tools-actions">
+            <h2>Tools & Business Action Router</h2>
+            <div class="card">
+              <p>Configure business APIs (e.g. order tracking, invoice search, ticket submission) that the agent can call dynamically. Tools execute within a strict permission matrix:</p>
+              <ul style="margin-left: 1.5rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                <li><code>READ</code>: Fetch orders, tracking status, shipping updates</li>
+                <li><code>WRITE</code>: Create ticket, add order note, update notification preference</li>
+                <li><code>SENSITIVE</code>: Trigger verified password reset, send confirmation code</li>
+                <li><code>ADMIN</code>: Account changes requiring explicit human confirmation</li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="password-reset">
+            <h2>Secure Password Reset Workflow</h2>
+            <div class="card">
+              <p><strong>Crucial Rule:</strong> The Contextis agent NEVER asks for, records, or accepts raw user passwords.</p>
+              <pre>Customer: "I forgot my password."
+Agent:    "I can help send a secure reset link. What email is on your account?"
+Customer: "alice@example.com"
+Agent:    [Calls send_password_reset tool via business authentication provider]
+Response: "A verified reset email has been dispatched to alice@example.com."</pre>
+            </div>
+          </section>
+
+          <section id="order-tracking">
+            <h2>Order Tracking Simulation</h2>
+            <div class="card">
+              <p>Pre-configured standard tool template available in the Developer Console:</p>
+              <pre>{
+  "name": "track_order",
+  "description": "Look up package tracking and status by order number",
+  "sensitivity": "READ",
+  "schema": {
+    "type": "object",
+    "required": ["orderNumber"],
+    "properties": { "orderNumber": { "type": "string" } }
+  }
+}</pre>
+            </div>
+          </section>
+
+          <section id="rate-limits">
+            <h2>Plans & Rate Limits</h2>
+            <div class="card">
+              <p>API quotas are enforced per organization subscription tier:</p>
+              <table style="width: 100%; border-collapse: collapse; margin-top: 0.5rem; color: var(--text-secondary);">
+                <thead><tr style="text-align: left; border-bottom: 1px solid var(--surface-border);"><th style="padding: 0.5rem;">Plan</th><th>Monthly Requests</th><th>Projects</th><th>Rate Limit</th></tr></thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);"><td style="padding: 0.5rem; color: white;">Starter</td><td>10,000</td><td>3</td><td>60 req/min</td></tr>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);"><td style="padding: 0.5rem; color: white;">Growth</td><td>100,000</td><td>10</td><td>300 req/min</td></tr>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);"><td style="padding: 0.5rem; color: white;">Scale</td><td>1,000,000</td><td>50</td><td>1,200 req/min</td></tr>
+                  <tr><td style="padding: 0.5rem; color: white;">Enterprise</td><td>Custom</td><td>Unlimited</td><td>Custom SLA</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="security-tenancy">
+            <h2>Security & Multi-Tenancy</h2>
+            <div class="card">
+              <p>Strict multi-tenant isolation is enforced server-side on every request. Client-supplied tenant IDs are never trusted. All database queries, memory lookups, and audit trails scope to the authenticated organization.</p>
+            </div>
+          </section>
+
+          <section id="webhooks">
+            <h2>Outbound Webhooks</h2>
+            <div class="card">
+              <p>Contextis dispatches real-time HTTPS webhooks for critical lifecycle events. Deliveries are cryptographically signed using your webhook secret via HMAC-SHA256.</p>
+              <h3>Signature Verification</h3>
+              <p>Every delivery includes the signature header:</p>
+              <pre>X-Contextis-Signature: sha256=d5b3f2...hash</pre>
+              <p>Verify the payload in Node.js:</p>
+              <pre>const crypto = require('crypto');
+const expected = 'sha256=' + crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));</pre>
+              <h3>Supported Events</h3>
+              <ul style="margin-left: 1.5rem; color: var(--text-secondary);">
+                <li><code>conversation.created</code>: New customer session opened</li>
+                <li><code>conversation.resolved</code>: Issue resolved by AI or agent</li>
+                <li><code>conversation.escalated</code>: Human agent handoff requested with complete context dossier</li>
+                <li><code>feedback.created</code>: Customer submitted helpful/unhelpful rating</li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="error-codes">
+            <h2>Standard Error Codes</h2>
+            <div class="card">
+              <p>All API errors return consistent JSON payloads with an unambiguous <code>requestId</code>:</p>
+              <pre>{
+  "error": {
+    "code": "ORGANIZATION_SUSPENDED",
+    "message": "This organization has been suspended. Please contact platform support.",
+    "requestId": "req_839023471"
+  }
+}</pre>
+            </div>
+          </section>
+        </article>
+      </div>
+
+      <!-- VIEW 2: INTERACTIVE API CONSOLE -->
+      <div id="console-container">
+        <div class="card" style="margin-bottom: 2rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+            <div>
+              <h2 style="margin:0;">Interactive API Console</h2>
+              <p style="margin:0; font-size:0.9rem;">Test live Contextis REST endpoints with zero setup. Credentials are never saved to external servers.</p>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+              <span style="font-size:0.85rem; color:var(--text-secondary);">Environment:</span>
+              <button id="console-env-test" class="tab-btn active" style="font-size:0.75rem;" onclick="setConsoleEnv('test')">TEST</button>
+              <button id="console-env-live" class="tab-btn" style="font-size:0.75rem;" onclick="setConsoleEnv('live')">LIVE</button>
+            </div>
+          </div>
+
+          <div class="console-grid">
+            <div class="console-form">
+              <div class="form-group">
+                <label for="console-key">API Key (Public or Secret)</label>
+                <input type="password" id="console-key" class="form-input" placeholder="pk_test_... or sk_test_..." autocomplete="off" />
+              </div>
+              <div class="form-group">
+                <label for="console-user">Customer User ID</label>
+                <input type="text" id="console-user" class="form-input" value="cust_demo_101" placeholder="e.g. user_12345" />
+              </div>
+              <div class="form-group">
+                <label for="console-msg">Customer Message</label>
+                <textarea id="console-msg" class="form-textarea" rows="3" placeholder="Enter message to test agent reasoning and memory...">Can you help check my order ORD-8492?</textarea>
+              </div>
+              <button id="console-send-btn" class="btn-primary" onclick="sendConsoleRequest()">
+                <span id="console-btn-text">Send Test Request</span>
+              </button>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <label style="font-size:0.85rem; font-weight:600; color:#cbd5e1;">Response Inspector</label>
+                <div style="display:flex; gap:1rem; font-size:0.8rem; color:#94a3b8;">
+                  <span id="console-status-badge">Status: —</span>
+                  <span id="console-latency-badge">Latency: —</span>
+                </div>
+              </div>
+              <pre id="console-output" style="min-height: 220px; max-height: 340px; margin:0;">// Click "Send Test Request" to execute against /v1/support/chat
+// Results and memory status will display here live.</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: SWAGGER UI INTERACTIVE EXPLORER -->
+      <div id="swagger-container">
+        <div id="swagger-ui"></div>
+      </div>
+    </main>
 
     <script src="/swagger-ui/swagger-ui-bundle.js"></script>
     <script src="/swagger-ui/swagger-ui-standalone-preset.js"></script>
     <script>
-      window.onload = function () {
-        const ui = SwaggerUIBundle({
-          url: '/api/openapi.json',
-          dom_id: '#swagger-ui',
-          deepLinking: true,
-          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
-          plugins: [SwaggerUIBundle.plugins.DownloadUrl],
-          layout: 'StandaloneLayout',
-          persistAuthorization: false,
+      const guidesContainer = document.getElementById('guides-container');
+      const consoleContainer = document.getElementById('console-container');
+      const swaggerContainer = document.getElementById('swagger-container');
+      const tabGuidesBtn = document.getElementById('tab-guides-btn');
+      const tabConsoleBtn = document.getElementById('tab-console-btn');
+      const tabSwaggerBtn = document.getElementById('tab-swagger-btn');
+
+      tabGuidesBtn.addEventListener('click', () => {
+        tabGuidesBtn.classList.add('active');
+        tabConsoleBtn.classList.remove('active');
+        tabSwaggerBtn.classList.remove('active');
+        guidesContainer.style.display = 'grid';
+        consoleContainer.style.display = 'none';
+        swaggerContainer.style.display = 'none';
+      });
+
+      tabConsoleBtn.addEventListener('click', () => {
+        tabConsoleBtn.classList.add('active');
+        tabGuidesBtn.classList.remove('active');
+        tabSwaggerBtn.classList.remove('active');
+        guidesContainer.style.display = 'none';
+        consoleContainer.style.display = 'block';
+        swaggerContainer.style.display = 'none';
+      });
+
+      tabSwaggerBtn.addEventListener('click', () => {
+        tabSwaggerBtn.classList.add('active');
+        tabGuidesBtn.classList.remove('active');
+        tabConsoleBtn.classList.remove('active');
+        guidesContainer.style.display = 'none';
+        consoleContainer.style.display = 'none';
+        swaggerContainer.style.display = 'block';
+        if (!window.uiLoaded) {
+          window.uiLoaded = true;
+          window.ui = SwaggerUIBundle({
+            url: '/api/openapi.json',
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+            plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+            layout: 'StandaloneLayout',
+            persistAuthorization: false,
+          });
+        }
+      });
+
+      // Snippet Language Tab Switching
+      function switchSnippetLang(btn, lang) {
+        const box = btn.closest('.snippet-box');
+        box.querySelectorAll('.snippet-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        box.querySelectorAll('.snippet-code-pane').forEach(p => {
+          p.style.display = p.getAttribute('data-lang') === lang ? 'block' : 'none';
         });
-        window.ui = ui;
+      }
+
+      // Snippet Copy Button
+      function copySnippetText(btn) {
+        const box = btn.closest('.snippet-box');
+        const activePane = box.querySelector('.snippet-code-pane[style*="block"]') ||
+                           box.querySelector('.snippet-code-pane:not([style*="none"])') ||
+                           box.querySelector('pre');
+        if (!activePane) return;
+        const text = activePane.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          const original = btn.innerHTML;
+          btn.classList.add('copied');
+          btn.innerHTML = '<span>Copied!</span>';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = original;
+          }, 2000);
+        });
+      }
+
+      // Interactive Console Environment Toggle
+      let consoleEnv = 'test';
+      function setConsoleEnv(env) {
+        consoleEnv = env;
+        document.getElementById('console-env-test').classList.toggle('active', env === 'test');
+        document.getElementById('console-env-live').classList.toggle('active', env === 'live');
+      }
+
+      // Interactive Console Request Execution
+      async function sendConsoleRequest() {
+        const key = document.getElementById('console-key').value.trim();
+        const userId = document.getElementById('console-user').value.trim();
+        const message = document.getElementById('console-msg').value.trim();
+        const output = document.getElementById('console-output');
+        const statusBadge = document.getElementById('console-status-badge');
+        const latencyBadge = document.getElementById('console-latency-badge');
+        const sendBtn = document.getElementById('console-send-btn');
+        const btnText = document.getElementById('console-btn-text');
+
+        if (!key) {
+          alert('Please enter your API Key (e.g. pk_test_... or sk_test_...) to test.');
+          document.getElementById('console-key').focus();
+          return;
+        }
+
+        sendBtn.disabled = true;
+        btnText.innerText = 'Sending...';
+        statusBadge.innerText = 'Status: Waiting...';
+        latencyBadge.innerText = 'Latency: —';
+        output.innerText = '// Dispatching request to /v1/support/chat...';
+
+        const start = performance.now();
+        try {
+          const headers = { 'Content-Type': 'application/json' };
+          if (key.startsWith('sk_')) {
+            headers['Authorization'] = `Bearer ${key}`;
+          } else {
+            headers['x-api-key'] = key;
+          }
+
+          const res = await fetch('/v1/support/chat', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              user_id: userId || 'cust_demo_101',
+              message: message || 'Hello Contextis!',
+              environment: consoleEnv,
+            }),
+          });
+
+          const latency = Math.round(performance.now() - start);
+          latencyBadge.innerText = `Latency: ${latency}ms`;
+          statusBadge.innerText = `Status: ${res.status} ${res.statusText}`;
+
+          const data = await res.json();
+          output.innerText = JSON.stringify(data, null, 2);
+        } catch (err) {
+          const latency = Math.round(performance.now() - start);
+          latencyBadge.innerText = `Latency: ${latency}ms`;
+          statusBadge.innerText = 'Status: Network Error';
+          output.innerText = JSON.stringify({ error: err.message }, null, 2);
+        } finally {
+          sendBtn.disabled = false;
+          btnText.innerText = 'Send Test Request';
+        }
+      }
+
+      // Default load Swagger UI in background so SwaggerUIBundle is initialized
+      window.onload = function () {
+        if (location.hash === '#openapi' || location.hash === '#swagger') {
+          tabSwaggerBtn.click();
+        }
       };
     </script>
   </body>

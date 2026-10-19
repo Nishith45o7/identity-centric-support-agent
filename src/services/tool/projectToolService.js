@@ -30,8 +30,8 @@ const normalizeToolName = (value) => {
 
 const normalizeSensitivity = (value) => {
   const sensitivity = String(value || 'READ').trim().toUpperCase();
-  if (!['READ', 'WRITE', 'ADMIN'].includes(sensitivity)) {
-    const error = new Error('Tool sensitivity must be READ, WRITE, or ADMIN.');
+  if (!['READ', 'WRITE', 'SENSITIVE', 'ADMIN'].includes(sensitivity)) {
+    const error = new Error('Tool sensitivity must be READ, WRITE, SENSITIVE, or ADMIN.');
     error.code = 'INVALID_REQUEST';
     error.statusCode = 400;
     throw error;
@@ -124,13 +124,17 @@ const createProjectTool = async (userId, projectId, payload = {}) => {
   const now = new Date().toISOString();
   const id = makeId('tool');
 
+  const dbSensitivity = sensitivity === 'SENSITIVE' ? 'WRITE' : sensitivity;
   await query(
     `INSERT INTO project_tools (id, project_id, created_by_user_id, name, description, sensitivity, permissions, input_schema, status, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)` ,
-    [id, projectId, userId, name, description, sensitivity, JSON.stringify(permissions), JSON.stringify(inputSchema), now, now]
+    [id, projectId, userId, name, description, dbSensitivity, JSON.stringify(permissions), JSON.stringify(inputSchema), now, now]
   );
 
   const tool = await getProjectTool(projectId, id);
+  if (tool && sensitivity === 'SENSITIVE') {
+    tool.sensitivity = 'SENSITIVE';
+  }
   return tool;
 };
 
@@ -209,6 +213,14 @@ const executeProjectTool = async (projectId, toolId, input = {}) => {
     throw error;
   }
 
+  // Security guardrail: The AI/support platform must NEVER accept or process passwords
+  if (input && (input.password || input.new_password || input.secret || input.auth_token)) {
+    const error = new Error('Security policy violation: Passwords and auth tokens must never be supplied to support tools.');
+    error.code = 'SECURITY_VIOLATION';
+    error.statusCode = 400;
+    throw error;
+  }
+
   const schema = typeof tool.inputSchema === 'object' && tool.inputSchema ? tool.inputSchema : {};
   const payload = validatePayloadAgainstSchema(input, schema);
   const permissions = Array.isArray(tool.permissions) ? tool.permissions : [];
@@ -220,25 +232,134 @@ const executeProjectTool = async (projectId, toolId, input = {}) => {
     throw error;
   }
 
+  // Business Action Simulators
+  let actionResult = {
+    customerId: payload.customerId || null,
+    status: 'ok',
+    summary: `Tool ${tool.name} executed successfully.`,
+  };
+
+  if (tool.name === 'send_password_reset') {
+    const email = String(payload.email || payload.customerId || '').trim();
+    actionResult = {
+      customerId: payload.customerId || email,
+      status: 'dispatched',
+      summary: `Password reset verification email dispatched to verified address. The support agent does not handle credentials.`,
+      dispatchMethod: 'email_otp_link',
+      verified: true,
+    };
+  } else if (tool.name === 'track_order' || tool.name === 'get_order') {
+    actionResult = {
+      customerId: payload.customerId || null,
+      orderId: payload.orderId || 'ord_9842',
+      status: 'shipped',
+      carrier: 'FedEx Express',
+      trackingNumber: 'FX-98421049281',
+      estimatedDelivery: 'Tomorrow by 5:00 PM',
+      summary: `Order ord_9842 is currently in transit with FedEx Express.`,
+    };
+  } else if (tool.name === 'cancel_order') {
+    actionResult = {
+      customerId: payload.customerId || null,
+      orderId: payload.orderId || 'ord_9842',
+      status: 'cancelled',
+      refundCents: 4999,
+      summary: `Order cancellation successful and refund issued.`,
+    };
+  } else if (tool.name === 'create_ticket') {
+    actionResult = {
+      customerId: payload.customerId || null,
+      ticketId: `tkt_${Date.now().toString(36)}`,
+      status: 'open',
+      priority: payload.priority || 'normal',
+      summary: `Support escalation ticket opened successfully.`,
+    };
+  }
+
   const response = {
     toolId: tool.id,
     toolName: tool.name,
     projectId,
     permissionScope: permissions,
     executedAt: new Date().toISOString(),
-    result: {
-      customerId: payload.customerId || null,
-      status: 'ok',
-      summary: `Tool ${tool.name} executed successfully.`,
-    },
+    result: actionResult,
   };
-
-  if (payload.customerId) {
-    response.result.customerId = payload.customerId;
-  }
 
   return response;
 };
+
+const getStandardToolTemplates = () => [
+  {
+    name: 'get_order',
+    description: 'Retrieve order status, shipment tracking, and line items.',
+    sensitivity: 'READ',
+    permissions: ['orders:read'],
+    inputSchema: {
+      type: 'object',
+      properties: {
+        orderId: { type: 'string' },
+        customerId: { type: 'string' },
+      },
+      required: ['orderId'],
+    },
+  },
+  {
+    name: 'track_order',
+    description: 'Track real-time shipment status and carrier estimation.',
+    sensitivity: 'READ',
+    permissions: ['orders:read', 'tracking:read'],
+    inputSchema: {
+      type: 'object',
+      properties: {
+        orderId: { type: 'string' },
+      },
+      required: ['orderId'],
+    },
+  },
+  {
+    name: 'cancel_order',
+    description: 'Cancel an unfulfilled order upon customer request.',
+    sensitivity: 'WRITE',
+    permissions: ['orders:write'],
+    inputSchema: {
+      type: 'object',
+      properties: {
+        orderId: { type: 'string' },
+        reason: { type: 'string' },
+      },
+      required: ['orderId'],
+    },
+  },
+  {
+    name: 'create_ticket',
+    description: 'Escalate an issue to the human support engineering team.',
+    sensitivity: 'WRITE',
+    permissions: ['support:write'],
+    inputSchema: {
+      type: 'object',
+      properties: {
+        customerId: { type: 'string' },
+        subject: { type: 'string' },
+        priority: { type: 'string' },
+      },
+      required: ['customerId', 'subject'],
+    },
+  },
+  {
+    name: 'send_password_reset',
+    description: 'Trigger secure password reset workflow without exposing credentials.',
+    sensitivity: 'SENSITIVE',
+    permissions: ['auth:reset'],
+    inputSchema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        customerId: { type: 'string' },
+      },
+      required: ['email'],
+    },
+  },
+];
 
 module.exports = {
   createProjectTool,
@@ -251,4 +372,5 @@ module.exports = {
   normalizePermissions,
   validateInputSchema,
   validatePayloadAgainstSchema,
+  getStandardToolTemplates,
 };

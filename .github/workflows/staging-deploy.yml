@@ -1,0 +1,86 @@
+name: Contextis Staging CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-and-verify:
+    name: Test & Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Test Suite (15 Test Suites)
+        run: npm test
+        env:
+          NODE_ENV: test
+          API_KEY_PEPPER: ci-test-pepper-crypto-hash-998877
+
+      - name: Validate Staging Runtime Configuration
+        run: |
+          node -e "
+            const { validateRuntimeConfig } = require('./src/config');
+            validateRuntimeConfig({
+              nodeEnv: 'staging',
+              apiKeyPepper: 'staging-pepper-crypto-hash-998877',
+              billingWebhookSecret: 'whsec_staging_secret_9988',
+              supportApiKey: 'sup_staging_key_9988',
+            });
+            console.log('Staging configuration validation successful.');
+          "
+
+  deploy-staging:
+    name: Staging Container Build & Smoke Probe
+    needs: test-and-verify
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: actions/setup-buildx-action@v3
+
+      - name: Build Staging Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: contextis-staging:latest
+
+      - name: Start Staging Stack via Docker Compose
+        run: |
+          docker compose -f docker-compose.staging.yml up -d
+          echo "Waiting for staging services to report healthy..."
+          sleep 12
+
+      - name: Verify Staging Readiness Probe
+        run: |
+          curl --retry 5 --retry-delay 3 --retry-connrefused -s http://localhost:3001/ready | grep '"ready":true'
+          echo "Staging /ready probe responded with ready: true."
+
+      - name: Verify Staging Demo Page
+        run: |
+          curl -s http://localhost:3001/staging | grep 'STAGING ENVIRONMENT'
+          echo "Staging sandbox demo page verified."
+
+      - name: Tear Down Staging Stack
+        if: always()
+        run: docker compose -f docker-compose.staging.yml down -v

@@ -3,24 +3,195 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create your workspace · Continuity API</title>
+    <title>Create your workspace · Contextis</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <style>
-      :root { --ink:#172522; --muted:#65736e; --paper:#f4f5ef; --line:#dce3dc; --green:#146b54; --red:#a73826; --mono:'DM Mono',monospace; --sans:'Manrope',sans-serif; }
-      *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 85% 30%,#f8e8dd,transparent 34%),radial-gradient(ellipse at 15% 70%,#e0eee5,transparent 42%),var(--paper);color:var(--ink);font-family:var(--sans)}header{height:68px;padding:0 6vw;display:flex;align-items:center;border-bottom:1px solid var(--line)}a{color:inherit;text-decoration:none}.brand{font-size:14px;font-weight:800;display:flex;gap:10px;align-items:center}.mark{width:27px;height:27px;background:var(--green);color:#fff;display:grid;place-items:center;border-radius:6px;font:13px var(--mono)}main{min-height:calc(100vh - 68px);display:grid;place-items:center;padding:38px 20px}.wrap{width:min(100%,420px)}.eyebrow{color:var(--green);font:11px var(--mono);text-transform:uppercase}.wrap h1{font-size:34px;letter-spacing:0;margin:12px 0 8px}.sub{color:var(--muted);font-size:14px;margin:0 0 27px}form{display:grid;gap:15px}label{display:grid;gap:7px;font-size:12px;font-weight:700}input{height:45px;border:1px solid #ccd6cf;border-radius:4px;background:#fff;padding:0 12px;font:14px var(--sans);color:var(--ink)}input:focus{outline:2px solid #91c7af;outline-offset:1px}button{height:46px;border:0;border-radius:4px;background:var(--green);color:#fff;font:700 13px var(--sans);cursor:pointer}button:disabled{opacity:.6;cursor:wait}.error{min-height:18px;color:var(--red);font-size:12px}.foot{margin-top:22px;color:var(--muted);font-size:12px}.foot a{color:var(--green);font-weight:700}.fine{font-size:11px;color:var(--muted);line-height:1.6}.home{margin-left:auto;color:var(--muted);font-size:12px}
+      :root {
+        --bg: #070d1e;
+        --card-bg: rgba(13, 23, 49, 0.75);
+        --border: rgba(148, 163, 184, 0.15);
+        --accent: #38bdf8;
+        --accent-glow: rgba(56, 189, 248, 0.25);
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --red: #f87171;
+        --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+        --mono: 'JetBrains Mono', monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        min-height: 100vh;
+        font-family: var(--sans);
+        background: radial-gradient(circle at 85% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                    radial-gradient(circle at 15% 80%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                    var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        height: 72px;
+        padding: 0 clamp(20px, 6vw, 80px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border);
+        background: rgba(7, 13, 30, 0.6);
+        backdrop-filter: blur(16px);
+      }
+      a { color: inherit; text-decoration: none; }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 800;
+        font-size: 15px;
+        letter-spacing: -0.01em;
+      }
+      .mark {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+        color: #031525;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 15px;
+      }
+      .home-link {
+        font-size: 13px;
+        color: var(--muted);
+        transition: color 0.15s ease;
+      }
+      .home-link:hover { color: var(--accent); }
+      main {
+        flex: 1;
+        display: grid;
+        place-items: center;
+        padding: 40px 20px;
+      }
+      .card {
+        width: 100%;
+        max-width: 440px;
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 36px 32px;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.4), 0 0 20px rgba(56, 189, 248, 0.05);
+      }
+      .eyebrow {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 6px;
+      }
+      .sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+      form { display: grid; gap: 16px; }
+      label {
+        display: grid;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      input {
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(15, 23, 42, 0.8);
+        padding: 0 14px;
+        color: var(--text);
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.15s ease;
+      }
+      input:focus { border-color: var(--accent); }
+      button {
+        height: 46px;
+        border-radius: 12px;
+        border: 0;
+        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        color: #031525;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        margin-top: 4px;
+      }
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(56, 189, 248, 0.35);
+      }
+      button:disabled { opacity: 0.6; cursor: wait; }
+      .fine {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .error {
+        min-height: 18px;
+        color: var(--red);
+        font-size: 12px;
+      }
+      .foot {
+        margin-top: 24px;
+        font-size: 13px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .foot a {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .foot a:hover { text-decoration: underline; }
     </style>
   </head>
   <body>
-    <header><a class="brand" href="/"><span class="mark">ic</span> Continuity API</a><a class="home" href="/">Back to home</a></header>
-    <main><section class="wrap" aria-labelledby="title"><div class="eyebrow">Start with a project</div><h1 id="title">Create your workspace.</h1><p class="sub">Your first project and test key are a few steps away.</p>
-      <form id="signup-form"><label>Your name<input name="name" autocomplete="name" required minlength="1" maxlength="120" /></label><label>Work email<input name="email" type="email" autocomplete="email" required maxlength="254" /></label><label>Password<input name="password" type="password" autocomplete="new-password" required minlength="12" maxlength="256" aria-describedby="password-note" /></label><div class="fine" id="password-note">Use at least 12 characters. Passwords are stored as scrypt hashes.</div><div class="error" id="error" role="alert"></div><button id="submit" type="submit">Create account</button></form>
-      <p class="foot">Already registered? <a href="/login">Log in</a></p>
-    </section></main>
-    <script>
-      const form=document.getElementById('signup-form');
-      fetch('/v1/auth/session').then(r=>r.json()).then(d=>{if(d.user)location.replace('/dashboard')}).catch(()=>{});
-      form.addEventListener('submit',async event=>{event.preventDefault();const button=document.getElementById('submit');const error=document.getElementById('error');button.disabled=true;error.textContent='';try{const response=await fetch('/v1/auth/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(form)))});const data=await response.json();if(!response.ok)throw new Error(data.error?.message||'Unable to create account.');location.assign('/dashboard')}catch(err){error.textContent=err.message}finally{button.disabled=false}});
-    </script>
+    <header>
+      <a class="brand" href="/"><span class="mark">C</span> Contextis</a>
+      <a class="home-link" href="/">Back to home</a>
+    </header>
+    <main>
+      <section class="card" aria-labelledby="title">
+        <div class="eyebrow">Start with a project</div>
+        <h1 id="title">Create your workspace.</h1>
+        <p class="sub">Your first project and persistent customer memory are a few clicks away.</p>
+        <form id="signup-form">
+          <label>Your name
+            <input name="name" autocomplete="name" required minlength="1" maxlength="120" placeholder="Jane Doe" />
+          </label>
+          <label>Work email
+            <input name="email" type="email" autocomplete="email" required maxlength="254" placeholder="jane@company.com" />
+          </label>
+          <label>Password
+            <input name="password" type="password" autocomplete="new-password" required minlength="12" maxlength="256" aria-describedby="password-note" placeholder="••••••••••••" />
+          </label>
+          <div class="fine" id="password-note">Use at least 12 characters. Passwords are securely hashed with scrypt.</div>
+          <div class="error" id="error" role="alert"></div>
+          <button id="submit" type="submit">Create account</button>
+        </form>
+        <p class="foot">Already registered? <a href="/login">Log in</a></p>
+      </section>
+    </main>
+    <script src="/signup.js" defer></script>
   </body>
 </html>

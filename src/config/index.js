@@ -18,12 +18,19 @@ const config = {
   supportApiKey: process.env.SUPPORT_API_KEY || '',
   billingWebhookSecret: process.env.BILLING_WEBHOOK_SECRET || '',
   databaseUrl: process.env.DATABASE_URL || '',
-  apiKeyPepper: process.env.API_KEY_PEPPER || (process.env.NODE_ENV === 'production' ? '' : 'identity-centric-support-development-only'),
+  apiKeyPepper: process.env.API_KEY_PEPPER || (['production', 'staging'].includes(process.env.NODE_ENV) ? '' : 'identity-centric-support-development-only'),
 };
 
 const validateRuntimeConfig = (runtime = config) => {
-  if (String(runtime.nodeEnv || 'development').toLowerCase() !== 'production') {
+  const env = String(runtime.nodeEnv || 'development').toLowerCase();
+  if (env !== 'production' && env !== 'staging') {
     return runtime;
+  }
+
+  const envLabel = env === 'production' ? 'Production' : 'Staging';
+
+  if (runtime.apiKeyPepper === 'identity-centric-support-development-only') {
+    throw new Error(`${envLabel} deployment cannot use the default development API_KEY_PEPPER.`);
   }
 
   const requiredSecrets = [
@@ -33,7 +40,7 @@ const validateRuntimeConfig = (runtime = config) => {
   ].filter(([, value]) => !String(value || '').trim());
 
   if (requiredSecrets.length > 0) {
-    throw new Error(`Production deployment is missing required environment values: ${requiredSecrets.map(([key]) => key).join(', ')}.`);
+    throw new Error(`${envLabel} deployment is missing required environment values: ${requiredSecrets.map(([key]) => key).join(', ')}.`);
   }
 
   return runtime;

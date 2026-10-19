@@ -1,8 +1,12 @@
 const { logger } = require('../utils/logger');
 
 const requestLogger = (req, res, next) => {
-  const requestId = `req_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
+  const incomingId = req.get('x-request-id');
+  const requestId = incomingId && /^req_[A-Za-z0-9_-]{4,64}$/.test(incomingId)
+    ? incomingId
+    : `req_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
   req.requestId = requestId;
+  res.setHeader('X-Request-ID', requestId);
 
   logger.info('Incoming request', {
     requestId,
